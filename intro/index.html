@@ -83,10 +83,9 @@
       justify-content: center;
     }
 
-    video {
+    iframe {
       width: 96%;
       height: 92%;
-      object-fit: contain;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(255,255,255,0.2);
     }
@@ -193,10 +192,13 @@
 
   <div class="page-wrapper">
     <div class="video-frame">
-      <video id="introVideo" autoplay muted playsinline>
-        <source src="assets/intro.mp4" type="video/mp4">
-        متصفحك لا يدعم تشغيل الفيديو.
-      </video>
+      <iframe width="100%" height="100%"
+        src="https://www.youtube.com/embed/KgbJWrK7FXE?autoplay=1&rel=0"
+        title="YouTube video"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+      </iframe>
     </div>
 
     <div class="intro-text">
@@ -212,11 +214,13 @@
       <summary>جريمة السلوك المجرد</summary>
       <p>إن جريمة السلوك المجرد سواء أكان إيجابياً أم سلبياً لها مكان ولكن ليس لها مسرح.</p>
     </details>
-       <details class="crime-box">
+
+    <details class="crime-box">
       <summary>الجريمة الشكلية</summary>
       <p>أن الجريمة الشكلية سواء تمثلت في جريمة سلوك مجرد، أم في جريمة حدث مجرد ، لها هي الأخرى مكان ولكن ليس لها مسـرح..</p>
     </details>
-       <details class="crime-box">
+
+    <details class="crime-box">
       <summary>مسرح الجريمة واثار الجريمة</summary>
       <p>مسرح الجريمة يعتبر مصدراً مهماً من مصادر جمع التحريات لأنه المكان الذى يحتوى على الكثير من الآثار المتخلفة عن ارتكاب الجريمة ومن خلاله يبدأ رجال البحث الجنائى من خلاله خطوات وإجراءات البحث والتحرى للكشف عن الحقيقة.</p>
     </details>
@@ -232,33 +236,18 @@
     </div>
 
     <div class="footer-controls">
-      <button class="nav-button" onclick="playVideo()">▶️ تشغيل</button>
-      <button class="nav-button" onclick="pauseVideo()">⏸️ إيقاف</button>
-      <button class="nav-button" onclick="toggleMute()">🔊 صوت</button>
+      <button class="nav-button" onclick="flipToPrevious()">⏮️ رجوع</button>
+      <button class="nav-button" onclick="flipToNext()">⏭️ استمرار</button>
     </div>
   </footer>
 
   <script>
-    const video = document.getElementById('introVideo');
-
-    function playVideo() {
-      video.play();
-    }
-
-    function pauseVideo() {
-      video.pause();
-    }
-
-    function toggleMute() {
-      video.muted = !video.muted;
-    }
-
     function flipToPrevious() {
-      window.location.href = 'chapter1.html';
+      window.location.href = 'https://dns3uae-glitch.github.io/crime-book/chapter1';
     }
 
     function flipToNext() {
-      window.location.href = 'chapter2.html';
+      window.location.href = 'https://dns3uae-glitch.github.io/crime-book/chapter2';
     }
   </script>
 </body>
