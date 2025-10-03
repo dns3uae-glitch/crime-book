@@ -2,19 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Crime Scene Intro</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      height: 100%;
+      min-height: 100vh;
     }
+
     .fullscreen {
       background: url('https://dns3uae-glitch.github.io/crime-book/assets/crime-scene.jpg') no-repeat center center;
       background-size: cover;
       width: 100vw;
       height: 100vh;
+    }
+
+    @media (max-width: 768px) {
+      .fullscreen {
+        background-size: contain;
+        background-position: center center;
+        background-repeat: no-repeat;
+      }
     }
   </style>
   <script>
