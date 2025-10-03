@@ -48,7 +48,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0 30px;
+      padding-inline: 60px;
     }
 
     footer button {
@@ -255,6 +255,7 @@
   <div id="highlight-list">
     <h3>الكلمات المظللة</h3>
     <button id="read-all">🔊 قراءة كل الملاحظات</button>
+    <button onclick="testVoice()">🔊 اختبار الصوت</button>
     <div id="highlight-items"></div>
   </div>
 <script>
@@ -264,6 +265,54 @@
 
   function goToNext() {
     window.location.href = 'https://dns3uae-glitch.github.io/crime-book/intro'; // غيّر حسب اسم الفصل التالي
+  }
+
+  function testVoice() {
+    const text = "هذا اختبار صوتي باللغة العربية";
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'ar-SA';
+
+    const voices = speechSynthesis.getVoices();
+    const arabicVoice = voices.find(v => v.lang.includes('ar')) || voices.find(v => v.lang.includes('en')) || voices[0];
+    if (arabicVoice) utterance.voice = arabicVoice;
+
+    speechSynthesis.cancel();
+    setTimeout(() => {
+      speechSynthesis.speak(utterance);
+    }, 100);
+  }
+
+  function speakText(text) {
+    if (!('speechSynthesis' in window)) {
+      alert('المتصفح لا يدعم القراءة الصوتية');
+      return;
+    }
+
+    let voices = speechSynthesis.getVoices();
+
+    function playVoice() {
+      const arabicVoice = voices.find(v => v.lang.includes('ar')) || voices.find(v => v.lang.includes('en')) || voices[0];
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.voice = arabicVoice;
+      utterance.lang = arabicVoice.lang;
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
+      speechSynthesis.cancel();
+      setTimeout(() => {
+        speechSynthesis.speak(utterance);
+      }, 100);
+    }
+
+    if (voices.length === 0) {
+      speechSynthesis.onvoiceschanged = () => {
+        voices = speechSynthesis.getVoices();
+        playVoice();
+      };
+    } else {
+      playVoice();
+    }
   }
 
   const menu = document.getElementById('highlight-menu');
@@ -326,39 +375,6 @@
     }
     saved.forEach(item => speakText(item.text));
   };
-
-  function speakText(text) {
-    if (!('speechSynthesis' in window)) {
-      alert('المتصفح لا يدعم القراءة الصوتية');
-      return;
-    }
-
-    let voices = speechSynthesis.getVoices();
-
-    function playVoice() {
-      const arabicVoice = voices.find(v => v.lang.includes('ar')) || voices.find(v => v.lang.includes('en')) || voices[0];
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.voice = arabicVoice;
-      utterance.lang = arabicVoice.lang;
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-
-      speechSynthesis.cancel();
-      setTimeout(() => {
-        speechSynthesis.speak(utterance);
-      }, 100);
-    }
-
-    if (voices.length === 0) {
-      speechSynthesis.onvoiceschanged = () => {
-        voices = speechSynthesis.getVoices();
-        playVoice();
-      };
-    } else {
-      playVoice();
-    }
-  }
 
   document.querySelectorAll('.color').forEach(colorBtn => {
     colorBtn.addEventListener('click', () => {
@@ -449,4 +465,3 @@
 </script>
 </body>
 </html>
-
