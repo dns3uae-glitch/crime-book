@@ -49,28 +49,19 @@
       color: #fff;
       text-shadow: 0 0 16px rgba(255,255,255,0.6);
       margin: 0;
+      opacity: 0;
+      animation: fadeInUp 1.2s ease-out forwards;
     }
 
-    .video-frame {
-      width: 95%;
-      max-width: 900px;
-      height: clamp(250px, 50vh, 500px);
-      border: 5px solid #fdd835;
-      box-shadow: 0 0 40px rgba(255, 255, 0, 0.4);
-      border-radius: 14px;
-      background-color: black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1;
-    }
-
-    video {
-      width: 96%;
-      height: 92%;
-      object-fit: contain;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     header, footer {
@@ -193,4 +184,3 @@
   </script>
 </body>
 </html>
-
