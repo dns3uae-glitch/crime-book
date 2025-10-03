@@ -16,7 +16,7 @@
       overflow-x: hidden;
     }
 
-    header, footer {
+    header {
       width: 100%;
       height: clamp(60px, 8vh, 70px);
       background-color: #000;
@@ -32,11 +32,41 @@
       border-bottom: 4px solid #fdd835;
       box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
       position: fixed;
+      top: 0;
       z-index: 10;
     }
 
-    header { top: 0; }
-    footer { bottom: 0; padding: 0 30px; gap: 20px; }
+    footer {
+      width: 100%;
+      height: clamp(60px, 8vh, 70px);
+      background-color: #000;
+      border-top: 4px solid #fdd835;
+      box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+      position: fixed;
+      bottom: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 30px;
+    }
+
+    footer button {
+      background-color: #fdd835;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      box-shadow: 0 0 8px rgba(255, 255, 0, 0.3);
+      transition: background 0.3s;
+    }
+
+    footer button:hover {
+      background-color: #ffe066;
+    }
 
     .page-wrapper {
       padding: 100px 20px 80px;
@@ -227,14 +257,13 @@
     <button id="read-all">🔊 قراءة كل الملاحظات</button>
     <div id="highlight-items"></div>
   </div>
-
 <script>
   function goToPrevious() {
-    window.location.href = 'https://dns3uae-glitch.github.io/crime-book/welcome'; // غيّر حسب اسم الفصل السابق
+    window.location.href = 'chapter0.html'; // غيّر حسب الفصل السابق
   }
 
   function goToNext() {
-    window.location.href = 'https://dns3uae-glitch.github.io/crime-book/intro'; // غيّر حسب اسم الفصل التالي
+    window.location.href = 'chapter2.html'; // غيّر حسب الفصل التالي
   }
 
   const menu = document.getElementById('highlight-menu');
