@@ -2,6 +2,7 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>intro</title>
   <style>
     html, body {
@@ -183,6 +184,34 @@
     .nav-button:hover {
       background-color: rgba(255,255,0,0.2);
     }
+
+    /* ✅ تصميم متجاوب */
+    @media (max-width: 768px) {
+      .video-frame {
+        width: 95%;
+        height: 45vh;
+      }
+
+      .crime-box {
+        width: 90%;
+        margin: 0 auto 20px;
+        font-size: 16px;
+      }
+
+      .intro-text {
+        font-size: 16px;
+      }
+
+      .nav-button {
+        font-size: 14px;
+        padding: 6px 12px;
+      }
+
+      header, footer {
+        font-size: 18px;
+        height: 60px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -234,7 +263,6 @@
     <div class="next-button">
       <button class="nav-button" onclick="flipToNext()">⬅️ التالي</button>
     </div>
-
   </footer>
 
   <script>
@@ -248,4 +276,3 @@
   </script>
 </body>
 </html>
-
