@@ -18,30 +18,55 @@
 
     .page-wrapper {
       width: 100%;
-      min-height: 100vh;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+      padding-top: clamp(70px, 8vh, 80px);
+      padding-bottom: clamp(70px, 8vh, 80px);
       position: relative;
       z-index: 1;
-      padding-top: clamp(60px, 8vh, 70px);
-      padding-bottom: clamp(60px, 8vh, 70px);
-      box-sizing: border-box;
     }
 
-    .page-flip {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: transparent;
-      z-index: 999;
-      transform: rotateY(0deg);
-      transition: transform 0.6s ease;
-      pointer-events: none;
+    .center-box {
+      background-color: #222;
+      border: 2px solid #fdd835;
+      border-radius: 12px;
+      padding: 30px 50px;
+      box-shadow: 0 0 30px rgba(255, 255, 0, 0.3);
+      text-align: center;
+      margin-bottom: 40px;
     }
 
-    .page-flip.active {
-      background-color: #111;
-      transform: rotateY(180deg);
+    .center-box h1 {
+      font-size: clamp(28px, 4vw, 40px);
+      color: #fff;
+      text-shadow: 0 0 12px rgba(255,255,255,0.6);
+      margin: 0;
+    }
+
+    .video-frame {
+      width: 95%;
+      max-width: 900px;
+      height: clamp(250px, 50vh, 500px);
+      border: 5px solid #fdd835;
+      box-shadow: 0 0 40px rgba(255, 255, 0, 0.4);
+      border-radius: 14px;
+      background-color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    video {
+      width: 96%;
+      height: 92%;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.2);
     }
 
     header, footer {
@@ -101,35 +126,34 @@
       background-color: rgba(255,255,0,0.2);
     }
 
-    .video-frame {
-      width: 95%;
-      max-width: 900px;
-      margin: 0 auto;
-      height: clamp(250px, 50vh, 500px);
-      border: 5px solid #fdd835;
-      box-shadow: 0 0 40px rgba(255, 255, 0, 0.4);
-      border-radius: 14px;
-      background-color: black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1;
+    .page-flip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: transparent;
+      z-index: 999;
+      transform: rotateY(0deg);
+      transition: transform 0.6s ease;
+      pointer-events: none;
     }
 
-    video {
-      width: 96%;
-      height: 92%;
-      object-fit: contain;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+    .page-flip.active {
+      background-color: #111;
+      transform: rotateY(180deg);
     }
   </style>
 </head>
 <body>
+  <header>
+    📘 الفصل الأول
+  </header>
+
   <div class="page-wrapper">
-    <header>
-      📘 الفصل الأول
-    </header>
+    <div class="center-box">
+      <h1>الفصل الأول</h1>
+    </div>
 
     <div class="video-frame">
       <video id="chapterVideo" autoplay muted playsinline>
@@ -137,17 +161,17 @@
         متصفحك لا يدعم تشغيل الفيديو.
       </video>
     </div>
-
-    <footer>
-      <div class="prev-button">
-        <button class="nav-button" onclick="flipToPrevious()">➡️ السابق</button>
-      </div>
-
-      <div class="next-button">
-        <button class="nav-button" onclick="flipToNext()">⬅️ التالي</button>
-      </div>
-    </footer>
   </div>
+
+  <footer>
+    <div class="prev-button">
+      <button class="nav-button" onclick="flipToPrevious()">➡️ السابق</button>
+    </div>
+
+    <div class="next-button">
+      <button class="nav-button" onclick="flipToNext()">⬅️ التالي</button>
+    </div>
+  </footer>
 
   <div class="page-flip" id="flipEffect"></div>
 
