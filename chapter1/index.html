@@ -36,7 +36,7 @@
     }
 
     header { top: 0; }
-    footer { bottom: 0; padding: 0 30px; }
+    footer { bottom: 0; padding: 0 30px; gap: 20px; }
 
     .page-wrapper {
       padding: 100px 20px 80px;
@@ -196,7 +196,10 @@
     </div>
   </div>
 
-  <footer>⬅️ التالي | ➡️ السابق</footer>
+  <footer>
+    <button onclick="goToPrevious()">⬅️ السابق</button>
+    <button onclick="goToNext()">➡️ التالي</button>
+  </footer>
 
   <div id="tool-menu">
     <button id="tool-highlight">✏️</button>
@@ -224,7 +227,16 @@
     <button id="read-all">🔊 قراءة كل الملاحظات</button>
     <div id="highlight-items"></div>
   </div>
+
 <script>
+  function goToPrevious() {
+    window.location.href = 'https://dns3uae-glitch.github.io/crime-book/welcome'; // غيّر حسب اسم الفصل السابق
+  }
+
+  function goToNext() {
+    window.location.href = 'https://dns3uae-glitch.github.io/crime-book/intro'; // غيّر حسب اسم الفصل التالي
+  }
+
   const menu = document.getElementById('highlight-menu');
   const noteInput = document.getElementById('note-input');
   const alertBtn = document.getElementById('highlight-alert');
