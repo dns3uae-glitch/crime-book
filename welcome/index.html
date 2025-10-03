@@ -65,15 +65,19 @@
     }
 
     .page-wrapper {
-      padding: clamp(80px, 10vh, 100px) 20px clamp(80px, 10vh, 100px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      padding-top: clamp(70px, 8vh, 80px);
+      padding-bottom: clamp(70px, 8vh, 80px);
       box-sizing: border-box;
-      overflow-y: auto;
     }
 
     .video-frame {
       width: 95%;
       max-width: 900px;
-      margin: 0 auto 30px;
       height: clamp(250px, 50vh, 500px);
       border: 5px solid #fdd835;
       box-shadow: 0 0 40px rgba(255, 255, 0, 0.4);
