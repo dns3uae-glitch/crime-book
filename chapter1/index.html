@@ -266,9 +266,7 @@
             w.style.backgroundColor = color;
             highlights.set(word, color);
           }
-          w.style.backgroundColor = color;
-          highlights.set(word, color);
-        }
+        });
       });
       updateList();
       alertBtn.style.display = highlights.size > 0 ? 'block' : 'none';
@@ -276,3 +274,4 @@
   </script>
 </body>
 </html>
+
