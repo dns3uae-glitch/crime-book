@@ -35,14 +35,8 @@
       z-index: 10;
     }
 
-    header {
-      top: 0;
-    }
-
-    footer {
-      bottom: 0;
-      padding: 0 30px;
-    }
+    header { top: 0; }
+    footer { bottom: 0; padding: 0 30px; }
 
     .page-wrapper {
       padding: 100px 20px 80px;
@@ -143,6 +137,17 @@
       margin-bottom: 10px;
     }
 
+    .highlight-item textarea {
+      width: 100%;
+      height: 50px;
+      margin-top: 6px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: none;
+      padding: 6px;
+      resize: vertical;
+    }
+
     .highlight-item button {
       background: #ff4081;
       border: none;
@@ -200,8 +205,11 @@
     let selectedText = '';
     let selectedRange = null;
 
-    document.addEventListener('mouseup', () => {
+    document.addEventListener('mouseup', (e) => {
       const selection = window.getSelection();
+      const isNoteFocused = e.target.id === 'note-input';
+      if (isNoteFocused) return;
+
       if (selection.toString().trim().length > 0) {
         selectedText = selection.toString();
         selectedRange = selection.getRangeAt(0);
@@ -244,14 +252,16 @@
       saved.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'highlight-item';
-        div.innerHTML = `<div style="background:${item.color};padding:4px;border-radius:4px;">${item.text}</div>
-                         <div style="margin-top:6px;font-size:14px;">📝 ${item.note || 'بدون ملاحظة'}</div>
-                         <button onclick="removeHighlight(${index}, '${item.text}')">حذف</button>`;
+        div.innerHTML = `
+          <div style="background:${item.color};padding:4px;border-radius:4px;">${item.text}</div>
+          <textarea onchange="editNote(${index}, this.value)">${item.note || ''}</textarea>
+          <button onclick="removeHighlight(${index}, '${item.text}')">حذف</button>
+        `;
         listItems.appendChild(div);
       });
       const hasHighlights = saved.length > 0;
       alertBtn.style.display = hasHighlights ? 'block' : 'none';
-           listBox.style.display = hasHighlights ? 'block' : 'none';
+      listBox.style.display = hasHighlights ? 'block' : 'none';
     }
 
     window.removeHighlight = function(index, text) {
@@ -266,6 +276,12 @@
       textBox.innerHTML = html.replace(regex, text);
 
       updateList();
+    };
+
+    window.editNote = function(index, newNote) {
+      const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
+      saved[index].note = newNote;
+      localStorage.setItem('highlights', JSON.stringify(saved));
     };
 
     window.addEventListener('DOMContentLoaded', () => {
