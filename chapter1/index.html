@@ -79,6 +79,7 @@
       display: flex;
       gap: 8px;
       margin-bottom: 10px;
+      flex-wrap: wrap;
     }
 
     .color {
@@ -90,11 +91,13 @@
     }
 
     #note-input {
-      width: 200px;
-      padding: 6px;
-      border-radius: 4px;
+      width: 260px;
+      height: 60px;
+      font-size: 16px;
+      padding: 8px;
+      resize: vertical;
+      border-radius: 6px;
       border: none;
-      font-size: 14px;
     }
 
     #highlight-alert {
@@ -178,7 +181,7 @@
       <span class="color" data-color="#9c27b0" style="background:#9c27b0;"></span>
       <span class="color" data-color="#00bcd4" style="background:#00bcd4;"></span>
     </div>
-    <input type="text" id="note-input" placeholder="اكتب ملاحظة هنا..." />
+    <textarea id="note-input" placeholder="اكتب ملاحظة هنا..."></textarea>
   </div>
 
   <div id="highlight-alert">📌 كلمات مظللة</div>
@@ -219,6 +222,7 @@
         mark.textContent = selectedText;
         mark.style.backgroundColor = color;
         mark.setAttribute('data-note', note);
+        mark.setAttribute('data-text', selectedText);
         selectedRange.deleteContents();
         selectedRange.insertNode(mark);
         saveHighlight(selectedText, color, note);
@@ -242,37 +246,37 @@
         div.className = 'highlight-item';
         div.innerHTML = `<div style="background:${item.color};padding:4px;border-radius:4px;">${item.text}</div>
                          <div style="margin-top:6px;font-size:14px;">📝 ${item.note || 'بدون ملاحظة'}</div>
-                         <button onclick="removeHighlight(${index})">حذف</button>`;
+                         <button onclick="removeHighlight(${index}, '${item.text}')">حذف</button>`;
         listItems.appendChild(div);
       });
-      alertBtn.style.display = saved.length > 0 ? 'block' : 'none';
-      listBox.style.display = saved.length > 0 ? 'block' : 'none';
+      const hasHighlights = saved.length > 0;
+      alertBtn.style.display = hasHighlights ? 'block' : 'none';
+           listBox.style.display = hasHighlights ? 'block' : 'none';
     }
 
-    window.removeHighlight = function(index) {
-      const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
-      saved.splice(index, 1);
-          localStorage.setItem('highlights', JSON.stringify(saved));
-      updateList();
-    }
-
-    window.removeHighlight = function(index) {
+    window.removeHighlight = function(index, text) {
       const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
       saved.splice(index, 1);
       localStorage.setItem('highlights', JSON.stringify(saved));
+
+      // إزالة التظليل من النص
+      const textBox = document.getElementById('text-box');
+      const html = textBox.innerHTML;
+      const regex = new RegExp(`<mark[^>]*data-text="${text}"[^>]*>${text}</mark>`, 'g');
+      textBox.innerHTML = html.replace(regex, text);
+
       updateList();
     };
 
     window.addEventListener('DOMContentLoaded', () => {
       const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
+      let html = document.getElementById('text-box').innerHTML;
       saved.forEach(item => {
-        const mark = document.createElement('mark');
-        mark.textContent = item.text;
-        mark.style.backgroundColor = item.color;
-        mark.setAttribute('data-note', item.note);
-        document.getElementById('text-box').innerHTML =
-          document.getElementById('text-box').innerHTML.replace(item.text, mark.outerHTML);
+        const mark = `<mark style="background-color:${item.color}" data-note="${item.note}" data-text="${item.text}">${item.text}</mark>`;
+        const regex = new RegExp(item.text, 'g');
+        html = html.replace(regex, mark);
       });
+      document.getElementById('text-box').innerHTML = html;
       updateList();
     });
   </script>
