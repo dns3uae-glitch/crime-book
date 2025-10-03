@@ -243,7 +243,7 @@
       const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
       saved.push({ text, color, note });
       localStorage.setItem('highlights', JSON.stringify(saved));
-      updateList();
+            updateList();
     }
 
     function updateList() {
@@ -259,10 +259,22 @@
         `;
         listItems.appendChild(div);
       });
+
       const hasHighlights = saved.length > 0;
       alertBtn.style.display = hasHighlights ? 'block' : 'none';
-      listBox.style.display = hasHighlights ? 'block' : 'none';
+
+      // لا تفتح القائمة تلقائيًا، فقط نحدث محتواها
+      if (!listBox.classList.contains('manual-open')) {
+        listBox.style.display = 'none';
+      }
     }
+
+    alertBtn.addEventListener('click', () => {
+      const isVisible = listBox.style.display === 'block';
+      listBox.style.display = isVisible ? 'none' : 'block';
+      if (!isVisible) listBox.classList.add('manual-open');
+      else listBox.classList.remove('manual-open');
+    });
 
     window.removeHighlight = function(index, text) {
       const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
@@ -298,3 +310,4 @@
   </script>
 </body>
 </html>
+
