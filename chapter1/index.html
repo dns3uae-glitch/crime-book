@@ -253,13 +253,22 @@
   };
 
   toolSearch.onclick = () => {
-window.location.href = `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`;
+    window.open(
+      `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`,
+      'googlePopup',
+      'width=600,height=500,left=100,top=100'
+    );
   };
 
   toolSpeak.onclick = () => {
-    const utterance = new SpeechSynthesisUtterance(selectedText);
-    utterance.lang = 'ar-SA';
-    speechSynthesis.speak(utterance);
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(selectedText);
+      utterance.lang = 'ar-SA';
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utterance);
+    } else {
+      alert('المتصفح لا يدعم القراءة الصوتية');
+    }
   };
 
   document.querySelectorAll('.color').forEach(colorBtn => {
@@ -351,4 +360,3 @@ window.location.href = `https://www.google.com/search?q=${encodeURIComponent(sel
 </script>
 </body>
 </html>
-
