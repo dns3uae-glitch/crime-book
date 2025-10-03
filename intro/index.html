@@ -12,11 +12,12 @@
       background-color: #111;
       color: #fdd835;
       direction: rtl;
+      height: 100vh;
       overflow: hidden;
     }
 
     body {
-      overflow-y: auto;
+      overflow: hidden;
     }
 
     body::-webkit-scrollbar {
@@ -65,9 +66,14 @@
     }
 
     .page-wrapper {
-      padding: clamp(80px, 10vh, 100px) 20px clamp(80px, 10vh, 100px);
-      box-sizing: border-box;
+      position: absolute;
+      top: clamp(60px, 8vh, 70px);
+      bottom: clamp(60px, 8vh, 70px);
+      left: 0;
+      right: 0;
       overflow-y: auto;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
     .video-frame {
