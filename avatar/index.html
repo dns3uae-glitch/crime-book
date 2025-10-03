@@ -13,22 +13,27 @@
       background-color: #000;
       overflow: hidden;
     }
+
+    #avatar-container {
+      width: 100vw;
+      height: 100vh;
+    }
   </style>
 </head>
 <body>
 
-  <!-- ✅ D-ID Avatar Script -->
- <script type="module"
-      src="https://agent.d-id.com/v2/index.js"
-      data-mode="full"
-      data-client-key="Z29vZ2xlLW9hdXRoMnwxMTYxMTA1NDg0NzE4MjIxMjEzNzU6ZW1hOGpRYnRPcnJOSENjeU9nTUF3"
-      data-agent-id="v2_agt_JPqY3TqZ"
-      data-name="did-agent"
-      data-monitor="true"
-      data-target-id="<PLACE_YOUR_DIV_ID_HERE>">
-</script>
-  
-  <!-- ✅ تشغيل الصوت تلقائيًا -->
+  <div id="avatar-container"></div>
+
+  <script type="module"
+    src="https://agent.d-id.com/v2/index.js"
+    data-mode="full"
+    data-client-key="Z29vZ2xlLW9hdXRoMnwxMTYxMTA1NDg0NzE4MjIxMjEzNzU6ZW1hOGpRYnRPcnJOSENjeU9nTUF3"
+    data-agent-id="v2_agt_JPqY3TqZ"
+    data-name="did-agent"
+    data-monitor="true"
+    data-target-id="avatar-container">
+  </script>
+
   <script>
     window.addEventListener("DOMContentLoaded", () => {
       const speak = () => {
@@ -44,4 +49,3 @@
 
 </body>
 </html>
-
