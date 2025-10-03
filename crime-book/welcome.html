@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>chapter2</title>
+  <title>intro</title>
   <style>
     html, body {
       margin: 0;
@@ -70,52 +70,96 @@
       overflow-y: auto;
     }
 
-    .content-box {
+    .video-frame {
       width: 88%;
-      margin: 0 auto;
-      font-size: 18px;
-      line-height: 1.6;
-      text-align: center;
+      margin: 0 auto 30px;
+      height: 58vh;
+      border: 5px solid #fdd835;
+      box-shadow: 0 0 40px rgba(255, 255, 0, 0.4);
+      border-radius: 14px;
+      background-color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    iframe {
+      width: 96%;
+      height: 92%;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+    }
+
+    .footer-controls {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .next-button {
+      position: absolute;
+      left: 80px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .prev-button {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .nav-button {
+      background-color: #222;
+      color: #fdd835;
+      border: 2px solid #fdd835;
+      padding: 8px 16px;
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+
+    .nav-button:hover {
+      background-color: rgba(255,255,0,0.2);
     }
   </style>
 </head>
 <body>
   <header>
-    🧠 الفصل الثاني
+    🎬 المقدمة
   </header>
 
   <div class="page-wrapper">
-    <div class="content-box">
-      هذا هو محتوى الفصل الثاني. يمكنك إضافة عناصر تفاعلية أو تعليمية هنا.
+    <div class="video-frame">
+      <iframe 
+        src="https://www.youtube.com/embed/HqZPo4pvreE?autoplay=1&rel=0"
+        title="YouTube video"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+      </iframe>
     </div>
   </div>
 
   <footer>
-    <div class="footer-controls">
-      <button class="nav-button" onclick="goBack()">⬅️ رجوع</button>
-      <button class="nav-button" onclick="goNext()">➡️ التالي</button>
+    <div class="prev-button">
+      <button class="nav-button" onclick="flipToPrevious()">➡️ السابق</button>
+    </div>
+
+    <div class="next-button">
+      <button class="nav-button" onclick="flipToNext()">⬅️ التالي</button>
     </div>
   </footer>
 
-  <!-- ✅ D-ID Avatar Script -->
-  <script type="module"
-    src="https://agent.d-id.com/v2/index.js"
-    data-mode="fabio"
-    data-client-key="Z29vZ2xlLW9hdXRoMnwxMTYxMTA1NDg0NzE4MjIxMjEzNzU6ZW1hOGpRYnRPcnJOSENjeU9nTUF3"
-    data-agent-id="v2_agt_JPqY3TqZ"
-    data-name="did-agent"
-    data-monitor="true"
-    data-orientation="horizontal"
-    data-position="right">
-  </script>
-
   <script>
-    function goBack() {
-      window.location.href = 'intro.html';
+    function flipToPrevious() {
+      window.location.href = 'chapter1.html';
     }
 
-    function goNext() {
-      window.location.href = 'chapter3.html';
+    function flipToNext() {
+      window.location.href = 'chapter2.html';
     }
   </script>
 </body>
