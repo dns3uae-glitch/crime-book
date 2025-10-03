@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>مسرح الجريمة المغلق</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .crime-box {
+      background: linear-gradient(to bottom, #1a1a1a, #000);
+      border: 2px solid #e50914;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 700px;
+      width: 90%;
+      box-shadow: 0 0 30px rgba(229, 9, 20, 0.5);
+      text-align: center;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .crime-box h1 {
+      font-size: 2.5em;
+      color: #e50914;
+      margin-bottom: 20px;
+      text-shadow: 0 0 12px #e50914;
+    }
+
+    .crime-box p {
+      font-size: 1.4em;
+      line-height: 1.8;
+      margin-bottom: 30px;
+      color: #ddd;
+    }
+
+    .crime-box p span {
+      color: #ff4444;
+      font-weight: bold;
+    }
+
+    .cta-button {
+      padding: 15px 35px;
+      font-size: 18px;
+      background-color: #e50914;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 0 12px #e50914;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .cta-button:hover {
+      background-color: #b20710;
+    }
+
+    .model-frame {
+      display: none;
+      width: 90vw;
+      height: 90vh;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div id="intro-box" class="crime-box">
+      <h1>🕵️‍♂️ مسرح الجريمة المغلق</h1>
+      <p>
+        <span>ألقِ نظرة دقيقة</span> على النموذج الثلاثي الأبعاد التالي،  
+        لتكتشف تفاصيل <span>مسرح الجريمة المغلق</span>،  
+        وتتعرف على بعض <span>الأدلة المادية</span> التي تم العثور عليها بداخله.  
+        كل عنصر قد يحمل <span>مفتاحًا لكشف الحقيقة</span>.
+      </p>
+      <button class="cta-button" onclick="revealModel()">نموذج - اضغط هنا</button>
+    </div>
+
+    <div id="crime-scene" class="model-frame">
+      <iframe 
+        src="https://sketchfab.com/3d-models/crime-scene-diorama-bda75f27462145efb0ddd121bcdd2c8b/embed?autostart=1" 
+        title="نموذج ثلاثي الأبعاد"
+        allow="autoplay; fullscreen; xr-spatial-tracking"
+        allowfullscreen
+        execution-while-not-rendered
+        execution-while-out-of-viewport
+        web-share
+        xr-spatial-tracking>
+      </iframe>
+    </div>
+  </div>
+
+  <script>
+    function revealModel() {
+      const intro = document.getElementById("intro-box");
+      const model = document.getElementById("crime-scene");
+
+      intro.style.opacity = "0";
+      intro.style.transform = "scale(0.95)";
+      setTimeout(() => {
+        intro.style.display = "none";
+        model.style.display = "block";
+      }, 600);
+    }
+  </script>
+
+</body>
+</html>
