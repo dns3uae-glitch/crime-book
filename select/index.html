@@ -1,0 +1,152 @@
+<!--?xml version='1.0' encoding='UTF-8'?--><!DOCTYPE html><html xml:lang="en-us" lang="en-us" xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head>
+    <link rel="stylesheet" type="text/css" href="../../css/base.css" />
+<link rel="stylesheet" type="text/css" href="../../css/kotobeeInteractive.css" />
+<link rel="stylesheet" type="text/css" href="../../css/global.css" />
+
+    <script type="text/javascript" src="../../js/kotobeeInteractive.js"></script>
+<script type="text/javascript" src="../../js/global.js"></script>
+
+    <title>حدد المكان</title>
+    
+
+<meta charset="utf-8" />
+ </head>
+<body>
+<style type="text/css">body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+      color: #fff;
+    }
+
+    .image-container {
+      position: relative;
+      width: 800px;
+      margin: 40px auto;
+      border: 4px solid #444;
+      box-shadow: 0 0 20px rgba(255,0,0,0.3);
+    }
+
+    .image-container img {
+      width: 100%;
+      display: block;
+    }
+
+    @keyframes pulse {
+      0%   { background-color: red; }
+      50%  { background-color: black; }
+      100% { background-color: red; }
+    }
+
+    .hotspot {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid white;
+      animation: pulse 1s infinite;
+      z-index: 5;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.95);
+      color: #000;
+      border: 1px solid #333;
+      padding: 12px 15px;
+      border-radius: 8px;
+      width: 220px;
+      display: none;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      z-index: 10;
+      animation: fadeInUp 0.4s ease-out;
+      backdrop-filter: blur(4px);
+    }
+
+    .tooltip::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: -10px;
+      transform: translateY(-50%);
+      border-width: 8px;
+      border-style: solid;
+      border-color: transparent #fff transparent transparent;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+</style>
+<div class="image-container"><img alt="مشهد جريمة" class="kInteractive image image631" data-="" src="https://dns3uae-glitch.github.io/crime-book/assets/room2.jpg" style="margin: 5px auto; position: static;" /> <!-- نقطة على الشريط الأصفر -->
+<div class="hotspot" onclick="toggleTooltip(this, 'جثة انسان.')" style="top: 68.1%; left: 65.9%;">&#160;</div>
+<!-- نقطة على الفستان الأحمر -->
+
+<div class="hotspot" onclick="toggleTooltip(this, 'بقعة دم في الجدار')" style="top: 20.1%; left: 15.3%;">&#160;</div>
+<!-- نقطة على الرجل -->
+
+<div class="hotspot" onclick="toggleTooltip(this, 'بقعة دم على الارض')" style="top: 53.8%; left: 52.8%;">&#160;</div>
+<!-- نقطة على الرجل -->
+
+<div class="hotspot" onclick="toggleTooltip(this, 'بقعة دم على الارض')" style="top: 66.5%; left: 61.8%;">&#160;</div>
+<!-- نقطة على الرجل -->
+
+<div class="hotspot" onclick="toggleTooltip(this, 'الحوض')" style="top: 38.5%; left: 80.8%;">&#160;</div>
+<!-- نقطة على الرجل -->
+
+<div class="hotspot" onclick="toggleTooltip(this, 'بقعة دم في الحمام')" style="top: 64.0%; left: 23.1%;">&#160;</div>
+<!-- مربع الشرح -->
+
+<div class="tooltip" id="tooltip">&#160;</div>
+</div>
+<script>
+  let activeHotspot = null;
+
+  function toggleTooltip(element, text) {
+    const tooltip = document.getElementById('tooltip');
+
+    if (activeHotspot === element) {
+      tooltip.style.display = 'none';
+      activeHotspot = null;
+      return;
+    }
+
+    const hotspotTop = element.offsetTop;
+    const hotspotLeft = element.offsetLeft;
+
+    tooltip.innerText = text;
+    tooltip.style.top = (hotspotTop - 10) + 'px';
+    tooltip.style.left = (hotspotLeft + 25) + 'px';
+    tooltip.style.display = 'block';
+
+    activeHotspot = element;
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('hotspot')) {
+      document.getElementById('tooltip').style.display = 'none';
+      activeHotspot = null;
+    }
+  });
+</script><script>
+      // كود تحديد احداثيات النقطه
+  document.querySelector('img').addEventListener('click', function(e) {
+    const container = this.parentElement;
+    const rect = container.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    alert(`Left: ${x.toFixed(1)}% | Top: ${y.toFixed(1)}%`);
+  });
+</script>
+
+</body></html>
