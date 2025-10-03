@@ -274,55 +274,44 @@
   };
 
   toolSpeak.onclick = () => {
-    if ('speechSynthesis' in window) {
-      const voices = speechSynthesis.getVoices();
-      const arabicVoice = voices.find(v => v.lang.startsWith('ar'));
-
-      const utterance = new SpeechSynthesisUtterance(selectedText);
-      utterance.lang = 'ar-SA';
-      if (arabicVoice) utterance.voice = arabicVoice;
-
-      speechSynthesis.cancel();
-      speechSynthesis.speak(utterance);
-    } else {
-      alert('المتصفح لا يدعم القراءة الصوتية');
-    }
+    speakText(selectedText);
   };
 
   readAllBtn.onclick = () => {
-    if (!('speechSynthesis' in window)) {
-      alert('المتصفح لا يدعم القراءة الصوتية');
-      return;
-    }
-
     const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
     if (saved.length === 0) {
       alert('لا توجد كلمات مظللة للقراءة');
       return;
     }
-
-    const voices = speechSynthesis.getVoices();
-    let arabicVoice = voices.find(v => v.lang.startsWith('ar'));
-
-    if (!arabicVoice) {
-      speechSynthesis.onvoiceschanged = () => {
-        const updatedVoices = speechSynthesis.getVoices();
-        arabicVoice = updatedVoices.find(v => v.lang.startsWith('ar'));
-        speakAll(saved, arabicVoice);
-      };
-    } else {
-      speakAll(saved, arabicVoice);
-    }
+    saved.forEach(item => speakText(item.text));
   };
 
-  function speakAll(list, voice) {
-    speechSynthesis.cancel();
-    list.forEach(item => {
-      const utterance = new SpeechSynthesisUtterance(item.text);
+  function speakText(text) {
+    if (!('speechSynthesis' in window)) {
+      alert('المتصفح لا يدعم القراءة الصوتية');
+      return;
+    }
+
+    function speakWithVoice() {
+      const voices = speechSynthesis.getVoices();
+      const arabicVoice = voices.find(v => v.lang.startsWith('ar')) || voices[0];
+
+      const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ar-SA';
-      if (voice) utterance.voice = voice;
+      utterance.voice = arabicVoice;
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+
+      speechSynthesis.cancel();
       speechSynthesis.speak(utterance);
-    });
+    }
+
+    if (speechSynthesis.getVoices().length === 0) {
+      speechSynthesis.onvoiceschanged = speakWithVoice;
+    } else {
+      speakWithVoice();
+    }
   }
 
   document.querySelectorAll('.color').forEach(colorBtn => {
