@@ -80,6 +80,59 @@
       text-align: center;
     }
 
+    .crime-box {
+      font-size: 18px;
+      padding: 15px 25px;
+      border: 2px solid #fdd835;
+      border-radius: 10px;
+      background-color: #222;
+      color: #fdd835;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 45%;
+      margin-right: 5%;
+      margin-left: auto;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(255, 255, 0, 0.2);
+    }
+
+    .crime-box summary {
+      list-style: none;
+      outline: none;
+      position: relative;
+      padding-right: 30px;
+      font-weight: bold;
+    }
+
+    .crime-box summary::before {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 8px;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-right: 8px solid #fdd835;
+      transition: transform 0.3s ease;
+    }
+
+    .crime-box[open] summary::before {
+      transform: rotate(-90deg);
+    }
+
+    .crime-box p {
+      margin-top: 15px;
+      font-size: 17px;
+      color: #ffffff;
+      animation: fadeInAnswer 0.6s ease;
+    }
+
+    @keyframes fadeInAnswer {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .footer-controls {
       display: flex;
       gap: 20px;
@@ -125,6 +178,11 @@
     <div class="content-box">
       هذا هو محتوى الفصل الثاني. يمكنك إضافة عناصر تفاعلية أو تعليمية هنا.
     </div>
+
+    <details class="crime-box">
+      <summary>مفهوم الجريمة الشكلية</summary>
+      <p>الجريمة الشكلية هي تلك التي تتحقق بمجرد وقوع الفعل دون الحاجة إلى تحقق نتيجة معينة، وتُعد من الجرائم التي يصعب تحديد مسرحها بدقة.</p>
+    </details>
   </div>
 
   <footer>
@@ -136,7 +194,11 @@
       <button class="nav-button" onclick="goNext()">⬅️ التالي</button>
     </div>
 
-      </footer>
+    <div class="footer-controls">
+      <button class="nav-button" onclick="goBack()">⏮️ رجوع</button>
+      <button class="nav-button" onclick="goNext()">⏭️ استمرار</button>
+    </div>
+  </footer>
 
   <!-- ✅ D-ID Avatar Script -->
   <script type="module"
@@ -157,21 +219,6 @@
 
     function goNext() {
       window.location.href = 'chapter3.html';
-    }
-
-    function playVideo() {
-      const video = document.getElementById('chapterVideo');
-      if (video) video.play();
-    }
-
-    function pauseVideo() {
-      const video = document.getElementById('chapterVideo');
-      if (video) video.pause();
-    }
-
-    function toggleMute() {
-      const video = document.getElementById('chapterVideo');
-      if (video) video.muted = !video.muted;
     }
   </script>
 </body>
