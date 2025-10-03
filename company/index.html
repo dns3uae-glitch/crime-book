@@ -112,10 +112,9 @@
       z-index: 1;
     }
 
-    video {
+    iframe {
       width: 96%;
       height: 92%;
-      object-fit: contain;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(255,255,255,0.2);
     }
@@ -128,61 +127,30 @@
     </header>
 
     <div class="video-frame">
-  <iframe width="100%" height="100%" 
-      src="https://www.youtube.com/embed/KPs2ktUji2Q?autoplay=1&rel=0"
-    title="YouTube video"
-    frameborder="0"
-    allow="autoplay; encrypted-media"
-    allowfullscreen>
-  </iframe>
-</div>
-
+      <iframe width="100%" height="100%" 
+        src="https://www.youtube.com/embed/KPs2ktUji2Q?autoplay=1&rel=0"
+        title="YouTube video"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+      </iframe>
+    </div>
 
     <footer>
-      <!-- زر التالي -->
       <div class="next-button">
         <button class="nav-button" onclick="flipPage()">⬅️ التالي</button>
       </div>
-
-         </footer>
+    </footer>
   </div>
 
-  <!-- تأثير الصفحة -->
   <div class="page-flip" id="flipEffect"></div>
 
   <script>
-    const video = document.getElementById('companyVideo');
-
-    // تشغيل الفيديو تلقائيًا ثم فك الكتم بعد التشغيل
-    window.addEventListener('load', () => {
-      video.play().then(() => {
-        video.muted = false;
-      }).catch(() => {
-        setTimeout(() => {
-          video.play().then(() => {
-            video.muted = false;
-          });
-        }, 500);
-      });
-    });
-
-    function playVideo() {
-      video.play();
-    }
-
-    function pauseVideo() {
-      video.pause();
-    }
-
-    function toggleMute() {
-      video.muted = !video.muted;
-    }
-
     function flipPage() {
       const flip = document.getElementById('flipEffect');
       flip.classList.add('active');
       setTimeout(() => {
-        window.location.href = "welcome.html";
+        window.location.href = "https://dns3uae-glitch.github.io/crime-book/welcome/";
       }, 1200);
     }
   </script>
