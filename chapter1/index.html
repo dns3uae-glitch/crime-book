@@ -141,6 +141,17 @@
       color: #fdd835;
     }
 
+    #read-all {
+      background: #40c4ff;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
     .highlight-item {
       background: #333;
       padding: 8px;
@@ -210,6 +221,7 @@
 
   <div id="highlight-list">
     <h3>الكلمات المظللة</h3>
+    <button id="read-all">🔊 قراءة كل الملاحظات</button>
     <div id="highlight-items"></div>
   </div>
 <script>
@@ -222,6 +234,7 @@
   const toolHighlight = document.getElementById('tool-highlight');
   const toolSearch = document.getElementById('tool-search');
   const toolSpeak = document.getElementById('tool-speak');
+  const readAllBtn = document.getElementById('read-all');
 
   let selectedText = '';
   let selectedRange = null;
@@ -262,14 +275,55 @@
 
   toolSpeak.onclick = () => {
     if ('speechSynthesis' in window) {
+      const voices = speechSynthesis.getVoices();
+      const arabicVoice = voices.find(v => v.lang.startsWith('ar'));
+
       const utterance = new SpeechSynthesisUtterance(selectedText);
       utterance.lang = 'ar-SA';
+      if (arabicVoice) utterance.voice = arabicVoice;
+
       speechSynthesis.cancel();
       speechSynthesis.speak(utterance);
     } else {
       alert('المتصفح لا يدعم القراءة الصوتية');
     }
   };
+
+  readAllBtn.onclick = () => {
+    if (!('speechSynthesis' in window)) {
+      alert('المتصفح لا يدعم القراءة الصوتية');
+      return;
+    }
+
+    const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
+    if (saved.length === 0) {
+      alert('لا توجد كلمات مظللة للقراءة');
+      return;
+    }
+
+    const voices = speechSynthesis.getVoices();
+    let arabicVoice = voices.find(v => v.lang.startsWith('ar'));
+
+    if (!arabicVoice) {
+      speechSynthesis.onvoiceschanged = () => {
+        const updatedVoices = speechSynthesis.getVoices();
+        arabicVoice = updatedVoices.find(v => v.lang.startsWith('ar'));
+        speakAll(saved, arabicVoice);
+      };
+    } else {
+      speakAll(saved, arabicVoice);
+    }
+  };
+
+  function speakAll(list, voice) {
+    speechSynthesis.cancel();
+    list.forEach(item => {
+      const utterance = new SpeechSynthesisUtterance(item.text);
+      utterance.lang = 'ar-SA';
+      if (voice) utterance.voice = voice;
+      speechSynthesis.speak(utterance);
+    });
+  }
 
   document.querySelectorAll('.color').forEach(colorBtn => {
     colorBtn.addEventListener('click', () => {
