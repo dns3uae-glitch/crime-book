@@ -253,7 +253,7 @@
   };
 
   toolSearch.onclick = () => {
-    window.open(`https://www.google.com/search?q=${encodeURIComponent(selectedText)}`, '_blank');
+window.location.href = `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`;
   };
 
   toolSpeak.onclick = () => {
@@ -351,3 +351,4 @@
 </script>
 </body>
 </html>
+
