@@ -56,6 +56,17 @@
       line-height: 2;
     }
 
+    #tool-menu {
+      position: absolute;
+      display: none;
+      gap: 10px;
+      background: #222;
+      border: 2px solid #fdd835;
+      padding: 10px;
+      border-radius: 8px;
+      z-index: 1000;
+    }
+
     #highlight-menu {
       position: absolute;
       background: #222;
@@ -176,6 +187,12 @@
 
   <footer>⬅️ التالي | ➡️ السابق</footer>
 
+  <div id="tool-menu">
+    <button id="tool-highlight">✏️</button>
+    <button id="tool-search">🔍</button>
+    <button id="tool-speak">🔊</button>
+  </div>
+
   <div id="highlight-menu">
     <div class="colors">
       <span class="color" data-color="#fdd835" style="background:#fdd835;"></span>
@@ -195,119 +212,142 @@
     <h3>الكلمات المظللة</h3>
     <div id="highlight-items"></div>
   </div>
+<script>
+  const menu = document.getElementById('highlight-menu');
+  const noteInput = document.getElementById('note-input');
+  const alertBtn = document.getElementById('highlight-alert');
+  const listBox = document.getElementById('highlight-list');
+  const listItems = document.getElementById('highlight-items');
+  const toolMenu = document.getElementById('tool-menu');
+  const toolHighlight = document.getElementById('tool-highlight');
+  const toolSearch = document.getElementById('tool-search');
+  const toolSpeak = document.getElementById('tool-speak');
 
-  <script>
-    const menu = document.getElementById('highlight-menu');
-    const noteInput = document.getElementById('note-input');
-    const alertBtn = document.getElementById('highlight-alert');
-    const listBox = document.getElementById('highlight-list');
-    const listItems = document.getElementById('highlight-items');
-    let selectedText = '';
-    let selectedRange = null;
+  let selectedText = '';
+  let selectedRange = null;
 
-    document.addEventListener('mouseup', (e) => {
-      const selection = window.getSelection();
-      const isNoteFocused = e.target.id === 'note-input';
-      if (isNoteFocused) return;
+  document.addEventListener('mouseup', (e) => {
+    const selection = window.getSelection();
+    const isNoteFocused = e.target.id === 'note-input';
+    if (isNoteFocused) return;
 
-      if (selection.toString().trim().length > 0) {
-        selectedText = selection.toString();
-        selectedRange = selection.getRangeAt(0);
-        const rect = selectedRange.getBoundingClientRect();
-        menu.style.top = `${rect.bottom + window.scrollY + 5}px`;
-        menu.style.left = `${rect.left + window.scrollX}px`;
-        menu.style.display = 'flex';
-      } else {
-        menu.style.display = 'none';
-      }
-    });
-
-    document.querySelectorAll('.color').forEach(colorBtn => {
-      colorBtn.addEventListener('click', () => {
-        const color = colorBtn.getAttribute('data-color');
-        const note = noteInput.value.trim();
-        const mark = document.createElement('mark');
-        mark.textContent = selectedText;
-        mark.style.backgroundColor = color;
-        mark.setAttribute('data-note', note);
-        mark.setAttribute('data-text', selectedText);
-        selectedRange.deleteContents();
-        selectedRange.insertNode(mark);
-        saveHighlight(selectedText, color, note);
-        menu.style.display = 'none';
-        noteInput.value = '';
-      });
-    });
-
-    function saveHighlight(text, color, note) {
-      const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
-      saved.push({ text, color, note });
-      localStorage.setItem('highlights', JSON.stringify(saved));
-            updateList();
+    if (selection.toString().trim().length > 0) {
+      selectedText = selection.toString();
+      selectedRange = selection.getRangeAt(0);
+      const rect = selectedRange.getBoundingClientRect();
+      toolMenu.style.top = `${rect.bottom + window.scrollY + 5}px`;
+      toolMenu.style.left = `${rect.left + window.scrollX}px`;
+      toolMenu.style.display = 'flex';
+      menu.style.display = 'none';
+    } else {
+      toolMenu.style.display = 'none';
+      menu.style.display = 'none';
     }
+  });
 
-    function updateList() {
-      const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
-      listItems.innerHTML = '';
-      saved.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'highlight-item';
-        div.innerHTML = `
-          <div style="background:${item.color};padding:4px;border-radius:4px;">${item.text}</div>
-          <textarea onchange="editNote(${index}, this.value)">${item.note || ''}</textarea>
-          <button onclick="removeHighlight(${index}, '${item.text}')">حذف</button>
-        `;
-        listItems.appendChild(div);
-      });
+  toolHighlight.onclick = () => {
+    toolMenu.style.display = 'none';
+    menu.style.top = toolMenu.style.top;
+    menu.style.left = toolMenu.style.left;
+    menu.style.display = 'flex';
+  };
 
-      const hasHighlights = saved.length > 0;
-      alertBtn.style.display = hasHighlights ? 'block' : 'none';
+  toolSearch.onclick = () => {
+    window.open(`https://www.google.com/search?q=${encodeURIComponent(selectedText)}`, '_blank');
+  };
 
-      // لا تفتح القائمة تلقائيًا، فقط نحدث محتواها
-      if (!listBox.classList.contains('manual-open')) {
-        listBox.style.display = 'none';
-      }
+  toolSpeak.onclick = () => {
+    const utterance = new SpeechSynthesisUtterance(selectedText);
+    utterance.lang = 'ar-SA';
+    speechSynthesis.speak(utterance);
+  };
+
+  document.querySelectorAll('.color').forEach(colorBtn => {
+    colorBtn.addEventListener('click', () => {
+      const color = colorBtn.getAttribute('data-color');
+      const note = noteInput.value.trim();
+      const mark = document.createElement('mark');
+      mark.textContent = selectedText;
+      mark.style.backgroundColor = color;
+      mark.setAttribute('data-note', note);
+      mark.setAttribute('data-text', selectedText);
+      selectedRange.deleteContents();
+      selectedRange.insertNode(mark);
+      saveHighlight(selectedText, color, note);
+      menu.style.display = 'none';
+      noteInput.value = '';
+    });
+  });
+
+  function saveHighlight(text, color, note) {
+    const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
+    saved.push({ text, color, note });
+    localStorage.setItem('highlights', JSON.stringify(saved));
+    updateList();
+  }
+
+  function updateList() {
+    const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
+    listItems.innerHTML = '';
+    saved.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.className = 'highlight-item';
+      div.innerHTML = `
+        <div style="background:${item.color};padding:4px;border-radius:4px;">${item.text}</div>
+        <textarea onchange="editNote(${index}, this.value)">${item.note || ''}</textarea>
+        <button onclick="removeHighlight(${index}, '${item.text}')">حذف</button>
+      `;
+      listItems.appendChild(div);
+    });
+
+    const hasHighlights = saved.length > 0;
+    alertBtn.style.display = hasHighlights ? 'block' : 'none';
+
+    if (!hasHighlights) {
+      listBox.style.display = 'none';
+      listBox.classList.remove('manual-open');
+    } else if (!listBox.classList.contains('manual-open')) {
+      listBox.style.display = 'none';
     }
+  }
 
-    alertBtn.addEventListener('click', () => {
-      const isVisible = listBox.style.display === 'block';
-      listBox.style.display = isVisible ? 'none' : 'block';
-      if (!isVisible) listBox.classList.add('manual-open');
-      else listBox.classList.remove('manual-open');
+  alertBtn.addEventListener('click', () => {
+    const isVisible = listBox.style.display === 'block';
+    listBox.style.display = isVisible ? 'none' : 'block';
+    if (!isVisible) listBox.classList.add('manual-open');
+    else listBox.classList.remove('manual-open');
+  });
+
+  window.removeHighlight = function(index, text) {
+    const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
+    saved.splice(index, 1);
+    localStorage.setItem('highlights', JSON.stringify(saved));
+
+    const textBox = document.getElementById('text-box');
+    const html = textBox.innerHTML;
+    const regex = new RegExp(`<mark[^>]*data-text="${text}"[^>]*>${text}</mark>`, 'g');
+    textBox.innerHTML = html.replace(regex, text);
+
+    updateList();
+  };
+
+  window.editNote = function(index, newNote) {
+    const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
+    saved[index].note = newNote;
+    localStorage.setItem('highlights', JSON.stringify(saved));
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
+    let html = document.getElementById('text-box').innerHTML;
+    saved.forEach(item => {
+      const mark = `<mark style="background-color:${item.color}" data-note="${item.note}" data-text="${item.text}">${item.text}</mark>`;
+      const regex = new RegExp(item.text, 'g');
+      html = html.replace(regex, mark);
     });
-
-    window.removeHighlight = function(index, text) {
-      const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
-      saved.splice(index, 1);
-      localStorage.setItem('highlights', JSON.stringify(saved));
-
-      // إزالة التظليل من النص
-      const textBox = document.getElementById('text-box');
-      const html = textBox.innerHTML;
-      const regex = new RegExp(`<mark[^>]*data-text="${text}"[^>]*>${text}</mark>`, 'g');
-      textBox.innerHTML = html.replace(regex, text);
-
-      updateList();
-    };
-
-    window.editNote = function(index, newNote) {
-      const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
-      saved[index].note = newNote;
-      localStorage.setItem('highlights', JSON.stringify(saved));
-    };
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
-      let html = document.getElementById('text-box').innerHTML;
-      saved.forEach(item => {
-        const mark = `<mark style="background-color:${item.color}" data-note="${item.note}" data-text="${item.text}">${item.text}</mark>`;
-        const regex = new RegExp(item.text, 'g');
-        html = html.replace(regex, mark);
-      });
-      document.getElementById('text-box').innerHTML = html;
-      updateList();
-    });
-  </script>
+    document.getElementById('text-box').innerHTML = html;
+    updateList();
+  });
+</script>
 </body>
 </html>
-
