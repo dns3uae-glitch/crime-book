@@ -292,25 +292,30 @@
       return;
     }
 
-    function speakWithVoice() {
-      const voices = speechSynthesis.getVoices();
-      const arabicVoice = voices.find(v => v.lang.startsWith('ar')) || voices[0];
+    let voices = speechSynthesis.getVoices();
 
+    function playVoice() {
+      const arabicVoice = voices.find(v => v.lang.includes('ar')) || voices.find(v => v.lang.includes('en')) || voices[0];
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ar-SA';
       utterance.voice = arabicVoice;
+      utterance.lang = arabicVoice.lang;
       utterance.rate = 1;
       utterance.pitch = 1;
       utterance.volume = 1;
 
       speechSynthesis.cancel();
-      speechSynthesis.speak(utterance);
+      setTimeout(() => {
+        speechSynthesis.speak(utterance);
+      }, 100);
     }
 
-    if (speechSynthesis.getVoices().length === 0) {
-      speechSynthesis.onvoiceschanged = speakWithVoice;
+    if (voices.length === 0) {
+      speechSynthesis.onvoiceschanged = () => {
+        voices = speechSynthesis.getVoices();
+        playVoice();
+      };
     } else {
-      speakWithVoice();
+      playVoice();
     }
   }
 
