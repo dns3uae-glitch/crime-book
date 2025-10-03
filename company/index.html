@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>Company Intro</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Georgia', serif;
+      background-color: #111;
+      overflow: hidden;
+      direction: rtl;
+    }
+
+    .page-wrapper {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-flip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #111;
+      z-index: 999;
+      clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+      transition: clip-path 1.2s ease-in-out;
+    }
+
+    .page-flip.active {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    header, footer {
+      width: 100%;
+      height: 70px;
+      background-color: #000;
+      color: #fdd835;
+      text-shadow: 1px 1px 2px black;
+      display: flex;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      border-top: 4px solid #fdd835;
+      border-bottom: 4px solid #fdd835;
+      box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      justify-content: center;
+      padding: 0 30px;
+      z-index: 2;
+    }
+
+    .footer-controls {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .next-button {
+      position: absolute;
+      left: 80px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .nav-button {
+      background-color: #222;
+      color: #fdd835;
+      border: 2px solid #fdd835;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .nav-button:hover {
+      background-color: rgba(255,255,0,0.2);
+    }
+
+    .video-frame {
+      position: absolute;
+      top: 16%;
+      left: 6%;
+      width: 88%;
+      height: 68%;
+      border: 5px solid #fdd835;
+      box-shadow: 0 0 40px rgba(255, 255, 0, 0.4);
+      border-radius: 14px;
+      background-color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    video {
+      width: 96%;
+      height: 92%;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <header>
+      🕵️‍♂️ إنتاجات مسرح الجريمة
+    </header>
+
+    <div class="video-frame">
+  <iframe width="100%" height="100%" 
+      src="https://www.youtube.com/embed/KPs2ktUji2Q?autoplay=1&rel=0"
+    title="YouTube video"
+    frameborder="0"
+    allow="autoplay; encrypted-media"
+    allowfullscreen>
+  </iframe>
+</div>
+
+
+    <footer>
+      <!-- زر التالي -->
+      <div class="next-button">
+        <button class="nav-button" onclick="flipPage()">⬅️ التالي</button>
+      </div>
+
+         </footer>
+  </div>
+
+  <!-- تأثير الصفحة -->
+  <div class="page-flip" id="flipEffect"></div>
+
+  <script>
+    const video = document.getElementById('companyVideo');
+
+    // تشغيل الفيديو تلقائيًا ثم فك الكتم بعد التشغيل
+    window.addEventListener('load', () => {
+      video.play().then(() => {
+        video.muted = false;
+      }).catch(() => {
+        setTimeout(() => {
+          video.play().then(() => {
+            video.muted = false;
+          });
+        }, 500);
+      });
+    });
+
+    function playVideo() {
+      video.play();
+    }
+
+    function pauseVideo() {
+      video.pause();
+    }
+
+    function toggleMute() {
+      video.muted = !video.muted;
+    }
+
+    function flipPage() {
+      const flip = document.getElementById('flipEffect');
+      flip.classList.add('active');
+      setTimeout(() => {
+        window.location.href = "welcome.html";
+      }, 1200);
+    }
+  </script>
+</body>
+</html>
