@@ -154,27 +154,26 @@
 
 <!-- قائمة التظليل والملاحظة -->
 <div id="highlight-menu" style="display:none; position:absolute; background:#222; border:2px solid #fdd835; padding:10px; border-radius:8px; z-index:1000; width:280px;">
- <div class="colors" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; margin-bottom:10px;">
-  <span class="color" data-color="#fdd835" style="background:#fdd835;"></span>
-  <span class="color" data-color="#ff4081" style="background:#ff4081;"></span>
-  <span class="color" data-color="#40c4ff" style="background:#40c4ff;"></span>
-  <span class="color" data-color="#4caf50" style="background:#4caf50;"></span>
-  <span class="color" data-color="#ff9800" style="background:#ff9800;"></span>
-  <span class="color" data-color="#9c27b0" style="background:#9c27b0;"></span>
-  <span class="color" data-color="#00bcd4" style="background:#00bcd4;"></span>
-  <span class="color" data-color="#795548" style="background:#795548;"></span>
-  <span class="color" data-color="#e91e63" style="background:#e91e63;"></span>
-  <span class="color" data-color="#8bc34a" style="background:#8bc34a;"></span>
-</div>
-
-  <textarea id="note-input" placeholder="اكتب ملاحظة هنا..." style="width:100%; height:60px; font-size:16px; padding:8px; resize:vertical; border-radius:6px; border:none; background:#111; color:#fff;"></textarea>
+  <div class="colors" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; margin-bottom:10px;">
+    <span class="color" data-color="#fdd835" style="background:#fdd835; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
+    <span class="color" data-color="#ff4081" style="background:#ff4081; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
+    <span class="color" data-color="#40c4ff" style="background:#40c4ff; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
+    <span class="color" data-color="#4caf50" style="background:#4caf50; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
+    <span class="color" data-color="#ff9800" style="background:#ff9800; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
+    <span class="color" data-color="#9c27b0" style="background:#9c27b0; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
+    <span class="color" data-color="#00bcd4" style="background:#00bcd4; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
+    <span class="color" data-color="#795548" style="background:#795548; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
+    <span class="color" data-color="#e91e63" style="background:#e91e63; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
+    <span class="color" data-color="#8bc34a" style="background:#8bc34a; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
+  </div>
+  <textarea id="note-input" placeholder="اكتب ملاحظة هنا..." style="width:100%; height:60px; font-size:16px; padding:8px; resize:vertical; border-radius:6px; border:1px solid #fdd835; background:#fff; color:#000;"></textarea>
   <div id="highlight-actions" style="margin-top:10px; display:flex; gap:10px;"></div>
 </div>
 
 <!-- دفتر الملاحظات -->
 <div id="notebook-panel" style="position:fixed; bottom:-300px; left:50%; transform:translateX(-50%); width:90%; max-width:600px; background:#222; border:2px solid #fdd835; border-radius:12px 12px 0 0; padding:20px; box-shadow:0 -4px 20px rgba(255,255,0,0.3); transition:bottom 0.4s ease; z-index:9999; color:#fff; text-align:center;">
   <h3>📔 ملاحظات عامة عن الصفحة</h3>
-<textarea id="note-input" placeholder="اكتب ملاحظة هنا..." style="width:100%; height:60px; font-size:16px; padding:8px; resize:vertical; border-radius:6px; border:1px solid #fdd835; background:#fff; color:#000;"></textarea>
+  <textarea id="notebook-input" placeholder="اكتب ملاحظتك هنا..." style="width:100%; height:100px; font-size:16px; padding:10px; border-radius:6px; border:none; resize:vertical; margin-top:10px; background:#fff; color:#000;"></textarea>
   <button id="save-notebook" style="margin-top:10px; background:#4caf50; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">💾 حفظ</button>
   <button id="delete-notebook" style="margin-top:10px; background:#ff4081; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">🗑️ حذف</button>
 </div>
@@ -197,6 +196,7 @@
     <button id="sendBtn" style="background:#fdd835; color:#000; border:none; padding:8px 12px; margin-left:8px; border-radius:5px; cursor:pointer; font-weight:bold;">إرسال</button>
   </div>
 </div>
+
 <script>
   function goToPrevious() {
     window.location.href = 'https://dns3uae-glitch.github.io/crime-book/welcome';
@@ -238,14 +238,6 @@
   let selectedText = '';
   let selectedRange = null;
 
-  document.getElementById('tool-search').onclick = () => {
-  if (selectedText.trim()) {
-    const query = encodeURIComponent(selectedText.trim());
-    window.open(`https://www.google.com/search?q=${query}`, '_blank');
-  }
-};
-
-
   document.addEventListener('mouseup', (e) => {
     const selection = window.getSelection();
     if (selection.toString().trim().length > 0) {
@@ -267,6 +259,13 @@
     highlightMenu.style.left = toolMenu.style.left;
     highlightMenu.style.display = 'block';
     toolMenu.style.display = 'none';
+  };
+
+  document.getElementById('tool-search').onclick = () => {
+    if (selectedText.trim()) {
+      const query = encodeURIComponent(selectedText.trim());
+      window.open(`https://www.google.com/search?q=${query}`, '_blank');
+    }
   };
 
   document.querySelectorAll('.color').forEach(colorBtn => {
@@ -377,157 +376,9 @@
     const list = document.getElementById('highlight-list');
     list.style.display = list.style.display === 'block' ? 'none' : 'block';
   };
-  // دفتر الملاحظات 📔
-  const notebookPanel = document.getElementById('notebook-panel');
-  const notebookInput = document.getElementById('notebook-input');
-
-  document.getElementById('tool-notebook').onclick = () => {
-    notebookPanel.style.bottom = '0px';
-  };
-
-  document.getElementById('save-notebook').onclick = () => {
-    const note = notebookInput.value.trim();
-    if (note) {
-      localStorage.setItem('pageNote_chapter1', note);
-      notebookPanel.style.bottom = '-300px';
-      updateIndicators();
-      alert('✅ تم حفظ الملاحظة!');
-    }
-  };
-
-  document.getElementById('delete-notebook').onclick = () => {
-    localStorage.removeItem('pageNote_chapter1');
-    notebookInput.value = '';
-    notebookPanel.style.bottom = '-300px';
-    updateIndicators();
-    alert('🗑️ تم حذف الملاحظة!');
-  };
-
-  notebookIndicator.onclick = () => {
-    notebookPanel.style.bottom = '0px';
-  };
-
-  // الدردشة الذكية 💬
-  const chatToggle = document.getElementById('chat-toggle');
-  const chatBox = document.getElementById('chatBox');
-  const chatBody = document.getElementById('chatBody');
-  const userInput = document.getElementById('userInput');
-  const sendBtn = document.getElementById('sendBtn');
-
-  chatToggle.addEventListener('click', () => {
-    chatBox.style.display = chatBox.style.display === 'flex' ? 'none' : 'flex';
-    chatBox.style.flexDirection = 'column';
-  });
-
-  sendBtn.addEventListener('click', sendMessage);
-  userInput.addEventListener('keypress', e => {
-    if (e.key === 'Enter') sendMessage();
-  });
-
-  function appendMessage(role, content) {
-    const msg = document.createElement('div');
-    msg.className = 'chat-message ' + role;
-    msg.textContent = content;
-    msg.style.padding = '8px';
-    msg.style.marginBottom = '6px';
-    msg.style.borderRadius = '6px';
-    msg.style.background = role === 'user' ? '#333' : '#444';
-    msg.style.color = '#fdd835';
-    chatBody.appendChild(msg);
-  }
-
-  function updateLastBotMessage(content) {
-    const messages = document.querySelectorAll('.chat-message.bot');
-    if (messages.length > 0) {
-      messages[messages.length - 1].textContent = content;
-    }
-  }
-
-  async function sendMessage() {
-    const text = userInput.value.trim();
-    if (!text) return;
-
-    appendMessage('user', text);
-    appendMessage('bot', '...جاري التفكير');
-
-    try {
-      const response = await fetch('https://gpt-proxy-server-xs5u.onrender.com/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: text })
-      });
-
-      const data = await response.json();
-      updateLastBotMessage(data.reply);
-    } catch {
-      updateLastBotMessage('❌ حدث خطأ أثناء الاتصال بالخادم.');
-    }
-
-    userInput.value = '';
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }
-  // استعادة التظليلات والملاحظات عند تحميل الصفحة
-  window.addEventListener('DOMContentLoaded', () => {
-    const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
-    let html = textBox.innerHTML;
-    saved.forEach(item => {
-      const mark = `<mark style="background-color:${item.color}" data-note="${item.note}" data-text="${item.text}">${item.text}</mark>`;
-      const regex = new RegExp(item.text, 'g');
-      html = html.replace(regex, mark);
-    });
-    textBox.innerHTML = html;
-
-    const savedNote = localStorage.getItem('pageNote_chapter1');
-    if (savedNote) notebookInput.value = savedNote;
-
-    updateIndicators();
-    renderHighlightList();
-  });
-
-  // عرض أدوات التظليل عند الضغط على كلمة مظللة
-  textBox.addEventListener('click', e => {
-    if (e.target.tagName === 'MARK') {
-      const text = e.target.getAttribute('data-text');
-      const note = e.target.getAttribute('data-note');
-      const rect = e.target.getBoundingClientRect();
-      highlightMenu.style.top = `${rect.bottom + window.scrollY + 5}px`;
-      highlightMenu.style.left = `${rect.left + window.scrollX}px`;
-      highlightMenu.style.display = 'block';
-      noteInput.value = note;
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = '🗑️ حذف التظليل';
-      deleteBtn.style.background = '#ff4081';
-      deleteBtn.style.color = '#fff';
-      deleteBtn.style.border = 'none';
-      deleteBtn.style.padding = '6px 12px';
-      deleteBtn.style.borderRadius = '6px';
-      deleteBtn.style.cursor = 'pointer';
-      deleteBtn.onclick = () => {
-        e.target.remove();
-        removeHighlight(text);
-        highlightMenu.style.display = 'none';
-      };
-
-      const speakBtn = document.createElement('button');
-      speakBtn.textContent = '🔊 سماع الملاحظة';
-      speakBtn.style.background = '#4caf50';
-      speakBtn.style.color = '#fff';
-      speakBtn.style.border = 'none';
-      speakBtn.style.padding = '6px 12px';
-      speakBtn.style.borderRadius = '6px';
-      speakBtn.style.cursor = 'pointer';
-      speakBtn.onclick = () => {
-        speakText(note || text);
-      };
-
-      const actionsBox = document.getElementById('highlight-actions');
-      actionsBox.innerHTML = '';
-      actionsBox.appendChild(deleteBtn);
-      actionsBox.appendChild(speakBtn);
-    }
-  });
 </script>
+
 </body>
 </html>
+
 
