@@ -268,7 +268,7 @@
   document.getElementById('tool-search').onclick = () => {
     if (selectedText.trim()) {
       const query = encodeURIComponent(selectedText.trim());
-      window.open(`https://www.google.com/search?q=${query}`, '_blank');
+window.location.href = `https://www.google.com/search?q=${query}`;
     }
   };
 
@@ -534,4 +534,5 @@
 </script>
 </body>
 </html>
+
 
