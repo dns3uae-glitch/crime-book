@@ -120,21 +120,27 @@
       background-color: rgba(255,255,0,0.2);
     }
 
-    #highlight-alert {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fdd835;
-      color: #000;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(255,255,0,0.4);
-      display: none;
-      z-index: 1000;
-    }
+    #footer-indicators {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 1000;
+}
+
+#footer-indicators button {
+  background: #fdd835;
+  color: #000;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(255,255,0,0.3);
+}
+
 
     #tool-menu {
       position: absolute;
@@ -324,6 +330,7 @@
   <button id="highlight-alert">📌 كلمات مظللة</button>
   <button id="notebook-indicator">📔 ملاحظة محفوظة</button>
 </div>
+
 
   </footer>
 
@@ -611,6 +618,7 @@ if (savedNote) {
   </script>
 </body>
 </html>
+
 
 
 
