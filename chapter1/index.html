@@ -229,6 +229,10 @@
       speechSynthesis.speak(utterance);
     }, 100);
   }
+let voicesReady = false;
+speechSynthesis.onvoiceschanged = () => {
+  voicesReady = true;
+};
 
   const toolMenu = document.getElementById('tool-menu');
   const highlightMenu = document.getElementById('highlight-menu');
@@ -367,7 +371,10 @@ window.open(
       deleteBtn.onclick = () => {
         removeHighlight(item.text);
         const marks = document.querySelectorAll(`mark[data-text="${item.text}"]`);
-        marks.forEach(m => m.remove());
+marks.forEach(m => {
+  const textNode = document.createTextNode(m.getAttribute('data-text'));
+  m.replaceWith(textNode);
+});
       };
 
       actions.appendChild(speakBtn);
@@ -540,6 +547,7 @@ window.open(
 </script>
 </body>
 </html>
+
 
 
 
