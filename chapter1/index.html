@@ -255,16 +255,27 @@
     <button id="tool-speak">🔊</button>
   </div>
 
-  <div id="highlight-menu">
-<div class="colors">
-  <span class="color" data-color="#fdd835" style="background:#fdd835;"></span>
-  <span class="color" data-color="#ff4081" style="background:#ff4081;"></span>
-  <span class="color" data-color="#40c4ff" style="background:#40c4ff;"></span>
-  <span class="color" data-color="#4caf50" style="background:#4caf50;"></span>
-  <span class="color" data-color="#e91e63" style="background:#e91e63;"></span>
-  <span class="color" data-color="#9c27b0" style="background:#9c27b0;"></span>
-  <span class="color" data-color="#00bcd4" style="background:#00bcd4;"></span>
-</div>
+ <div id="highlight-menu">
+    <div class="colors">
+      <span class="color" data-color="#fdd835" style="background:#fdd835;"></span>
+      <span class="color" data-color="#ff4081" style="background:#ff4081;"></span>
+      <span class="color" data-color="#40c4ff" style="background:#40c4ff;"></span>
+      <span class="color" data-color="#4caf50" style="background:#4caf50;"></span>
+      <span class="color" data-color="#e91e63" style="background:#e91e63;"></span>
+      <span class="color" data-color="#9c27b0" style="background:#9c27b0;"></span>
+      <span class="color" data-color="#00bcd4" style="background:#00bcd4;"></span>
+    </div>
+    <textarea id="note-input" placeholder="اكتب ملاحظة هنا..."></textarea>
+  </div>
+
+  <div id="highlight-alert">📌 كلمات مظللة</div>
+
+  <div id="highlight-list">
+    <h3>الكلمات المظللة</h3>
+    <button id="read-all">🔊 قراءة كل الملاحظات</button>
+ <button onclick="testVoice()">🔊 اختبار الصوت</button>
+    <div id="highlight-items"></div>
+  </div>
 
         <script>
   function goToPrevious() {
@@ -473,4 +484,5 @@
 </script>
 </body>
 </html>
+
 
