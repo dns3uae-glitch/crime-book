@@ -33,7 +33,7 @@
       box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
       position: fixed;
       top: 0;
-      z-index: 10;
+      z-index: 100;
     }
 
     .page-wrapper {
@@ -75,7 +75,7 @@
       box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
       position: fixed;
       bottom: 0;
-      z-index: 10;
+      z-index: 100;
     }
 
     .footer-content {
@@ -153,7 +153,7 @@
 </div>
 
 <!-- قائمة التظليل والملاحظة -->
-<div id="highlight-menu" style="display:none; position:absolute; background:#222; border:2px solid #fdd835; padding:10px; border-radius:8px; z-index:1000; width:280px;">
+<div id="highlight-menu" style="display:none; position:absolute; background:#222; border:2px solid #fdd835; padding:10px; border-radius:8px; z-index:1000; width:280px;" onclick="event.stopPropagation();">
   <div class="colors" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; margin-bottom:10px;">
     <span class="color" data-color="#fdd835" style="background:#fdd835; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
     <span class="color" data-color="#ff4081" style="background:#ff4081; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
@@ -166,7 +166,7 @@
     <span class="color" data-color="#e91e63" style="background:#e91e63; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
     <span class="color" data-color="#8bc34a" style="background:#8bc34a; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
   </div>
-  <textarea id="note-input" placeholder="اكتب ملاحظة هنا..." style="width:100%; height:60px; font-size:16px; padding:8px; resize:vertical; border-radius:6px; border:1px solid #fdd835; background:#fff; color:#000;"></textarea>
+  <textarea id="note-input" placeholder="اكتب ملاحظة هنا..." style="width:100%; height:60px; font-size:16px; padding:8px; resize:vertical; border-radius:6px; border:1px solid #fdd835; background:#fff; color:#000;" onclick="event.stopPropagation();"></textarea>
   <div id="highlight-actions" style="margin-top:10px; display:flex; gap:10px;"></div>
 </div>
 
@@ -187,10 +187,10 @@
 </div>
 
 <!-- زر فتح الدردشة -->
-<button id="chat-toggle" style="background:#fdd835; color:#000; border:none; border-radius:50%; width:55px; height:55px; font-size:26px; cursor:pointer; position:fixed; bottom:90px; right:20px; box-shadow:0 0 10px rgba(255,255,0,0.5); z-index:1200;">💬</button>
+<button id="chat-toggle" style="background:#fdd835; color:#000; border:none; border-radius:50%; width:55px; height:55px; font-size:26px; cursor:pointer; position:fixed; bottom:90px; right:20px; box-shadow:0 0 10px rgba(255,255,0,0.5); z-index:1201;">💬</button>
 
 <!-- نافذة الدردشة -->
-<div class="chat-container" id="chatBox" style="position:fixed; bottom:160px; right:20px; max-width:400px; background:#222; border:2px solid #fdd835; border-radius:12px; box-shadow:0 0 20px rgba(255,255,0,0.3); display:none; flex-direction:column; overflow:hidden; z-index:1201;">
+<div class="chat-container" id="chatBox" style="position:fixed; bottom:160px; right:20px; max-width:400px; background:#222; border:2px solid #fdd835; border-radius:12px; box-shadow:0 0 20px rgba(255,255,0,0.3); display:none; flex-direction:column; overflow:hidden; z-index:1202;">
   <div class="chat-header" style="background:#000; color:#fdd835; padding:12px; font-size:18px; text-align:center; border-bottom:2px solid #fdd835;">مساعدك الذكي</div>
   <div class="chat-body" id="chatBody" style="padding:10px; height:250px; overflow-y:auto; background:#111;"></div>
   <div class="chat-footer" style="display:flex; padding:10px; border-top:1px solid #fdd835; background:#000;">
@@ -198,8 +198,6 @@
     <button id="sendBtn" style="background:#fdd835; color:#000; border:none; padding:8px 12px; margin-left:8px; border-radius:5px; cursor:pointer; font-weight:bold;">إرسال</button>
   </div>
 </div>
-
-
 <script>
   function goToPrevious() {
     window.location.href = 'https://dns3uae-glitch.github.io/crime-book/welcome';
@@ -379,8 +377,7 @@
     const list = document.getElementById('highlight-list');
     list.style.display = list.style.display === 'block' ? 'none' : 'block';
   };
-
-  // دفتر الملاحظات
+  // دفتر الملاحظات 📔
   const notebookPanel = document.getElementById('notebook-panel');
   const notebookInput = document.getElementById('notebook-input');
 
@@ -410,7 +407,67 @@
     notebookPanel.style.bottom = '0px';
   };
 
-  // استعادة التظليلات والملاحظات عند التحميل
+  // الدردشة الذكية 💬
+  const chatToggle = document.getElementById('chat-toggle');
+  const chatBox = document.getElementById('chatBox');
+  const chatBody = document.getElementById('chatBody');
+  const userInput = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  chatToggle.addEventListener('click', () => {
+    chatBox.style.display = chatBox.style.display === 'flex' ? 'none' : 'flex';
+    chatBox.style.flexDirection = 'column';
+  });
+
+  sendBtn.addEventListener('click', sendMessage);
+  userInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  function appendMessage(role, content) {
+    const msg = document.createElement('div');
+    msg.className = 'chat-message ' + role;
+    msg.textContent = content;
+    msg.style.padding = '8px';
+    msg.style.marginBottom = '6px';
+    msg.style.borderRadius = '6px';
+    msg.style.background = role === 'user' ? '#333' : '#444';
+    msg.style.color = '#fdd835';
+    chatBody.appendChild(msg);
+  }
+
+  function updateLastBotMessage(content) {
+    const messages = document.querySelectorAll('.chat-message.bot');
+    if (messages.length > 0) {
+      messages[messages.length - 1].textContent = content;
+    }
+  }
+
+  async function sendMessage() {
+    const text = userInput.value.trim();
+    if (!text) return;
+
+    appendMessage('user', text);
+    appendMessage('bot', '...جاري التفكير');
+
+    try {
+      const response = await fetch('https://gpt-proxy-server-xs5u.onrender.com/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: text })
+      });
+
+      const data = await response.json();
+      updateLastBotMessage(data.reply);
+    } catch {
+      updateLastBotMessage('❌ حدث خطأ أثناء الاتصال بالخادم.');
+    }
+
+    userInput.value = '';
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  // استعادة التظليلات والملاحظات عند تحميل الصفحة
   window.addEventListener('DOMContentLoaded', () => {
     const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
     let html = textBox.innerHTML;
@@ -434,41 +491,41 @@
       const text = e.target.getAttribute('data-text');
       const note = e.target.getAttribute('data-note');
       const rect = e.target.getBoundingClientRect();
-     highlightMenu.style.top = `${rect.bottom + window.scrollY + 5}px`;
-highlightMenu.style.left = `${rect.left + window.scrollX}px`;
-highlightMenu.style.display = 'block';
-noteInput.value = note;
+      highlightMenu.style.top = `${rect.bottom + window.scrollY + 5}px`;
+      highlightMenu.style.left = `${rect.left + window.scrollX}px`;
+      highlightMenu.style.display = 'block';
+      noteInput.value = note;
 
-const deleteBtn = document.createElement('button');
-deleteBtn.textContent = '🗑️ حذف التظليل';
-deleteBtn.style.background = '#ff4081';
-deleteBtn.style.color = '#fff';
-deleteBtn.style.border = 'none';
-deleteBtn.style.padding = '6px 12px';
-deleteBtn.style.borderRadius = '6px';
-deleteBtn.style.cursor = 'pointer';
-deleteBtn.onclick = () => {
-  e.target.remove();
-  removeHighlight(text);
-  highlightMenu.style.display = 'none';
-};
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '🗑️ حذف التظليل';
+      deleteBtn.style.background = '#ff4081';
+      deleteBtn.style.color = '#fff';
+      deleteBtn.style.border = 'none';
+      deleteBtn.style.padding = '6px 12px';
+      deleteBtn.style.borderRadius = '6px';
+      deleteBtn.style.cursor = 'pointer';
+      deleteBtn.onclick = () => {
+        e.target.remove();
+        removeHighlight(text);
+        highlightMenu.style.display = 'none';
+      };
 
-const speakBtn = document.createElement('button');
-speakBtn.textContent = '🔊 سماع الملاحظة';
-speakBtn.style.background = '#4caf50';
-speakBtn.style.color = '#fff';
-speakBtn.style.border = 'none';
-speakBtn.style.padding = '6px 12px';
-speakBtn.style.borderRadius = '6px';
-speakBtn.style.cursor = 'pointer';
-speakBtn.onclick = () => {
-  speakText(note || text);
-};
+      const speakBtn = document.createElement('button');
+      speakBtn.textContent = '🔊 سماع الملاحظة';
+      speakBtn.style.background = '#4caf50';
+      speakBtn.style.color = '#fff';
+      speakBtn.style.border = 'none';
+      speakBtn.style.padding = '6px 12px';
+      speakBtn.style.borderRadius = '6px';
+      speakBtn.style.cursor = 'pointer';
+      speakBtn.onclick = () => {
+        speakText(note || text);
+      };
 
-const actionsBox = document.getElementById('highlight-actions');
-actionsBox.innerHTML = '';
-actionsBox.appendChild(deleteBtn);
-actionsBox.appendChild(speakBtn);
+      const actionsBox = document.getElementById('highlight-actions');
+      actionsBox.innerHTML = '';
+      actionsBox.appendChild(deleteBtn);
+      actionsBox.appendChild(speakBtn);
     }
   });
 </script>
