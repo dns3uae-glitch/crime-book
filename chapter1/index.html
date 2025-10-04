@@ -350,44 +350,12 @@
   };
 
 toolSearch.onclick = () => {
-  const overlay = document.createElement('div');
-  overlay.style.position = 'fixed';
-  overlay.style.top = '0';
-  overlay.style.left = '0';
-  overlay.style.width = '100%';
-  overlay.style.height = '100%';
-  overlay.style.background = 'rgba(0,0,0,0.8)';
-  overlay.style.zIndex = '9999';
-  overlay.id = 'google-overlay';
-
-  const box = document.createElement('div');
-  box.style.position = 'absolute';
-  box.style.top = '50%';
-  box.style.left = '50%';
-  box.style.transform = 'translate(-50%, -50%)';
-  box.style.background = '#fff';
-  box.style.padding = '20px';
-  box.style.borderRadius = '12px';
-  box.style.width = '80%';
-  box.style.maxWidth = '600px';
-  box.style.textAlign = 'center';
-  box.style.color = '#000';
-  box.innerHTML = `
-    <h3>🔍 بحث Google عن:</h3>
-    <p style="margin: 20px 0; font-size: 20px;">${selectedText}</p>
-    <a href="https://www.google.com/search?q=${encodeURIComponent(selectedText)}" target="_blank" style="background:#fdd835; color:#000; padding:10px 20px; border-radius:6px; text-decoration:none; font-weight:bold;">فتح في Google</a>
-    <br><br>
-    <button id="close-google-popup" style="margin-top:10px; padding:6px 12px; background:#ff4081; color:#fff; border:none; border-radius:6px; cursor:pointer;">❌ إغلاق</button>
-  `;
-
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-
-  document.getElementById('close-google-popup').onclick = () => {
-    document.body.removeChild(overlay);
+    window.open(
+      `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`,
+      'googlePopup',
+      'width=600,height=500,left=100,top=100'
+    );
   };
-};
-
 
   toolSpeak.onclick = () => {
     speakText(selectedText);
