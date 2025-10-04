@@ -144,7 +144,7 @@
       </div>
     </div>
   </footer>
-  <!-- قائمة الأدوات العائمة -->
+<!-- قائمة الأدوات العائمة -->
 <div id="tool-menu" style="display:none; position:absolute; background:#222; border:2px solid #fdd835; padding:10px; border-radius:8px; z-index:1000; display:flex; gap:10px;">
   <button id="tool-highlight">✏️</button>
   <button id="tool-search">🔍</button>
@@ -189,7 +189,6 @@
     <button id="sendBtn" style="background:#fdd835; color:#000; border:none; padding:8px 12px; margin-left:8px; border-radius:5px; cursor:pointer; font-weight:bold;">إرسال</button>
   </div>
 </div>
-
 <script>
   function goToPrevious() {
     window.location.href = 'https://dns3uae-glitch.github.io/crime-book/welcome';
@@ -294,68 +293,20 @@
     notebookIndicator.style.display = note ? 'block' : 'none';
   }
 
-function renderHighlightList() {
-  const container = document.getElementById('highlight-items');
-  container.innerHTML = '';
-  const highlights = JSON.parse(localStorage.getItem('highlights') || '[]');
-
-  highlights.forEach((item, index) => {
-    const wrapper = document.createElement('div');
-    wrapper.style.background = item.color;
-    wrapper.style.padding = '8px';
-    wrapper.style.marginBottom = '6px';
-    wrapper.style.borderRadius = '6px';
-    wrapper.style.display = 'flex';
-    wrapper.style.flexDirection = 'column';
-    wrapper.style.gap = '6px';
-
-    const text = document.createElement('div');
-    text.textContent = `📍 ${item.text}`;
-    text.style.fontWeight = 'bold';
-
-    const note = document.createElement('div');
-    note.textContent = item.note ? `📝 ${item.note}` : '📝 لا توجد ملاحظة';
-
-    const actions = document.createElement('div');
-    actions.style.display = 'flex';
-    actions.style.gap = '10px';
-
-    const speakBtn = document.createElement('button');
-    speakBtn.textContent = '🔊';
-    speakBtn.style.background = '#4caf50';
-    speakBtn.style.color = '#fff';
-    speakBtn.style.border = 'none';
-    speakBtn.style.padding = '4px 10px';
-    speakBtn.style.borderRadius = '6px';
-    speakBtn.style.cursor = 'pointer';
-    speakBtn.onclick = () => {
-      speakText(item.note || item.text);
-    };
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = '🗑️';
-    deleteBtn.style.background = '#ff4081';
-    deleteBtn.style.color = '#fff';
-    deleteBtn.style.border = 'none';
-    deleteBtn.style.padding = '4px 10px';
-    deleteBtn.style.borderRadius = '6px';
-    deleteBtn.style.cursor = 'pointer';
-    deleteBtn.onclick = () => {
-      removeHighlight(item.text);
-      // إزالة التظليل من النص
-      const marks = document.querySelectorAll(`mark[data-text="${item.text}"]`);
-      marks.forEach(m => m.remove());
-    };
-
-    actions.appendChild(speakBtn);
-    actions.appendChild(deleteBtn);
-    wrapper.appendChild(text);
-    wrapper.appendChild(note);
-    wrapper.appendChild(actions);
-    container.appendChild(wrapper);
-  });
-}
-
+  function renderHighlightList() {
+    const container = document.getElementById('highlight-items');
+    container.innerHTML = '';
+    const highlights = JSON.parse(localStorage.getItem('highlights') || '[]');
+    highlights.forEach(item => {
+      const div = document.createElement('div');
+      div.textContent = `📍 ${item.text} — ${item.note}`;
+      div.style.background = item.color;
+      div.style.padding = '6px';
+      div.style.marginBottom = '4px';
+      div.style.borderRadius = '6px';
+      container.appendChild(div);
+    });
+  }
 
   highlightAlert.onclick = () => {
     const list = document.getElementById('highlight-list');
@@ -467,7 +418,7 @@ function renderHighlightList() {
   async function sendMessage() {
     const text = userInput.value.trim();
     if (!text) return;
-      appendMessage('user', text);
+appendMessage('user', text);
 appendMessage('bot', '...جاري التفكير');
     try {
       const response = await fetch('https://gpt-proxy-server-xs5u.onrender.com/ask', {
@@ -523,4 +474,4 @@ appendMessage('bot', '...جاري التفكير');
 </script>
 </body>
 </html>
-
+  
