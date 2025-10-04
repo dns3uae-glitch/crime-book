@@ -358,6 +358,8 @@
     <h3>📔 ملاحظات عامة عن الصفحة</h3>
     <textarea id="notebook-input" placeholder="اكتب ملاحظتك هنا..."></textarea>
     <button id="save-notebook">💾 حفظ الملاحظة</button>
+    <button id="delete-notebook">🗑️ حذف الملاحظة</button>
+
   </div>
 
   <script>
@@ -410,7 +412,8 @@
     const notebookPanel = document.getElementById('notebook-panel');
     const notebookInput = document.getElementById('notebook-input');
     const saveNotebookBtn = document.getElementById('save-notebook');
-const notebookIndicator = document.getElementById('notebook-indicator');
+    const deleteNotebookBtn = document.getElementById('delete-notebook');
+    const notebookIndicator = document.getElementById('notebook-indicator');
 
     let selectedText = '';
     let selectedRange = null;
@@ -495,6 +498,13 @@ const notebookIndicator = document.getElementById('notebook-indicator');
     notebookIndicator.style.display = 'block';
     alert('✅ تم حفظ الملاحظة!');
   }
+};
+deleteNotebookBtn.onclick = () => {
+  localStorage.removeItem('pageNote_chapter1');
+  notebookInput.value = '';
+  notebookPanel.style.bottom = '-300px';
+  notebookIndicator.style.display = 'none';
+  alert('🗑️ تم حذف الملاحظة!');
 };
 
 notebookIndicator.onclick = () => {
@@ -601,6 +611,7 @@ if (savedNote) {
   </script>
 </body>
 </html>
+
 
 
 
