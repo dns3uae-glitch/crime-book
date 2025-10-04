@@ -301,6 +301,8 @@
     </div>
 
     <div id="highlight-alert">📌 كلمات مظللة</div>
+    <button id="notebook-indicator" style="display:none; position:absolute; right:50%; transform:translateX(50%); bottom:10px; background:#fdd835; color:#000; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">📔 ملاحظة محفوظة</button>
+
   </footer>
 
   <div id="highlight-list">
@@ -386,6 +388,7 @@
     const notebookPanel = document.getElementById('notebook-panel');
     const notebookInput = document.getElementById('notebook-input');
     const saveNotebookBtn = document.getElementById('save-notebook');
+const notebookIndicator = document.getElementById('notebook-indicator');
 
     let selectedText = '';
     let selectedRange = null;
@@ -463,12 +466,18 @@
     };
 
     saveNotebookBtn.onclick = () => {
-      const note = notebookInput.value.trim();
-      if (note) {
-        localStorage.setItem('pageNote_chapter1', note);
-        alert('✅ تم حفظ الملاحظة!');
-      }
-        };
+  const note = notebookInput.value.trim();
+  if (note) {
+    localStorage.setItem('pageNote_chapter1', note);
+    notebookPanel.style.bottom = '-300px';
+    notebookIndicator.style.display = 'block';
+    alert('✅ تم حفظ الملاحظة!');
+  }
+};
+
+notebookIndicator.onclick = () => {
+  notebookPanel.style.bottom = '0px';
+};
 
     readAllBtn.onclick = () => {
       const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
@@ -569,4 +578,5 @@
   </script>
 </body>
 </html>
+
 
