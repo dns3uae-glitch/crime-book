@@ -281,6 +281,12 @@ window.open(
 
     }
   };
+document.getElementById('tool-speak').onclick = () => {
+  if (selectedText.trim()) {
+    speakText(selectedText.trim());
+    toolMenu.style.display = 'none';
+  }
+};
 
   document.querySelectorAll('.color').forEach(colorBtn => {
     colorBtn.addEventListener('click', () => {
@@ -547,6 +553,7 @@ marks.forEach(m => {
 </script>
 </body>
 </html>
+
 
 
 
