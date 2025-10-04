@@ -406,7 +406,69 @@
     if (savedNote) notebookInput.value = savedNote;
     updateIndicators();
     renderHighlightList();
+    textBox.addEventListener('click', (e) => {
+  if (e.target.tagName === 'MARK') {
+    const note = e.target.getAttribute('data-note') || '';
+    const text = e.target.getAttribute('data-text') || e.target.textContent;
+    selectedText = text;
+    selectedRange = null;
+
+    highlightMenu.style.top = `${e.clientY + window.scrollY}px`;
+    highlightMenu.style.left = `${e.clientX}px`;
+    highlightMenu.style.display = 'block';
+    noteInput.value = note;
+
+    // إزالة الأزرار القديمة إن وجدت
+    const oldDelete = document.getElementById('delete-highlight');
+    const oldSpeak = document.getElementById('speak-highlight');
+    if (oldDelete) oldDelete.remove();
+    if (oldSpeak) oldSpeak.remove();
+
+    // زر حذف التظليل
+    const deleteBtn = document.createElement('button');
+    deleteBtn.id = 'delete-highlight';
+    deleteBtn.textContent = '🗑️ حذف التظليل';
+    deleteBtn.style.marginTop = '10px';
+    deleteBtn.style.background = '#ff4081';
+    deleteBtn.style.color = '#fff';
+    deleteBtn.style.border = 'none';
+    deleteBtn.style.padding = '6px 12px';
+    deleteBtn.style.borderRadius = '6px';
+    deleteBtn.style.cursor = 'pointer';
+    deleteBtn.onclick = () => {
+      e.target.remove();
+      removeHighlight(text);
+      highlightMenu.style.display = 'none';
+    };
+    highlightMenu.appendChild(deleteBtn);
+
+    // زر سماع الملاحظة
+    const speakBtn = document.createElement('button');
+    speakBtn.id = 'speak-highlight';
+    speakBtn.textContent = '🔊 سماع الملاحظة';
+    speakBtn.style.marginTop = '10px';
+    speakBtn.style.background = '#4caf50';
+    speakBtn.style.color = '#fff';
+    speakBtn.style.border = 'none';
+    speakBtn.style.padding = '6px 12px';
+    speakBtn.style.borderRadius = '6px';
+    speakBtn.style.cursor = 'pointer';
+    speakBtn.onclick = () => {
+      speakText(note || text);
+    };
+    highlightMenu.appendChild(speakBtn);
+  }
+});
+
+function removeHighlight(text) {
+  const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
+  const updated = saved.filter(item => item.text !== text);
+  localStorage.setItem('highlights', JSON.stringify(updated));
+  updateIndicators();
+  renderHighlightList();
+    }
   });
 </script>
 </body>
 </html>
+
