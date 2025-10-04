@@ -167,9 +167,7 @@
   </style>
 </head>
 <body>
-  <header>
-    🧠 الفصل الثاني
-  </header>
+  <header>🧠 الفصل الثاني</header>
 
   <div class="page-wrapper">
     <div class="content-box">
@@ -186,13 +184,15 @@
     <div class="prev-button">
       <button class="nav-button" onclick="goBack()">➡️ السابق</button>
     </div>
-
     <div class="next-button">
       <button class="nav-button" onclick="goNext()">⬅️ التالي</button>
     </div>
   </footer>
 
-  <!-- ✅ D-ID Avatar Script -->
+  <!-- زر فتح الافتار -->
+  <button id="avatar-toggle" style="background:#fdd835; color:#000; border:none; border-radius:50%; width:55px; height:55px; font-size:26px; cursor:pointer; position:fixed; bottom:160px; right:20px; box-shadow:0 0 10px rgba(255,255,0,0.5); z-index:1201;">🤖</button>
+
+  <!-- سكربت D-ID Avatar -->
   <script type="module"
     src="https://agent.d-id.com/v2/index.js"
     data-mode="fabio"
@@ -201,7 +201,9 @@
     data-name="did-agent"
     data-monitor="true"
     data-orientation="horizontal"
-    data-position="right">
+    data-position="right"
+    data-show-avatar="false"
+    data-autostart="false">
   </script>
 
   <script>
@@ -212,7 +214,16 @@
     function goNext() {
       window.location.href = 'https://dns3uae-glitch.github.io/crime-book/3d';
     }
+
+    // زر تشغيل الافتار
+    const avatarToggle = document.getElementById('avatar-toggle');
+    avatarToggle.addEventListener('click', () => {
+      const avatarScript = document.querySelector('script[src*="agent.d-id.com"]');
+      if (avatarScript) {
+        avatarScript.setAttribute('data-show-avatar', 'true');
+        avatarScript.setAttribute('data-autostart', 'true');
+      }
+    });
   </script>
 </body>
 </html>
-
