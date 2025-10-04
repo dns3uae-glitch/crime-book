@@ -57,6 +57,7 @@
       font-size: 28px;
       line-height: 2;
       text-align: center;
+      color: #fff; /* ✅ الخط داخل المربع أصبح أبيض */
     }
 
     footer {
@@ -255,7 +256,7 @@
     <button id="tool-speak">🔊</button>
   </div>
 
- <div id="highlight-menu">
+  <div id="highlight-menu">
     <div class="colors">
       <span class="color" data-color="#fdd835" style="background:#fdd835;"></span>
       <span class="color" data-color="#ff4081" style="background:#ff4081;"></span>
@@ -263,7 +264,7 @@
       <span class="color" data-color="#4caf50" style="background:#4caf50;"></span>
       <span class="color" data-color="#e91e63" style="background:#e91e63;"></span>
       <span class="color" data-color="#9c27b0" style="background:#9c27b0;"></span>
-      <span class="color" data-color="#00bcd4" style="background:#00bcd4;"></span>
+<span class="color" data-color="#00bcd4" style="background:#00bcd4;"></span>
     </div>
     <textarea id="note-input" placeholder="اكتب ملاحظة هنا..."></textarea>
   </div>
@@ -273,11 +274,11 @@
   <div id="highlight-list">
     <h3>الكلمات المظللة</h3>
     <button id="read-all">🔊 قراءة كل الملاحظات</button>
- <button onclick="testVoice()">🔊 اختبار الصوت</button>
+    <button onclick="testVoice()">🔊 اختبار الصوت</button>
+    <select id="voiceSelect" style="margin-bottom:10px; padding:6px; font-size:16px;"></select>
     <div id="highlight-items"></div>
   </div>
-
-       <script>
+<script>
   function goToPrevious() {
     window.location.href = 'chapter0.html';
   }
@@ -287,14 +288,15 @@
   }
 
   function testVoice() {
-    const text = "هذا اختبار صوتي باللغة العربية";
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ar-SA';
-
+    const voiceSelect = document.getElementById('voiceSelect');
+    const selectedVoiceName = voiceSelect.value;
+    const utterance = new SpeechSynthesisUtterance("هذا اختبار صوتي باللغة العربية");
     const voices = speechSynthesis.getVoices();
-    const arabicVoice = voices.find(v => v.lang.includes('ar')) || voices.find(v => v.lang.includes('en')) || voices[0];
-    if (arabicVoice) utterance.voice = arabicVoice;
-
+    const selectedVoice = voices.find(v => v.name === selectedVoiceName);
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+      utterance.lang = selectedVoice.lang;
+    }
     speechSynthesis.cancel();
     setTimeout(() => {
       speechSynthesis.speak(utterance);
@@ -302,36 +304,19 @@
   }
 
   function speakText(text) {
-    if (!('speechSynthesis' in window)) {
-      alert('المتصفح لا يدعم القراءة الصوتية');
-      return;
+    const voiceSelect = document.getElementById('voiceSelect');
+    const selectedVoiceName = voiceSelect.value;
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = speechSynthesis.getVoices();
+    const selectedVoice = voices.find(v => v.name === selectedVoiceName);
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+      utterance.lang = selectedVoice.lang;
     }
-
-    let voices = speechSynthesis.getVoices();
-
-    function playVoice() {
-      const arabicVoice = voices.find(v => v.lang.includes('ar')) || voices.find(v => v.lang.includes('en')) || voices[0];
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.voice = arabicVoice;
-      utterance.lang = arabicVoice.lang;
-      utterance.rate = 1;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-
-      speechSynthesis.cancel();
-      setTimeout(() => {
-        speechSynthesis.speak(utterance);
-      }, 100);
-    }
-
-    if (voices.length === 0) {
-      speechSynthesis.onvoiceschanged = () => {
-        voices = speechSynthesis.getVoices();
-        playVoice();
-      };
-    } else {
-      playVoice();
-    }
+    speechSynthesis.cancel();
+    setTimeout(() => {
+      speechSynthesis.speak(utterance);
+    }, 100);
   }
 
   const menu = document.getElementById('highlight-menu');
@@ -350,9 +335,7 @@
 
   document.addEventListener('mouseup', (e) => {
     const selection = window.getSelection();
-    const isNoteFocused = e.target.id === 'note-input';
-    if (isNoteFocused) return;
-
+    if (e.target.id === 'note-input') return;
     if (selection.toString().trim().length > 0) {
       selectedText = selection.toString();
       selectedRange = selection.getRangeAt(0);
@@ -375,11 +358,7 @@
   };
 
   toolSearch.onclick = () => {
-    window.open(
-      `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`,
-      'googlePopup',
-      'width=600,height=500,left=100,top=100'
-    );
+    window.open(`https://www.google.com/search?q=${encodeURIComponent(selectedText)}`, 'googlePopup', 'width=600,height=500,left=100,top=100');
   };
 
   toolSpeak.onclick = () => {
@@ -433,10 +412,8 @@
       listItems.appendChild(div);
     });
 
-    const hasHighlights = saved.length > 0;
-    alertBtn.style.display = hasHighlights ? 'block' : 'none';
-
-    if (!hasHighlights) {
+    alertBtn.style.display = saved.length > 0 ? 'block' : 'none';
+    if (!saved.length) {
       listBox.style.display = 'none';
       listBox.classList.remove('manual-open');
     } else if (!listBox.classList.contains('manual-open')) {
@@ -447,20 +424,17 @@
   alertBtn.addEventListener('click', () => {
     const isVisible = listBox.style.display === 'block';
     listBox.style.display = isVisible ? 'none' : 'block';
-    if (!isVisible) listBox.classList.add('manual-open');
-    else listBox.classList.remove('manual-open');
+    listBox.classList.toggle('manual-open', !isVisible);
   });
 
   window.removeHighlight = function(index, text) {
     const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
     saved.splice(index, 1);
     localStorage.setItem('highlights', JSON.stringify(saved));
-
     const textBox = document.getElementById('text-box');
     const html = textBox.innerHTML;
     const regex = new RegExp(`<mark[^>]*data-text="${text}"[^>]*>${text}</mark>`, 'g');
     textBox.innerHTML = html.replace(regex, text);
-
     updateList();
   };
 
@@ -471,6 +445,22 @@
   };
 
   window.addEventListener('DOMContentLoaded', () => {
+    const voiceSelect = document.getElementById('voiceSelect');
+    function populateVoices() {
+      const voices = speechSynthesis.getVoices();
+      voiceSelect.innerHTML = '';
+      voices.forEach(voice => {
+        const option = document.createElement('option');
+        option.value = voice.name;
+        option.textContent = `${voice.name} (${voice.lang})`;
+        voiceSelect.appendChild(option);
+      });
+    }
+    populateVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = populateVoices;
+    }
+
     const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
     let html = document.getElementById('text-box').innerHTML;
     saved.forEach(item => {
