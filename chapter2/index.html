@@ -62,7 +62,10 @@
 
     footer {
       bottom: 0;
-      padding: 0 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 80px;
     }
 
     .page-wrapper {
@@ -130,15 +133,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ✅ أزرار التنقل في منتصف الفوتر */
-    .footer-controls {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-    }
-
+    /* ✅ تنسيق الأزرار في الفوتر */
     .nav-button {
       background-color: #222;
       color: #fdd835;
@@ -156,6 +151,14 @@
       transform: scale(1.05);
     }
 
+    /* ✨ تحديد المسافات حسب موقع الافتار */
+    .prev-button {
+      margin-right: 220px; /* قربها من الافتار */
+    }
+
+    .next-button {
+      margin-left: 220px; /* اجعلها على نفس المستوى تقريبًا */
+    }
   </style>
 </head>
 <body>
@@ -176,13 +179,11 @@
 
   <!-- ✅ فوتر معدل -->
   <footer>
-    <div class="footer-controls">
-      <button class="nav-button" onclick="goBack()">⬅️ السابق</button>
-      <button class="nav-button" onclick="goNext()">التالي ➡️</button>
-    </div>
+    <button class="nav-button prev-button" onclick="goBack()">⬅️ السابق</button>
+    <button class="nav-button next-button" onclick="goNext()">التالي ➡️</button>
   </footer>
 
-  <!-- ✅ D-ID Avatar (الافتار الأصلي في اليمين) -->
+  <!-- ✅ D-ID Avatar (الافتار في اليمين) -->
   <script type="module"
     src="https://agent.d-id.com/v2/index.js"
     data-mode="fabio"
