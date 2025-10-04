@@ -5,6 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>chapter1</title>
   <style>
+
+    #notebook-panel {
+  position: fixed;
+  bottom: -300px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  background: #222;
+  border: 2px solid #fdd835;
+  border-radius: 12px 12px 0 0;
+  padding: 20px;
+  box-shadow: 0 -4px 20px rgba(255, 255, 0, 0.3);
+  transition: bottom 0.4s ease;
+  z-index: 9999;
+  color: #fff;
+  text-align: center;
+}
+
+#notebook-panel textarea {
+  width: 100%;
+  height: 100px;
+  font-size: 16px;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  resize: vertical;
+  margin-top: 10px;
+}
+
+#save-notebook {
+  margin-top: 10px;
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
     html, body {
       margin: 0;
       padding: 0;
@@ -261,6 +302,7 @@
 
   <div id="tool-menu">
     <button id="tool-highlight">✏️</button>
+    <button id="tool-notebook">📔</button>
     <button id="tool-search">🔍</button>
     <button id="tool-speak">🔊</button>
   </div>
@@ -451,7 +493,39 @@ toolSearch.onclick = () => {
     document.getElementById('text-box').innerHTML = html;
     updateList();
   });
+  const notebookBtn = document.getElementById('tool-notebook');
+const notebookPanel = document.getElementById('notebook-panel');
+const notebookInput = document.getElementById('notebook-input');
+const saveNotebookBtn = document.getElementById('save-notebook');
+
+notebookBtn.onclick = () => {
+  const isVisible = notebookPanel.style.bottom === '0px';
+  notebookPanel.style.bottom = isVisible ? '-300px' : '0px';
+};
+
+saveNotebookBtn.onclick = () => {
+  const note = notebookInput.value.trim();
+  if (note) {
+    localStorage.setItem('pageNote_chapter1', note);
+    alert('✅ تم حفظ الملاحظة!');
+  }
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedNote = localStorage.getItem('pageNote_chapter1');
+  if (savedNote) {
+    notebookInput.value = savedNote;
+  }
+});
+
 </script>
+  <div id="notebook-panel">
+  <h3>📔 ملاحظات عامة عن الصفحة</h3>
+  <textarea id="notebook-input" placeholder="اكتب ملاحظتك هنا..."></textarea>
+  <button id="save-notebook">💾 حفظ الملاحظة</button>
+</div>
+
 </body>
 </html>
+
 
