@@ -267,46 +267,13 @@
 
   document.getElementById('tool-search').onclick = () => {
     if (selectedText.trim()) {
-      const query = encodeURIComponent(selectedText.trim());
+     const query = encodeURIComponent(selectedText.trim());
+window.open(
+  `https://www.google.com/search?q=${query}`,
+  'popupWindow',
+  'width=800,height=600,top=100,left=200'
+);
 
-const popup = document.createElement('div');
-popup.style.position = 'fixed';
-popup.style.top = '10%';
-popup.style.left = '50%';
-popup.style.transform = 'translateX(-50%)';
-popup.style.width = '90%';
-popup.style.maxWidth = '800px';
-popup.style.height = '80%';
-popup.style.background = '#000';
-popup.style.border = '2px solid #fdd835';
-popup.style.borderRadius = '12px';
-popup.style.zIndex = '9999';
-popup.style.boxShadow = '0 0 20px rgba(255,255,0,0.5)';
-popup.style.overflow = 'hidden';
-
-const closeBtn = document.createElement('button');
-closeBtn.textContent = '❌ إغلاق';
-closeBtn.style.position = 'absolute';
-closeBtn.style.top = '10px';
-closeBtn.style.left = '10px';
-closeBtn.style.zIndex = '10000';
-closeBtn.style.background = '#ff4081';
-closeBtn.style.color = '#fff';
-closeBtn.style.border = 'none';
-closeBtn.style.padding = '6px 12px';
-closeBtn.style.borderRadius = '6px';
-closeBtn.style.cursor = 'pointer';
-closeBtn.onclick = () => popup.remove();
-
-const iframe = document.createElement('iframe');
-iframe.src = `https://www.google.com/search?q=${query}`;
-iframe.style.width = '100%';
-iframe.style.height = '100%';
-iframe.style.border = 'none';
-
-popup.appendChild(closeBtn);
-popup.appendChild(iframe);
-document.body.appendChild(popup);
 
     }
   };
@@ -573,6 +540,7 @@ document.body.appendChild(popup);
 </script>
 </body>
 </html>
+
 
 
 
