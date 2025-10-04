@@ -569,14 +569,16 @@ notebookIndicator.onclick = () => {
       document.getElementById('text-box').innerHTML = html;
 
       const savedNote = localStorage.getItem('pageNote_chapter1');
-      if (savedNote) {
-        notebookInput.value = savedNote;
-      }
+if (savedNote) {
+  notebookInput.value = savedNote;
+  notebookIndicator.style.display = 'block';
+}
 
       updateList();
     });
   </script>
 </body>
 </html>
+
 
 
