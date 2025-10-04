@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>chapter1</title>
   <style>
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       min-height: 100vh;
@@ -14,6 +14,26 @@
       color: #fdd835;
       direction: rtl;
       overflow-x: hidden;
+    }
+
+    header {
+      width: 100%;
+      height: clamp(60px, 8vh, 70px);
+      background-color: #000;
+      color: #fdd835;
+      text-shadow: 1px 1px 2px black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(18px, 2vw, 22px);
+      font-weight: bold;
+      letter-spacing: 1px;
+      border-top: 4px solid #fdd835;
+      border-bottom: 4px solid #fdd835;
+      box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+      position: fixed;
+      top: 0;
+      z-index: 10;
     }
 
     footer {
@@ -31,7 +51,66 @@
       padding: 0 20px;
     }
 
-    /* الزر العائم لفتح الدردشة */
+    .nav-button {
+      background-color: #222;
+      color: #fdd835;
+      border: 2px solid #fdd835;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+
+    .nav-button:hover {
+      background-color: rgba(255,255,0,0.2);
+      transform: scale(1.05);
+    }
+
+    #footer-indicators {
+      display: flex;
+      gap: 12px;
+      z-index: 1000;
+    }
+
+    #footer-indicators button {
+      background: #fdd835;
+      color: #000;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(255,255,0,0.3);
+      display: none; /* افتراضياً مخفية */
+    }
+
+    /* محتوى الصفحة */
+    .page-wrapper {
+      padding-top: clamp(70px, 8vh, 80px);
+      padding-bottom: clamp(70px, 8vh, 80px);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .center-box {
+      width: 95%;
+      max-width: 900px;
+      background-color: #222;
+      border: 2px solid #fdd835;
+      border-radius: 14px;
+      box-shadow: 0 0 40px rgba(255, 255, 0, 0.3);
+      padding: 40px;
+      font-size: 28px;
+      line-height: 2;
+      text-align: center;
+      color: #fff;
+    }
+
+    /* زر المحادثة */
     #chat-toggle {
       background: #fdd835;
       color: #000;
@@ -45,15 +124,13 @@
       bottom: 90px;
       right: 20px;
       box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
-      z-index: 1000;
+      z-index: 1200;
       transition: transform 0.3s ease;
     }
 
-    #chat-toggle:hover {
-      transform: scale(1.1);
-    }
+    #chat-toggle:hover { transform: scale(1.1); }
 
-    /* نافذة الدردشة */
+    /* نافذة المحادثة */
     .chat-container {
       position: fixed;
       bottom: 160px;
@@ -66,7 +143,7 @@
       display: none;
       flex-direction: column;
       overflow: hidden;
-      z-index: 1001;
+      z-index: 1201;
     }
 
     .chat-header {
@@ -78,77 +155,35 @@
       border-bottom: 2px solid #fdd835;
     }
 
-    .chat-body {
-      padding: 10px;
-      height: 250px;
-      overflow-y: auto;
-      background: #111;
-    }
+    .chat-body { padding: 10px; height: 250px; overflow-y: auto; background: #111; }
+    .chat-message { margin: 8px 0; padding: 10px; border-radius: 8px; max-width: 80%; font-size: 15px; }
+    .user { background: #fdd835; color: #000; margin-left: auto; }
+    .bot { background: #333; color: #fdd835; margin-right: auto; }
 
-    .chat-message {
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 8px;
-      max-width: 80%;
-      font-size: 15px;
-    }
-
-    .user {
-      background: #fdd835;
-      color: #000;
-      margin-left: auto;
-    }
-
-    .bot {
-      background: #333;
-      color: #fdd835;
-      margin-right: auto;
-    }
-
-    .chat-footer {
-      display: flex;
-      padding: 10px;
-      border-top: 1px solid #fdd835;
-      background: #000;
-    }
-
-    #userInput {
-      flex: 1;
-      padding: 8px;
-      border: none;
-      border-radius: 5px;
-      font-size: 14px;
-      background: #222;
-      color: #fff;
-    }
-
-    #sendBtn {
-      background: #fdd835;
-      color: #000;
-      border: none;
-      padding: 8px 12px;
-      margin-left: 8px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+    .chat-footer { display: flex; padding: 10px; border-top: 1px solid #fdd835; background: #000; }
+    #userInput { flex: 1; padding: 8px; border: none; border-radius: 5px; font-size: 14px; background: #222; color: #fff; }
+    #sendBtn { background: #fdd835; color: #000; border: none; padding: 8px 12px; margin-left: 8px; border-radius: 5px; cursor: pointer; font-weight: bold; }
   </style>
 </head>
 <body>
   <header>📘 الفصل الأول</header>
 
-  <div class="page-wrapper" style="padding-top:80px; text-align:center;">
-    <div class="center-box" style="background:#222; border:2px solid #fdd835; border-radius:14px; padding:40px; color:#fff;">
+  <div class="page-wrapper">
+    <div class="center-box" id="text-box">
       في هذا الفصل سوف نكتشف أسرار الجريمة وكيف تم حلها بطرق غير تقليدية.
     </div>
   </div>
 
   <footer>
-    <div>© 2025 - مسرح الجريمة</div>
+    <button class="nav-button" onclick="goToPrevious()">➡️ السابق</button>
+    <div id="footer-indicators">
+      <button id="highlight-alert">📌 كلمات مظللة</button>
+      <button id="notebook-indicator">📔 ملاحظة محفوظة</button>
+    </div>
+    <button class="nav-button" onclick="goToNext()">⬅️ التالي</button>
   </footer>
 
   <button id="chat-toggle">💬</button>
-
   <div class="chat-container" id="chatBox">
     <div class="chat-header">مساعدك الذكي من شركة ASK</div>
     <div class="chat-body" id="chatBody"></div>
@@ -164,6 +199,8 @@
     const chatBody = document.getElementById('chatBody');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
+    const highlightAlert = document.getElementById('highlight-alert');
+    const notebookIndicator = document.getElementById('notebook-indicator');
 
     chatToggle.addEventListener('click', () => {
       chatBox.style.display = chatBox.style.display === 'flex' ? 'none' : 'flex';
@@ -171,30 +208,22 @@
     });
 
     sendBtn.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') sendMessage();
-    });
+    userInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
 
     async function sendMessage() {
       const text = userInput.value.trim();
       if (!text) return;
-
       appendMessage('user', text);
       appendMessage('bot', '...جاري التفكير');
-
       try {
-        const response = await fetch("https://gpt-proxy-server-xs5u.onrender.com/ask", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question: text })
+        const response = await fetch('https://gpt-proxy-server-xs5u.onrender.com/ask', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: text })
         });
-
         const data = await response.json();
         updateLastBotMessage(data.reply);
-      } catch (error) {
-        updateLastBotMessage("حدث خطأ أثناء الاتصال بالخادم.");
+      } catch {
+        updateLastBotMessage('حدث خطأ أثناء الاتصال بالخادم.');
       }
-
       userInput.value = '';
       chatBody.scrollTop = chatBody.scrollHeight;
     }
@@ -210,6 +239,15 @@
       const messages = document.querySelectorAll('.chat-message.bot');
       messages[messages.length - 1].textContent = content;
     }
+
+    function updateIndicators() {
+      const highlights = JSON.parse(localStorage.getItem('highlights') || '[]');
+      const note = localStorage.getItem('pageNote_chapter1');
+      highlightAlert.style.display = highlights.length > 0 ? 'block' : 'none';
+      notebookIndicator.style.display = note ? 'block' : 'none';
+    }
+
+    window.addEventListener('DOMContentLoaded', updateIndicators);
   </script>
 </body>
 </html>
