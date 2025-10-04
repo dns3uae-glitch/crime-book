@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>chapter1</title>
   <style>
-    html, body {
+    body {
       margin: 0;
       padding: 0;
       min-height: 100vh;
@@ -14,50 +14,6 @@
       color: #fdd835;
       direction: rtl;
       overflow-x: hidden;
-    }
-
-    header {
-      width: 100%;
-      height: clamp(60px, 8vh, 70px);
-      background-color: #000;
-      color: #fdd835;
-      text-shadow: 1px 1px 2px black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: clamp(18px, 2vw, 22px);
-      font-weight: bold;
-      letter-spacing: 1px;
-      border-top: 4px solid #fdd835;
-      border-bottom: 4px solid #fdd835;
-      box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
-      position: fixed;
-      top: 0;
-      z-index: 10;
-    }
-
-    .page-wrapper {
-      padding-top: clamp(70px, 8vh, 80px);
-      padding-bottom: clamp(70px, 8vh, 80px);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-sizing: border-box;
-    }
-
-    .center-box {
-      width: 95%;
-      max-width: 900px;
-      background-color: #222;
-      border: 2px solid #fdd835;
-      border-radius: 14px;
-      box-shadow: 0 0 40px rgba(255, 255, 0, 0.3);
-      padding: 40px;
-      font-size: 28px;
-      line-height: 2;
-      text-align: center;
-      color: #fff;
     }
 
     footer {
@@ -69,288 +25,131 @@
       position: fixed;
       bottom: 0;
       z-index: 10;
-    }
-
-    .prev-button, .next-button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .prev-button {
-      right: 20px;
-    }
-
-    .next-button {
-      left: 80px;
-    }
-
-    .nav-button {
-      background-color: #222;
-      color: #fdd835;
-      border: 2px solid #fdd835;
-      padding: clamp(8px, 2vh, 14px) clamp(16px, 4vw, 24px);
-      font-size: clamp(14px, 2vw, 18px);
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background-color 0.3s;
-    }
-
-    .nav-button:hover {
-      background-color: rgba(255,255,0,0.2);
-    }
-
-    #footer-indicators {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
       display: flex;
-      gap: 12px;
-      z-index: 1000;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
     }
 
-    #footer-indicators button {
+    /* الزر العائم لفتح الدردشة */
+    #chat-toggle {
       background: #fdd835;
       color: #000;
       border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: bold;
+      border-radius: 50%;
+      width: 55px;
+      height: 55px;
+      font-size: 26px;
       cursor: pointer;
-      box-shadow: 0 0 6px rgba(255,255,0,0.3);
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+      z-index: 1000;
+      transition: transform 0.3s ease;
     }
 
-    #tool-menu {
-      position: absolute;
-      display: none;
-      gap: 10px;
+    #chat-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    /* نافذة الدردشة */
+    .chat-container {
+      position: fixed;
+      bottom: 160px;
+      right: 20px;
+      max-width: 400px;
       background: #222;
       border: 2px solid #fdd835;
-      padding: 10px;
-      border-radius: 8px;
-      z-index: 1000;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1001;
     }
 
-    #tool-menu button {
-      font-size: 20px;
+    .chat-header {
+      background: #000;
+      color: #fdd835;
+      padding: 12px;
+      font-size: 18px;
+      text-align: center;
+      border-bottom: 2px solid #fdd835;
+    }
+
+    .chat-body {
+      padding: 10px;
+      height: 250px;
+      overflow-y: auto;
+      background: #111;
+    }
+
+    .chat-message {
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+      max-width: 80%;
+      font-size: 15px;
+    }
+
+    .user {
+      background: #fdd835;
+      color: #000;
+      margin-left: auto;
+    }
+
+    .bot {
       background: #333;
       color: #fdd835;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
+      margin-right: auto;
     }
 
-    #highlight-menu {
-      position: absolute;
-      background: #222;
-      border: 2px solid #fdd835;
-      border-radius: 8px;
-      padding: 10px;
-      display: none;
-      gap: 10px;
-      align-items: center;
-      z-index: 1000;
-      flex-direction: column;
-    }
-
-    .colors {
+    .chat-footer {
       display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
+      padding: 10px;
+      border-top: 1px solid #fdd835;
+      background: #000;
     }
 
-    .color {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid #fff;
-    }
-
-    #note-input {
-      width: 260px;
-      height: 60px;
-      font-size: 16px;
+    #userInput {
+      flex: 1;
       padding: 8px;
-      resize: vertical;
-      border-radius: 6px;
       border: none;
-    }
-
-    #highlight-list {
-      position: fixed;
-      bottom: 80px;
-      left: 20px;
+      border-radius: 5px;
+      font-size: 14px;
       background: #222;
-      border: 2px solid #fdd835;
-      border-radius: 10px;
-      padding: 20px;
-      max-height: 300px;
-      overflow-y: auto;
-      display: none;
-      z-index: 1000;
-      width: 320px;
       color: #fff;
     }
 
-    #highlight-list h3 {
-      margin-top: 0;
-      color: #fdd835;
-    }
-
-    #read-all {
-      background: #40c4ff;
+    #sendBtn {
+      background: #fdd835;
       color: #000;
-      font-weight: bold;
       border: none;
       padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-
-    .highlight-item {
-      background: #333;
-      padding: 8px;
-      border-radius: 6px;
-      margin-bottom: 10px;
-    }
-
-    .highlight-item textarea {
-      width: 100%;
-      height: 50px;
-      margin-top: 6px;
-      font-size: 14px;
-      border-radius: 4px;
-      border: none;
-      padding: 6px;
-      resize: vertical;
-    }
-
-    .highlight-item button {
-      background: #ff4081;
-      border: none;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 6px;
-    }
-
-    mark {
-      background-color: inherit;
-      padding: 2px 4px;
-      border-radius: 4px;
-    }
-
-    #notebook-panel {
-      position: fixed;
-      bottom: -300px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 600px;
-      background: #222;
-      border: 2px solid #fdd835;
-      border-radius: 12px 12px 0 0;
-      padding: 20px;
-      box-shadow: 0 -4px 20px rgba(255, 255, 0, 0.3);
-      transition: bottom 0.4s ease;
-      z-index: 9999;
-      color: #fff;
-      text-align: center;
-    }
-
-    #notebook-panel textarea {
-      width: 100%;
-      height: 100px;
-      font-size: 16px;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      resize: vertical;
-      margin-top: 10px;
-    }
-
-    #save-notebook, #delete-notebook {
-      margin-top: 10px;
-      background: #4caf50;
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
+      margin-left: 8px;
+      border-radius: 5px;
       cursor: pointer;
       font-weight: bold;
-    }
-
-    #delete-notebook {
-      background: #ff4081;
-      margin-right: 10px;
     }
   </style>
 </head>
 <body>
   <header>📘 الفصل الأول</header>
 
-  <div class="page-wrapper">
-    <div class="center-box" id="text-box">
+  <div class="page-wrapper" style="padding-top:80px; text-align:center;">
+    <div class="center-box" style="background:#222; border:2px solid #fdd835; border-radius:14px; padding:40px; color:#fff;">
       في هذا الفصل سوف نكتشف أسرار الجريمة وكيف تم حلها بطرق غير تقليدية.
     </div>
   </div>
 
   <footer>
-    <div class="prev-button">
-      <button class="nav-button" onclick="goToPrevious()">➡️ السابق</button>
-    </div>
-
-    <div class="next-button">
-      <button class="nav-button" onclick="goToNext()">⬅️ التالي</button>
-    </div>
-
-    <div id="footer-indicators">
-      <button id="highlight-alert">📌 كلمات مظللة</button>
-      <button id="notebook-indicator">📔 ملاحظة محفوظة</button>
-    </div>
+    <div>© 2025 - مسرح الجريمة</div>
   </footer>
 
-  <div id="highlight-list">
-    <h3>الكلمات المظللة</h3>
-    <button id="read-all">🔊 قراءة كل الملاحظات</button>
-    <button onclick="testVoice()">🔊 اختبار الصوت</button>
-    <div id="highlight-items"></div>
-  </div>
+  <button id="chat-toggle">💬</button>
 
-  <div id="tool-menu">
-    <button id="tool-highlight">✏️</button>
-    <button id="tool-search">🔍</button>
-    <button id="tool-speak">🔊</button>
-    <button id="tool-notebook">📔</button>
-  </div>
-
-  <div id="highlight-menu">
-    <div class="colors">
-      <span class="color" data-color="#fdd835" style="background:#fdd835;"></span>
-      <span class="color" data-color="#ff4081" style="background:#ff4081;"></span>
-      <span class="color" data-color="#40c4ff" style="background:#40c4ff;"></span>
-      <span class="color" data-color="#4caf50" style="background:#4caf50;"></span>
-      <span class="color" data-color="#e91e63" style="background:#e91e63;"></span>
-      <span class="color" data-color="#9c27b0" style="background:#9c27b0;"></span>
-      <span class="color" data-color="#00bcd4" style="background:#00bcd4;"></span>
-    </div>
-    <textarea id="note-input" placeholder="اكتب ملاحظة هنا..."></textarea>
-  </div>
-
-  <div id="notebook-panel">
-    <h3>📔 ملاحظات عامة عن الصفحة</h3>
-    <textarea id="notebook-input" placeholder="اكتب ملاحظتك هنا..."></textarea>
-    <button id="save-notebook">💾 حفظ الملاحظة</button>
-    <button id="delete-notebook">🗑️ حذف الملاحظة</button>
-  </div>
-
-  <div class="chat-container">
+  <div class="chat-container" id="chatBox">
     <div class="chat-header">مساعدك الذكي من شركة ASK</div>
     <div class="chat-body" id="chatBody"></div>
     <div class="chat-footer">
@@ -360,9 +159,16 @@
   </div>
 
   <script>
+    const chatToggle = document.getElementById('chat-toggle');
+    const chatBox = document.getElementById('chatBox');
     const chatBody = document.getElementById('chatBody');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
+
+    chatToggle.addEventListener('click', () => {
+      chatBox.style.display = chatBox.style.display === 'flex' ? 'none' : 'flex';
+      chatBox.style.flexDirection = 'column';
+    });
 
     sendBtn.addEventListener('click', sendMessage);
     userInput.addEventListener('keypress', function(e) {
@@ -407,4 +213,3 @@
   </script>
 </body>
 </html>
-      
