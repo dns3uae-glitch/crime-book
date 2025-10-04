@@ -240,20 +240,23 @@
   let selectedRange = null;
 
   document.addEventListener('mouseup', (e) => {
-    const selection = window.getSelection();
-    if (selection.toString().trim().length > 0) {
-      selectedText = selection.toString();
-      selectedRange = selection.getRangeAt(0);
-      const rect = selectedRange.getBoundingClientRect();
-      toolMenu.style.top = `${rect.bottom + window.scrollY + 5}px`;
-      toolMenu.style.left = `${rect.left + window.scrollX}px`;
-      toolMenu.style.display = 'flex';
-      highlightMenu.style.display = 'none';
-    } else {
-      toolMenu.style.display = 'none';
-      highlightMenu.style.display = 'none';
-    }
-  });
+  if (e.target.closest('#highlight-menu')) return;
+
+  const selection = window.getSelection();
+  if (selection.toString().trim().length > 0) {
+    selectedText = selection.toString();
+    selectedRange = selection.getRangeAt(0);
+    const rect = selectedRange.getBoundingClientRect();
+    toolMenu.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    toolMenu.style.left = `${rect.left + window.scrollX}px`;
+    toolMenu.style.display = 'flex';
+    highlightMenu.style.display = 'none';
+  } else {
+    toolMenu.style.display = 'none';
+    highlightMenu.style.display = 'none';
+  }
+});
+
 
   document.getElementById('tool-highlight').onclick = () => {
     highlightMenu.style.top = toolMenu.style.top;
@@ -531,3 +534,4 @@
 </script>
 </body>
 </html>
+
