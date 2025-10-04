@@ -297,84 +297,74 @@
     const container = document.getElementById('highlight-items');
     container.innerHTML = '';
     const highlights = JSON.parse(localStorage.getItem('highlights') || '[]');
-    highlights.forEach(item => {
-      const div = document.createElement('div');
-      div.textContent = `📍 ${item.text} — ${item.note}`;
-      div.style.background = item.color;
-      div.style.padding = '6px';
-      div.style.marginBottom = '4px';
-      div.style.borderRadius = '6px';
-      container.appendChild(div);
+
+    highlights.forEach((item, index) => {
+      const wrapper = document.createElement('div');
+      wrapper.style.background = item.color;
+      wrapper.style.padding = '8px';
+      wrapper.style.marginBottom = '6px';
+      wrapper.style.borderRadius = '6px';
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.gap = '6px';
+
+      const text = document.createElement('div');
+      text.textContent = `📍 ${item.text}`;
+      text.style.fontWeight = 'bold';
+
+      const note = document.createElement('div');
+      note.textContent = item.note ? `📝 ${item.note}` : '📝 لا توجد ملاحظة';
+
+      const actions = document.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.gap = '10px';
+
+      const speakBtn = document.createElement('button');
+      speakBtn.textContent = '🔊';
+      speakBtn.style.background = '#4caf50';
+      speakBtn.style.color = '#fff';
+      speakBtn.style.border = 'none';
+      speakBtn.style.padding = '4px 10px';
+      speakBtn.style.borderRadius = '6px';
+      speakBtn.style.cursor = 'pointer';
+      speakBtn.onclick = () => {
+        speakText(item.note || item.text);
+      };
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '🗑️';
+      deleteBtn.style.background = '#ff4081';
+      deleteBtn.style.color = '#fff';
+      deleteBtn.style.border = 'none';
+      deleteBtn.style.padding = '4px 10px';
+      deleteBtn.style.borderRadius = '6px';
+      deleteBtn.style.cursor = 'pointer';
+      deleteBtn.onclick = () => {
+        removeHighlight(item.text);
+        const marks = document.querySelectorAll(`mark[data-text="${item.text}"]`);
+        marks.forEach(m => m.remove());
+      };
+
+      actions.appendChild(speakBtn);
+      actions.appendChild(deleteBtn);
+      wrapper.appendChild(text);
+      wrapper.appendChild(note);
+      wrapper.appendChild(actions);
+      container.appendChild(wrapper);
     });
+
+    const listBox = document.getElementById('highlight-list');
+    listBox.style.display = highlights.length === 0 ? 'none' : 'block';
   }
 
   highlightAlert.onclick = () => {
     const list = document.getElementById('highlight-list');
     list.style.display = list.style.display === 'block' ? 'none' : 'block';
   };
-
-  textBox.addEventListener('click', (e) => {
-    if (e.target.tagName === 'MARK') {
-      const note = e.target.getAttribute('data-note') || '';
-      const text = e.target.getAttribute('data-text') || e.target.textContent;
-      selectedText = text;
-      selectedRange = null;
-
-      highlightMenu.style.top = `${e.clientY + window.scrollY}px`;
-      highlightMenu.style.left = `${e.clientX}px`;
-      highlightMenu.style.display = 'block';
-      noteInput.value = note;
-
-      const oldDelete = document.getElementById('delete-highlight');
-      const oldSpeak = document.getElementById('speak-highlight');
-      if (oldDelete) oldDelete.remove();
-      if (oldSpeak) oldSpeak.remove();
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.id = 'delete-highlight';
-      deleteBtn.textContent = '🗑️ حذف التظليل';
-      deleteBtn.style.marginTop = '10px';
-      deleteBtn.style.background = '#ff4081';
-      deleteBtn.style.color = '#fff';
-      deleteBtn.style.border = 'none';
-      deleteBtn.style.padding = '6px 12px';
-      deleteBtn.style.borderRadius = '6px';
-      deleteBtn.style.cursor = 'pointer';
-      deleteBtn.onclick = () => {
-        e.target.remove();
-        removeHighlight(text);
-        highlightMenu.style.display = 'none';
-      };
-      highlightMenu.appendChild(deleteBtn);
-
-      const speakBtn = document.createElement('button');
-      speakBtn.id = 'speak-highlight';
-      speakBtn.textContent = '🔊 سماع الملاحظة';
-      speakBtn.style.marginTop = '10px';
-      speakBtn.style.background = '#4caf50';
-      speakBtn.style.color = '#fff';
-      speakBtn.style.border = 'none';
-      speakBtn.style.padding = '6px 12px';
-      speakBtn.style.borderRadius = '6px';
-      speakBtn.style.cursor = 'pointer';
-      speakBtn.onclick = () => {
-        speakText(note || text);
-      };
-      highlightMenu.appendChild(speakBtn);
-    }
-  });
-
-  document.getElementById('tool-search').onclick = () => {
-    const query = encodeURIComponent(selectedText);
-    window.open(`https://www.google.com/search?q=${query}`, '_blank');
-  };
-
-  document.getElementById('tool-speak').onclick = () => {
-    speakText(selectedText);
-  };
-
+  // دفتر الملاحظات 📔
   const notebookPanel = document.getElementById('notebook-panel');
   const notebookInput = document.getElementById('notebook-input');
+
   document.getElementById('tool-notebook').onclick = () => {
     notebookPanel.style.bottom = '0px';
   };
@@ -401,6 +391,7 @@
     notebookPanel.style.bottom = '0px';
   };
 
+  // الدردشة الذكية 💬
   const chatToggle = document.getElementById('chat-toggle');
   const chatBox = document.getElementById('chatBox');
   const chatBody = document.getElementById('chatBody');
@@ -413,27 +404,9 @@
   });
 
   sendBtn.addEventListener('click', sendMessage);
-  userInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
-
-  async function sendMessage() {
-    const text = userInput.value.trim();
-    if (!text) return;
-appendMessage('user', text);
-appendMessage('bot', '...جاري التفكير');
-    try {
-      const response = await fetch('https://gpt-proxy-server-xs5u.onrender.com/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: text })
-      });
-      const data = await response.json();
-      updateLastBotMessage(data.reply);
-    } catch {
-      updateLastBotMessage('حدث خطأ أثناء الاتصال بالخادم.');
-    }
-    userInput.value = '';
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }
+  userInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') sendMessage();
+  });
 
   function appendMessage(role, content) {
     const msg = document.createElement('div');
@@ -454,6 +427,29 @@ appendMessage('bot', '...جاري التفكير');
     }
   }
 
+  async function sendMessage() {
+  const text = userInput.value.trim();
+  if (!text) return;
+
+  appendMessage('user', text);
+  appendMessage('bot', '...جاري التفكير');
+
+  try {
+    const response = await fetch('https://gpt-proxy-server-xs5u.onrender.com/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: text })
+    });
+
+    const data = await response.json();
+    updateLastBotMessage(data.reply);
+  } catch {
+    updateLastBotMessage('❌ حدث خطأ أثناء الاتصال بالخادم.');
+  }
+
+  userInput.value = '';
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
   // استعادة التظليلات والملاحظات عند تحميل الصفحة
   window.addEventListener('DOMContentLoaded', () => {
     const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
@@ -474,4 +470,5 @@ appendMessage('bot', '...جاري التفكير');
 </script>
 </body>
 </html>
+
   
