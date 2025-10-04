@@ -154,18 +154,19 @@
 
 <!-- قائمة التظليل والملاحظة -->
 <div id="highlight-menu" style="display:none; position:absolute; background:#222; border:2px solid #fdd835; padding:10px; border-radius:8px; z-index:1000; width:280px;">
-  <div class="colors" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
-    <span class="color" data-color="#fdd835" style="background:#fdd835; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
-    <span class="color" data-color="#ff4081" style="background:#ff4081; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
-    <span class="color" data-color="#40c4ff" style="background:#40c4ff; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
-    <span class="color" data-color="#4caf50" style="background:#4caf50; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
-    <span class="color" data-color="#ff9800" style="background:#ff9800; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
-    <span class="color" data-color="#9c27b0" style="background:#9c27b0; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
-    <span class="color" data-color="#00bcd4" style="background:#00bcd4; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
-    <span class="color" data-color="#795548" style="background:#795548; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
-    <span class="color" data-color="#e91e63" style="background:#e91e63; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
-    <span class="color" data-color="#8bc34a" style="background:#8bc34a; width:24px; height:24px; border-radius:50%; cursor:pointer;"></span>
-  </div>
+ <div class="colors" style="display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; margin-bottom:10px;">
+  <span class="color" data-color="#fdd835" style="background:#fdd835;"></span>
+  <span class="color" data-color="#ff4081" style="background:#ff4081;"></span>
+  <span class="color" data-color="#40c4ff" style="background:#40c4ff;"></span>
+  <span class="color" data-color="#4caf50" style="background:#4caf50;"></span>
+  <span class="color" data-color="#ff9800" style="background:#ff9800;"></span>
+  <span class="color" data-color="#9c27b0" style="background:#9c27b0;"></span>
+  <span class="color" data-color="#00bcd4" style="background:#00bcd4;"></span>
+  <span class="color" data-color="#795548" style="background:#795548;"></span>
+  <span class="color" data-color="#e91e63" style="background:#e91e63;"></span>
+  <span class="color" data-color="#8bc34a" style="background:#8bc34a;"></span>
+</div>
+
   <textarea id="note-input" placeholder="اكتب ملاحظة هنا..." style="width:100%; height:60px; font-size:16px; padding:8px; resize:vertical; border-radius:6px; border:none; background:#111; color:#fff;"></textarea>
   <div id="highlight-actions" style="margin-top:10px; display:flex; gap:10px;"></div>
 </div>
@@ -173,7 +174,7 @@
 <!-- دفتر الملاحظات -->
 <div id="notebook-panel" style="position:fixed; bottom:-300px; left:50%; transform:translateX(-50%); width:90%; max-width:600px; background:#222; border:2px solid #fdd835; border-radius:12px 12px 0 0; padding:20px; box-shadow:0 -4px 20px rgba(255,255,0,0.3); transition:bottom 0.4s ease; z-index:9999; color:#fff; text-align:center;">
   <h3>📔 ملاحظات عامة عن الصفحة</h3>
-  <textarea id="notebook-input" placeholder="اكتب ملاحظتك هنا..." style="width:100%; height:100px; font-size:16px; padding:10px; border-radius:6px; border:none; resize:vertical; margin-top:10px;"></textarea>
+<textarea id="note-input" placeholder="اكتب ملاحظة هنا..." style="width:100%; height:60px; font-size:16px; padding:8px; resize:vertical; border-radius:6px; border:1px solid #fdd835; background:#fff; color:#000;"></textarea>
   <button id="save-notebook" style="margin-top:10px; background:#4caf50; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">💾 حفظ</button>
   <button id="delete-notebook" style="margin-top:10px; background:#ff4081; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">🗑️ حذف</button>
 </div>
@@ -236,6 +237,14 @@
   const textBox = document.getElementById('text-box');
   let selectedText = '';
   let selectedRange = null;
+
+  document.getElementById('tool-search').onclick = () => {
+  if (selectedText.trim()) {
+    const query = encodeURIComponent(selectedText.trim());
+    window.open(`https://www.google.com/search?q=${query}`, '_blank');
+  }
+};
+
 
   document.addEventListener('mouseup', (e) => {
     const selection = window.getSelection();
@@ -521,3 +530,4 @@
 </script>
 </body>
 </html>
+
