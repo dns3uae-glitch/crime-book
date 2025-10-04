@@ -57,7 +57,7 @@
       font-size: 28px;
       line-height: 2;
       text-align: center;
-      color: #fff; /* ✅ الخط داخل المربع أبيض */
+      color: #fff;
     }
 
     footer {
@@ -115,6 +115,121 @@
       display: none;
       z-index: 1000;
     }
+
+    #tool-menu {
+      position: absolute;
+      display: none;
+      gap: 10px;
+      background: #222;
+      border: 2px solid #fdd835;
+      padding: 10px;
+      border-radius: 8px;
+      z-index: 1000;
+    }
+
+    #highlight-menu {
+      position: absolute;
+      background: #222;
+      border: 2px solid #fdd835;
+      border-radius: 8px;
+      padding: 10px;
+      display: none;
+      gap: 10px;
+      align-items: center;
+      z-index: 1000;
+      flex-direction: column;
+    }
+
+    .colors {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .color {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #fff;
+    }
+
+    #note-input {
+      width: 260px;
+      height: 60px;
+      font-size: 16px;
+      padding: 8px;
+      resize: vertical;
+      border-radius: 6px;
+      border: none;
+    }
+
+    #highlight-list {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      background: #222;
+      border: 2px solid #fdd835;
+      border-radius: 10px;
+      padding: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+      z-index: 1000;
+      width: 320px;
+      color: #fff;
+    }
+
+    #highlight-list h3 {
+      margin-top: 0;
+      color: #fdd835;
+    }
+
+    #read-all {
+      background: #40c4ff;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .highlight-item {
+      background: #333;
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .highlight-item textarea {
+      width: 100%;
+      height: 50px;
+      margin-top: 6px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: none;
+      padding: 6px;
+      resize: vertical;
+    }
+
+    .highlight-item button {
+      background: #ff4081;
+      border: none;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    mark {
+      background-color: inherit;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -137,6 +252,31 @@
 
     <div id="highlight-alert">📌 كلمات مظللة</div>
   </footer>
+  <div id="highlight-list">
+    <h3>الكلمات المظللة</h3>
+    <button id="read-all">🔊 قراءة كل الملاحظات</button>
+    <button onclick="testVoice()">🔊 اختبار الصوت</button>
+    <div id="highlight-items"></div>
+  </div>
+
+  <div id="tool-menu">
+    <button id="tool-highlight">✏️</button>
+    <button id="tool-search">🔍</button>
+    <button id="tool-speak">🔊</button>
+  </div>
+
+  <div id="highlight-menu">
+    <div class="colors">
+      <span class="color" data-color="#fdd835" style="background:#fdd835;"></span>
+      <span class="color" data-color="#ff4081" style="background:#ff4081;"></span>
+      <span class="color" data-color="#40c4ff" style="background:#40c4ff;"></span>
+      <span class="color" data-color="#4caf50" style="background:#4caf50;"></span>
+      <span class="color" data-color="#e91e63" style="background:#e91e63;"></span>
+      <span class="color" data-color="#9c27b0" style="background:#9c27b0;"></span>
+      <span class="color" data-color="#00bcd4" style="background:#00bcd4;"></span>
+    </div>
+    <textarea id="note-input" placeholder="اكتب ملاحظة هنا..."></textarea>
+  </div>
 <script>
   function goToPrevious() {
     window.location.href = 'chapter0.html';
@@ -210,7 +350,7 @@
   };
 
   toolSearch.onclick = () => {
-    window.open(`https://www.google.com/search?q=${encodeURIComponent(selectedText)}`, 'googlePopup', 'width=600,height=500,left=100,top=100');
+    window.open(`https://www.google.com/search?q=${encodeURIComponent(selectedText)}`, '_blank');
   };
 
   toolSpeak.onclick = () => {
