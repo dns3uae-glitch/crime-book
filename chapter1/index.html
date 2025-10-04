@@ -294,20 +294,68 @@
     notebookIndicator.style.display = note ? 'block' : 'none';
   }
 
-  function renderHighlightList() {
-    const container = document.getElementById('highlight-items');
-    container.innerHTML = '';
-    const highlights = JSON.parse(localStorage.getItem('highlights') || '[]');
-    highlights.forEach(item => {
-      const div = document.createElement('div');
-      div.textContent = `📍 ${item.text} — ${item.note}`;
-      div.style.background = item.color;
-      div.style.padding = '6px';
-      div.style.marginBottom = '4px';
-      div.style.borderRadius = '6px';
-      container.appendChild(div);
-    });
-  }
+function renderHighlightList() {
+  const container = document.getElementById('highlight-items');
+  container.innerHTML = '';
+  const highlights = JSON.parse(localStorage.getItem('highlights') || '[]');
+
+  highlights.forEach((item, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.style.background = item.color;
+    wrapper.style.padding = '8px';
+    wrapper.style.marginBottom = '6px';
+    wrapper.style.borderRadius = '6px';
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'column';
+    wrapper.style.gap = '6px';
+
+    const text = document.createElement('div');
+    text.textContent = `📍 ${item.text}`;
+    text.style.fontWeight = 'bold';
+
+    const note = document.createElement('div');
+    note.textContent = item.note ? `📝 ${item.note}` : '📝 لا توجد ملاحظة';
+
+    const actions = document.createElement('div');
+    actions.style.display = 'flex';
+    actions.style.gap = '10px';
+
+    const speakBtn = document.createElement('button');
+    speakBtn.textContent = '🔊';
+    speakBtn.style.background = '#4caf50';
+    speakBtn.style.color = '#fff';
+    speakBtn.style.border = 'none';
+    speakBtn.style.padding = '4px 10px';
+    speakBtn.style.borderRadius = '6px';
+    speakBtn.style.cursor = 'pointer';
+    speakBtn.onclick = () => {
+      speakText(item.note || item.text);
+    };
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '🗑️';
+    deleteBtn.style.background = '#ff4081';
+    deleteBtn.style.color = '#fff';
+    deleteBtn.style.border = 'none';
+    deleteBtn.style.padding = '4px 10px';
+    deleteBtn.style.borderRadius = '6px';
+    deleteBtn.style.cursor = 'pointer';
+    deleteBtn.onclick = () => {
+      removeHighlight(item.text);
+      // إزالة التظليل من النص
+      const marks = document.querySelectorAll(`mark[data-text="${item.text}"]`);
+      marks.forEach(m => m.remove());
+    };
+
+    actions.appendChild(speakBtn);
+    actions.appendChild(deleteBtn);
+    wrapper.appendChild(text);
+    wrapper.appendChild(note);
+    wrapper.appendChild(actions);
+    container.appendChild(wrapper);
+  });
+}
+
 
   highlightAlert.onclick = () => {
     const list = document.getElementById('highlight-list');
@@ -475,3 +523,4 @@ appendMessage('bot', '...جاري التفكير');
 </script>
 </body>
 </html>
+
