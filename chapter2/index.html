@@ -1,28 +1,238 @@
-<!-- زر فتح الافتار -->
-<button id="avatar-toggle" style="background:#fdd835; color:#000; border:none; border-radius:50%; width:55px; height:55px; font-size:26px; cursor:pointer; position:fixed; bottom:230px; right:20px; box-shadow:0 0 10px rgba(255,255,0,0.5); z-index:1201;">🤖</button>
-
-<!-- سكربت D-ID Avatar (مخفي افتراضيًا) -->
-<script type="module"
-  src="https://agent.d-id.com/v2/index.js"
-  data-mode="fabio"
-  data-client-key="Z29vZ2xlLW9hdXRoMnwxMTYxMTA1NDg0NzE4MjIxMjEzNzU6ZW1hOGpRYnRPcnJOSENjeU9nTUF3"
-  data-agent-id="v2_agt_JPqY3TqZ"
-  data-name="did-agent"
-  data-monitor="true"
-  data-orientation="horizontal"
-  data-position="right"
-  data-show-avatar="false"
-  data-autostart="false">
-</script>
-
-<script>
-  // زر تشغيل الافتار
-  const avatarToggle = document.getElementById('avatar-toggle');
-  avatarToggle.addEventListener('click', () => {
-    const avatarScript = document.querySelector('script[src*="agent.d-id.com"]');
-    if (avatarScript) {
-      avatarScript.setAttribute('data-show-avatar', 'true');
-      avatarScript.setAttribute('data-autostart', 'true');
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>chapter2</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #111;
+      color: #fdd835;
+      direction: rtl;
+      overflow: hidden;
     }
-  });
-</script>
+
+    body {
+      overflow-y: auto;
+    }
+
+    body::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    body::-webkit-scrollbar-track {
+      background: #111;
+    }
+
+    body::-webkit-scrollbar-thumb {
+      background-color: #fdd835;
+      border-radius: 6px;
+      border: 2px solid #111;
+    }
+
+    body::-webkit-scrollbar-thumb:hover {
+      background-color: #ffe066;
+    }
+
+    header, footer {
+      width: 100%;
+      height: clamp(60px, 8vh, 70px);
+      background-color: #000;
+      color: #fdd835;
+      text-shadow: 1px 1px 2px black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(18px, 2vw, 22px);
+      font-weight: bold;
+      letter-spacing: 1px;
+      border-top: 4px solid #fdd835;
+      border-bottom: 4px solid #fdd835;
+      box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+      position: fixed;
+      z-index: 10;
+    }
+
+    header { top: 0; }
+    footer { bottom: 0; padding: 0 30px; }
+
+    .page-wrapper {
+      padding: clamp(80px, 10vh, 100px) 20px clamp(80px, 10vh, 100px);
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .content-box {
+      width: min(90%, 800px);
+      margin: 0 auto 30px;
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .crime-box {
+      font-size: clamp(16px, 2vw, 20px);
+      padding: 15px 25px;
+      border: 2px solid #fdd835;
+      border-radius: 10px;
+      background-color: #222;
+      color: #fdd835;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: min(90%, 600px);
+      margin: 0 auto 20px;
+      box-shadow: 0 0 10px rgba(255, 255, 0, 0.2);
+    }
+
+    .crime-box summary {
+      list-style: none;
+      outline: none;
+      position: relative;
+      padding-right: 30px;
+      font-weight: bold;
+    }
+
+    .crime-box summary::before {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 8px;
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-right: 8px solid #fdd835;
+      transition: transform 0.3s ease;
+    }
+
+    .crime-box[open] summary::before {
+      transform: rotate(-90deg);
+    }
+
+    .crime-box p {
+      margin-top: 15px;
+      font-size: clamp(15px, 2vw, 18px);
+      color: #ffffff;
+      animation: fadeInAnswer 0.6s ease;
+    }
+
+    @keyframes fadeInAnswer {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== زر الافتار العائم المتحرك ===== */
+    .avatar-button {
+      position: fixed;
+      bottom: 90px;
+      left: 20px;
+      background: radial-gradient(circle, #fdd835 60%, #bfa600 90%);
+      border: 3px solid #000;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: float 3s ease-in-out infinite;
+      overflow: hidden;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .avatar-button img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      animation: blink 4s infinite ease-in-out;
+      object-fit: cover;
+    }
+
+    @keyframes blink {
+      0%, 90%, 100% { filter: brightness(1); transform: rotate(0deg); }
+      92% { filter: brightness(0.8); transform: rotate(-2deg); }
+      96% { filter: brightness(1.2); transform: rotate(2deg); }
+    }
+
+    /* اخفاء الافتار الافتراضي */
+    #did-avatar {
+      display: none;
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <header>🧠 الفصل الثاني</header>
+
+  <div class="page-wrapper">
+    <div class="content-box">
+      هذا هو محتوى الفصل الثاني. يمكنك إضافة عناصر تفاعلية أو تعليمية هنا.
+    </div>
+
+    <details class="crime-box">
+      <summary>مفهوم الجريمة الشكلية</summary>
+      <p>الجريمة الشكلية هي تلك التي تتحقق بمجرد وقوع الفعل دون الحاجة إلى تحقق نتيجة معينة، وتُعد من الجرائم التي يصعب تحديد مسرحها بدقة.</p>
+    </details>
+  </div>
+
+  <footer>
+    <div class="prev-button">
+      <button class="nav-button" onclick="goBack()">➡️ السابق</button>
+    </div>
+    <div class="next-button">
+      <button class="nav-button" onclick="goNext()">⬅️ التالي</button>
+    </div>
+  </footer>
+
+  <!-- 🎭 زر الدردشة العائم (بصورة الافتار المتحركة) -->
+  <button class="avatar-button" id="toggleAvatarBtn" title="افتح الدردشة">
+    <img src="https://cdn.dribbble.com/users/1626229/screenshots/11174104/media/f0c2e1ad9db874dfaf36d73920dfc82f.gif" alt="avatar-icon">
+  </button>
+
+  <!-- 🤖 D-ID Avatar الحقيقي (مخفي) -->
+  <div id="did-avatar">
+    <script type="module"
+      src="https://agent.d-id.com/v2/index.js"
+      data-mode="fabio"
+      data-client-key="Z29vZ2xlLW9hdXRoMnwxMTYxMTA1NDg0NzE4MjIxMjEzNzU6ZW1hOGpRYnRPcnJOSENjeU9nTUF3"
+      data-agent-id="v2_agt_JPqY3TqZ"
+      data-name="did-agent"
+      data-monitor="true"
+      data-orientation="horizontal"
+      data-position="right">
+    </script>
+  </div>
+
+  <script>
+    function goBack() {
+      window.location.href = 'https://dns3uae-glitch.github.io/crime-book/intro';
+    }
+
+    function goNext() {
+      window.location.href = 'https://dns3uae-glitch.github.io/crime-book/3d';
+    }
+
+    // 🔁 إظهار وإخفاء الافتار الحقيقي
+    const toggleBtn = document.getElementById('toggleAvatarBtn');
+    const avatarDiv = document.getElementById('did-avatar');
+    let isVisible = false;
+
+    toggleBtn.addEventListener('click', () => {
+      isVisible = !isVisible;
+      avatarDiv.style.display = isVisible ? 'block' : 'none';
+    });
+  </script>
+</body>
+</html>
