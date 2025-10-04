@@ -15,6 +15,31 @@
       direction: rtl;
       overflow-x: hidden;
     }
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+}
+
+.nav-left, .nav-right, .nav-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#footer-indicators button {
+  background: #fdd835;
+  color: #000;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(255,255,0,0.3);
+  display: none;
+}
 
     header {
       width: 100%;
@@ -76,15 +101,20 @@
     </div>
   </div>
 <footer>
-  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-    <button class="nav-button" onclick="goToNext()">⬅️ التالي</button>
-    <div id="footer-indicators">
+  <div class="footer-content">
+    <div class="nav-left">
+      <button class="nav-button" onclick="goToPrevious()">⬅️ السابق</button>
+    </div>
+    <div class="nav-center">
       <button id="highlight-alert">📌 كلمات مظللة</button>
       <button id="notebook-indicator">📔 ملاحظة محفوظة</button>
     </div>
-    <button class="nav-button" onclick="goToPrevious()">➡️ السابق</button>
+    <div class="nav-right">
+      <button class="nav-button" onclick="goToNext()">➡️ التالي</button>
+    </div>
   </div>
 </footer>
+
 
 
 <div id="highlight-menu" style="display:none; position:absolute; background:#222; border:2px solid #fdd835; padding:10px; border-radius:8px; z-index:1000;">
@@ -219,6 +249,10 @@
       highlightAlert.style.display = highlights.length > 0 ? 'block' : 'none';
       notebookIndicator.style.display = note ? 'block' : 'none';
     }
+highlightAlert.onclick = () => {
+  const list = document.getElementById('highlight-list');
+  list.style.display = list.style.display === 'block' ? 'none' : 'block';
+};
 
     // زر البحث 🔍
     document.getElementById('tool-search').onclick = () => {
@@ -322,5 +356,6 @@
   </script>
 </body>
 </html>
+
 
 
