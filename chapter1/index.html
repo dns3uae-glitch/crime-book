@@ -172,10 +172,12 @@
 
 <!-- دفتر الملاحظات -->
 <div id="notebook-panel" style="position:fixed; bottom:-300px; left:50%; transform:translateX(-50%); width:90%; max-width:600px; background:#222; border:2px solid #fdd835; border-radius:12px 12px 0 0; padding:20px; box-shadow:0 -4px 20px rgba(255,255,0,0.3); transition:bottom 0.4s ease; z-index:9999; color:#fff; text-align:center;">
-  <h3>📔 ملاحظات عامة عن الصفحة</h3>
-  <textarea id="notebook-input" placeholder="اكتب ملاحظتك هنا..." style="width:100%; height:100px; font-size:16px; padding:10px; border-radius:6px; border:none; resize:vertical; margin-top:10px; background:#fff; color:#000;"></textarea>
-  <button id="save-notebook" style="margin-top:10px; background:#4caf50; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">💾 حفظ</button>
-  <button id="delete-notebook" style="margin-top:10px; background:#ff4081; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">🗑️ حذف</button>
+  <h3 style="margin-top:0;">📔 ملاحظات عامة عن الصفحة</h3>
+  <textarea id="notebook-input" placeholder="اكتب ملاحظتك هنا..." style="width:100%; height:100px; font-size:16px; padding:10px; border-radius:6px; border:1px solid #fdd835; resize:vertical; margin-top:10px; background:#fff; color:#000;"></textarea>
+  <div style="display:flex; justify-content:center; gap:12px; margin-top:12px;">
+    <button id="save-notebook" style="background:#4caf50; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">💾 حفظ</button>
+    <button id="delete-notebook" style="background:#ff4081; color:#fff; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold;">🗑️ حذف</button>
+  </div>
 </div>
 
 <!-- قائمة التظليلات المحفوظة -->
@@ -196,6 +198,7 @@
     <button id="sendBtn" style="background:#fdd835; color:#000; border:none; padding:8px 12px; margin-left:8px; border-radius:5px; cursor:pointer; font-weight:bold;">إرسال</button>
   </div>
 </div>
+
 
 <script>
   function goToPrevious() {
@@ -313,7 +316,7 @@
     container.innerHTML = '';
     const highlights = JSON.parse(localStorage.getItem('highlights') || '[]');
 
-    highlights.forEach((item, index) => {
+    highlights.forEach(item => {
       const wrapper = document.createElement('div');
       wrapper.style.background = item.color;
       wrapper.style.padding = '8px';
@@ -376,9 +379,98 @@
     const list = document.getElementById('highlight-list');
     list.style.display = list.style.display === 'block' ? 'none' : 'block';
   };
-</script>
 
+  // دفتر الملاحظات
+  const notebookPanel = document.getElementById('notebook-panel');
+  const notebookInput = document.getElementById('notebook-input');
+
+  document.getElementById('tool-notebook').onclick = () => {
+    notebookPanel.style.bottom = '0px';
+  };
+
+  document.getElementById('save-notebook').onclick = () => {
+    const note = notebookInput.value.trim();
+    if (note) {
+      localStorage.setItem('pageNote_chapter1', note);
+      notebookPanel.style.bottom = '-300px';
+      updateIndicators();
+      alert('✅ تم حفظ الملاحظة!');
+    }
+  };
+
+  document.getElementById('delete-notebook').onclick = () => {
+    localStorage.removeItem('pageNote_chapter1');
+    notebookInput.value = '';
+    notebookPanel.style.bottom = '-300px';
+    updateIndicators();
+    alert('🗑️ تم حذف الملاحظة!');
+  };
+
+  notebookIndicator.onclick = () => {
+    notebookPanel.style.bottom = '0px';
+  };
+
+  // استعادة التظليلات والملاحظات عند التحميل
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = JSON.parse(localStorage.getItem('highlights') || '[]');
+    let html = textBox.innerHTML;
+    saved.forEach(item => {
+      const mark = `<mark style="background-color:${item.color}" data-note="${item.note}" data-text="${item.text}">${item.text}</mark>`;
+      const regex = new RegExp(item.text, 'g');
+      html = html.replace(regex, mark);
+    });
+    textBox.innerHTML = html;
+
+    const savedNote = localStorage.getItem('pageNote_chapter1');
+    if (savedNote) notebookInput.value = savedNote;
+
+    updateIndicators();
+    renderHighlightList();
+  });
+
+  // عرض أدوات التظليل عند الضغط على كلمة مظللة
+  textBox.addEventListener('click', e => {
+    if (e.target.tagName === 'MARK') {
+      const text = e.target.getAttribute('data-text');
+      const note = e.target.getAttribute('data-note');
+      const rect = e.target.getBoundingClientRect();
+     highlightMenu.style.top = `${rect.bottom + window.scrollY + 5}px`;
+highlightMenu.style.left = `${rect.left + window.scrollX}px`;
+highlightMenu.style.display = 'block';
+noteInput.value = note;
+
+const deleteBtn = document.createElement('button');
+deleteBtn.textContent = '🗑️ حذف التظليل';
+deleteBtn.style.background = '#ff4081';
+deleteBtn.style.color = '#fff';
+deleteBtn.style.border = 'none';
+deleteBtn.style.padding = '6px 12px';
+deleteBtn.style.borderRadius = '6px';
+deleteBtn.style.cursor = 'pointer';
+deleteBtn.onclick = () => {
+  e.target.remove();
+  removeHighlight(text);
+  highlightMenu.style.display = 'none';
+};
+
+const speakBtn = document.createElement('button');
+speakBtn.textContent = '🔊 سماع الملاحظة';
+speakBtn.style.background = '#4caf50';
+speakBtn.style.color = '#fff';
+speakBtn.style.border = 'none';
+speakBtn.style.padding = '6px 12px';
+speakBtn.style.borderRadius = '6px';
+speakBtn.style.cursor = 'pointer';
+speakBtn.onclick = () => {
+  speakText(note || text);
+};
+
+const actionsBox = document.getElementById('highlight-actions');
+actionsBox.innerHTML = '';
+actionsBox.appendChild(deleteBtn);
+actionsBox.appendChild(speakBtn);
+    }
+  });
+</script>
 </body>
 </html>
-
-
