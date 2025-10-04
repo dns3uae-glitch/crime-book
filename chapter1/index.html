@@ -76,13 +76,16 @@
     </div>
   </div>
 <footer>
-  <button class="nav-button" onclick="goToPrevious()">➡️ السابق</button>
-  <div id="footer-indicators">
-    <button id="highlight-alert">📌 كلمات مظللة</button>
-    <button id="notebook-indicator">📔 ملاحظة محفوظة</button>
+  <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+    <button class="nav-button" onclick="goToNext()">⬅️ التالي</button>
+    <div id="footer-indicators">
+      <button id="highlight-alert">📌 كلمات مظللة</button>
+      <button id="notebook-indicator">📔 ملاحظة محفوظة</button>
+    </div>
+    <button class="nav-button" onclick="goToPrevious()">➡️ السابق</button>
   </div>
-  <button class="nav-button" onclick="goToNext()">⬅️ التالي</button>
 </footer>
+
 
 <div id="highlight-menu" style="display:none; position:absolute; background:#222; border:2px solid #fdd835; padding:10px; border-radius:8px; z-index:1000;">
   <div class="colors" style="display:flex; gap:8px; margin-bottom:10px;">
@@ -319,4 +322,5 @@
   </script>
 </body>
 </html>
+
 
