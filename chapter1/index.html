@@ -286,34 +286,30 @@
     window.location.href = 'https://dns3uae-glitch.github.io/crime-book/intro'; // غيّر حسب اسم الفصل التالي
   }
 
-function getEmiratiMaleVoice() {
-  const voices = speechSynthesis.getVoices();
-  return voices.find(v => v.lang === 'ar-AE' && v.name.toLowerCase().includes('male')) ||
-         voices.find(v => v.lang === 'ar-AE' && v.name.toLowerCase().includes('hamdan')) ||
-         voices.find(v => v.lang.includes('ar') && v.name.toLowerCase().includes('male')) ||
-         voices.find(v => v.lang.includes('ar')) ||
-         voices.find(v => v.lang.includes('en')) ||
-         voices[0];
-}
-
-function speakText(text) {
-  const utterance = new SpeechSynthesisUtterance(text);
-  const voice = getEmiratiMaleVoice();
-  if (voice) {
-    utterance.voice = voice;
-    utterance.lang = voice.lang;
+  function getArabicMaleVoice() {
+    const voices = speechSynthesis.getVoices();
+    return voices.find(v => v.lang.includes('ar') && v.name.toLowerCase().includes('male')) ||
+           voices.find(v => v.lang.includes('ar')) ||
+           voices.find(v => v.lang.includes('en')) ||
+           voices[0];
   }
-  speechSynthesis.cancel();
-  setTimeout(() => {
-    speechSynthesis.speak(utterance);
-  }, 100);
-}
 
-function testVoice() {
-  speakText("هذا صوت إماراتي رجالي لاختبار القراءة");
-}
+  function speakText(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = getArabicMaleVoice();
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang;
+    }
+    speechSynthesis.cancel();
+    setTimeout(() => {
+      speechSynthesis.speak(utterance);
+    }, 100);
+  }
 
-
+  function testVoice() {
+    speakText("هذا اختبار صوتي باللغة العربية");
+  }
 
   const menu = document.getElementById('highlight-menu');
   const noteInput = document.getElementById('note-input');
@@ -353,9 +349,41 @@ function testVoice() {
     menu.style.display = 'flex';
   };
 
-  toolSearch.onclick = () => {
-    window.open(`https://www.google.com/search?q=${encodeURIComponent(selectedText)}`, '_blank');
+ toolSearch.onclick = () => {
+  const popup = document.createElement('iframe');
+  popup.src = `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`;
+  popup.style.position = 'fixed';
+  popup.style.top = '10%';
+  popup.style.left = '10%';
+  popup.style.width = '80%';
+  popup.style.height = '80%';
+  popup.style.border = '4px solid #fdd835';
+  popup.style.borderRadius = '12px';
+  popup.style.zIndex = '9999';
+  popup.style.background = '#fff';
+  popup.id = 'google-popup';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '❌ إغلاق';
+  closeBtn.style.position = 'absolute';
+  closeBtn.style.top = '8px';
+  closeBtn.style.left = '8px';
+  closeBtn.style.zIndex = '10000';
+  closeBtn.style.background = '#fdd835';
+  closeBtn.style.color = '#000';
+  closeBtn.style.fontWeight = 'bold';
+  closeBtn.style.border = 'none';
+  closeBtn.style.padding = '6px 10px';
+  closeBtn.style.borderRadius = '6px';
+  closeBtn.onclick = () => {
+    document.body.removeChild(popup);
+    document.body.removeChild(closeBtn);
   };
+
+  document.body.appendChild(popup);
+  document.body.appendChild(closeBtn);
+};
+
 
   toolSpeak.onclick = () => {
     speakText(selectedText);
@@ -454,5 +482,4 @@ function testVoice() {
 </script>
 </body>
 </html>
-
 
