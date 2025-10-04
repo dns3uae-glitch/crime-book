@@ -5,6 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>chapter1</title>
   <style>
+    #footer-indicators {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 1000;
+}
+
+#footer-indicators button {
+  background: #fdd835;
+  color: #000;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
     html, body {
       margin: 0;
       padding: 0;
@@ -300,8 +320,10 @@
       <button class="nav-button" onclick="goToNext()">⬅️ التالي</button>
     </div>
 
-    <div id="highlight-alert">📌 كلمات مظللة</div>
-    <button id="notebook-indicator" style="display:none; position:absolute; right:50%; transform:translateX(50%); bottom:10px; background:#fdd835; color:#000; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">📔 ملاحظة محفوظة</button>
+<div id="footer-indicators">
+  <button id="highlight-alert">📌 كلمات مظللة</button>
+  <button id="notebook-indicator">📔 ملاحظة محفوظة</button>
+</div>
 
   </footer>
 
@@ -579,6 +601,7 @@ if (savedNote) {
   </script>
 </body>
 </html>
+
 
 
 
