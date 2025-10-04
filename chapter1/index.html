@@ -285,33 +285,30 @@
   function goToNext() {
     window.location.href = 'https://dns3uae-glitch.github.io/crime-book/intro'; // 
 
- function getEmiratiMaleVoice() {
-  const voices = speechSynthesis.getVoices();
-  return voices.find(v => v.lang === 'ar-AE' && v.name.toLowerCase().includes('male')) ||
-         voices.find(v => v.lang === 'ar-AE' && v.name.toLowerCase().includes('hamdan')) ||
-         voices.find(v => v.lang.includes('ar') && v.name.toLowerCase().includes('male')) ||
-         voices.find(v => v.lang.includes('ar')) ||
-         voices.find(v => v.lang.includes('en')) ||
-         voices[0];
-}
-
-function speakText(text) {
-  const utterance = new SpeechSynthesisUtterance(text);
-  const voice = getEmiratiMaleVoice();
-  if (voice) {
-    utterance.voice = voice;
-    utterance.lang = voice.lang;
+  function getArabicMaleVoice() {
+    const voices = speechSynthesis.getVoices();
+    return voices.find(v => v.lang.includes('ar') && v.name.toLowerCase().includes('male')) ||
+           voices.find(v => v.lang.includes('ar')) ||
+           voices.find(v => v.lang.includes('en')) ||
+           voices[0];
   }
-  speechSynthesis.cancel();
-  setTimeout(() => {
-    speechSynthesis.speak(utterance);
-  }, 100);
-}
 
-function testVoice() {
-  speakText("هذا صوت إماراتي رجالي لاختبار القراءة");
-}
+  function speakText(text) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = getArabicMaleVoice();
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang;
+    }
+    speechSynthesis.cancel();
+    setTimeout(() => {
+      speechSynthesis.speak(utterance);
+    }, 100);
+  }
 
+  function testVoice() {
+    speakText("هذا اختبار صوتي باللغة العربية");
+  }
 
   const menu = document.getElementById('highlight-menu');
   const noteInput = document.getElementById('note-input');
