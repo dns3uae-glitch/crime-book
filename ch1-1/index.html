@@ -236,9 +236,10 @@ body::-webkit-scrollbar-track {
 <body>
   <header>📘 الفصل الأول</header>
 
-  <div class="page-wrapper">
+  
+   <div class="page-wrapper">
 
-  <!-- الفيديو الأول والنص التوضيحي -->
+  <!-- فيديو + مربع تحته -->
   <div class="video-section">
     <div class="video-frame">
       <iframe width="100%" height="100%"
@@ -249,32 +250,48 @@ body::-webkit-scrollbar-track {
         allowfullscreen>
       </iframe>
     </div>
-     </div>
-
-  <!-- النصوص التوضيحية التالية -->
-  <div class="text-section">
     <details class="crime-box">
       <summary>العلاقة بين الجريمة ومكان مسرح الجريمة</summary>
       <p>إن لكل جريمة مكان، ولكن ليس من اللازم أن يكون لكل جريمة مسرح.</p>
     </details>
+  </div>
 
+  <!-- فيديو + مربع آخر -->
+  <div class="video-section">
+    <div class="video-frame">
+      <iframe width="100%" height="100%"
+        src="https://www.youtube.com/embed/KgbJWrK7FXE?autoplay=1&rel=0"
+        title="YouTube video"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+      </iframe>
+    </div>
     <details class="crime-box">
       <summary>جريمة السلوك المجرد</summary>
       <p>إن جريمة السلوك المجرد سواء أكان إيجابياً أم سلبياً لها مكان ولكن ليس لها مسرح.</p>
     </details>
+  </div>
 
+  <!-- تكرار نفس النمط -->
+  <div class="video-section">
+    <div class="video-frame">
+      <iframe width="100%" height="100%"
+        src="https://www.youtube.com/embed/KgbJWrK7FXE?autoplay=1&rel=0"
+        title="YouTube video"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen>
+      </iframe>
+    </div>
     <details class="crime-box">
       <summary>الجريمة الشكلية</summary>
       <p>أن الجريمة الشكلية سواء تمثلت في جريمة سلوك مجرد، أم في جريمة حدث مجرد ، لها هي الأخرى مكان ولكن ليس لها مسـرح..</p>
     </details>
-
-    <details class="crime-box">
-      <summary>مسرح الجريمة واثار الجريمة</summary>
-      <p>مسرح الجريمة يعتبر مصدراً مهماً من مصادر جمع التحريات لأنه المكان الذى يحتوى على الكثير من الآثار المتخلفة عن ارتكاب الجريمة ومن خلاله يبدأ رجال البحث الجنائى من خلاله خطوات وإجراءات البحث والتحرى للكشف عن الحقيقة.</p>
-    </details>
   </div>
 
 </div>
+
 
 
   <footer>
@@ -700,6 +717,7 @@ marks.forEach(m => {
 </script>
 </body>
 </html>
+
 
 
 
