@@ -108,13 +108,15 @@ body::-webkit-scrollbar-track {
       box-shadow: 0 0 10px rgba(255, 255, 0, 0.2);
     }
 
-    .crime-box summary {
-      list-style: none;
-      outline: none;
-      position: relative;
-      padding-right: 30px;
-      font-weight: bold;
-    }
+   .crime-box summary {
+  list-style: none;
+  outline: none;
+  position: relative;
+  font-weight: bold;
+  text-align: center; /* ✅ النص في المنتصف */
+  padding-right: 30px; /* يبقى للسهم */
+}
+
 
     .crime-box summary::before {
       content: "";
@@ -705,6 +707,7 @@ marks.forEach(m => {
 </script>
 </body>
 </html>
+
 
 
 
