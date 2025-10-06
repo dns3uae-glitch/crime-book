@@ -57,14 +57,15 @@ body::-webkit-scrollbar-track {
     }
 
     .page-wrapper {
-      padding-top: clamp(70px, 8vh, 80px);
-      padding-bottom: clamp(70px, 8vh, 80px);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-sizing: border-box;
-    }
+  padding-top: clamp(70px, 8vh, 80px);
+  padding-bottom: clamp(70px, 8vh, 80px);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column; /* ✅ تكديس عمودي */
+  align-items: center;     /* ✅ توسيط أفقي */
+  box-sizing: border-box;
+}
+
 .video-frame {
       width: 95%;
       max-width: 900px;
@@ -704,6 +705,7 @@ marks.forEach(m => {
 </script>
 </body>
 </html>
+
 
 
 
