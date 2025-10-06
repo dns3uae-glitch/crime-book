@@ -18,6 +18,8 @@
     }
 body {
       overflow: auto;
+overflow-y: auto;
+  overflow-x: hidden;
     }
  body::-webkit-scrollbar {
       width: 10px;
@@ -26,17 +28,28 @@ body::-webkit-scrollbar-track {
       background: #111;
     }
 
-.gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-    margin-top: 40px;
+.image-box {
+    width: 95%;
+    max-width: 900px;
+    background-color: #222;
+    border: 2px solid #fdd835;
+    border-radius: 14px;
+    box-shadow: 0 0 40px rgba(255, 255, 0, 0.3);
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    justify-items: center;
   }
 
   .gallery img {
-    width: 200px;
-    height: 140px;
+    width: 100%;
+    max-width: 200px;
+    height: auto;
     object-fit: cover;
     border: 3px solid #fdd835;
     border-radius: 10px;
@@ -44,13 +57,24 @@ body::-webkit-scrollbar-track {
     transition: transform 0.4s ease, box-shadow 0.4s ease;
   }
 
-  .gallery img.zoomed {
-    transform: scale(2.5);
-    z-index: 1000;
-    box-shadow: 0 0 20px rgba(255, 255, 0, 0.6);
-    position: relative;
-  }
+.gallery img.zoomed {
+  transform: scale(2.5);
+  z-index: 1000;
+  position: relative;
+  box-shadow: 0 0 20px rgba(255, 255, 0, 0.6);
+}
 
+
+  @media (max-width: 600px) {
+    .gallery img.zoomed {
+      transform: scale(1.8);
+    }
+  }
+  @media (max-width: 600px) {
+    .gallery img.zoomed {
+      transform: scale(1.8); /* ✅ زوم أقل للجوال */
+    }
+  }
     body::-webkit-scrollbar-thumb:hover {
       background-color: #ffe066;
     }
@@ -260,16 +284,16 @@ body::-webkit-scrollbar-track {
 
   
   <div class="page-wrapper">
-<p>&#160;</p>
-  <!-- الفيديو في الأعلى -->
-  <div class="video-frame">
-    
-<div class="gallery">
-  <img src="https://picsum.photos/id/1015/400/300" alt="صورة 1" onclick="toggleZoom(this)">
-  <img src="https://picsum.photos/id/1025/400/300" alt="صورة 2" onclick="toggleZoom(this)">
-  <img src="https://picsum.photos/id/1035/400/300" alt="صورة 3" onclick="toggleZoom(this)">
-  <img src="https://picsum.photos/id/1045/400/300" alt="صورة 4" onclick="toggleZoom(this)">
-</div>
+  <p>&#160;</p>
+
+  <!-- مربع الصور -->
+  <div class="image-box">
+    <div class="gallery">
+      <img src="https://picsum.photos/id/1015/400/300" alt="صورة 1" onclick="toggleZoom(this)">
+      <img src="https://picsum.photos/id/1025/400/300" alt="صورة 2" onclick="toggleZoom(this)">
+      <img src="https://picsum.photos/id/1035/400/300" alt="صورة 3" onclick="toggleZoom(this)">
+      <img src="https://picsum.photos/id/1045/400/300" alt="صورة 4" onclick="toggleZoom(this)">
+    </div>
   </div>
 
   <!-- الجملة التوضيحية -->
@@ -643,14 +667,14 @@ marks.forEach(m => {
     chatBody.appendChild(msg);
   }
 function toggleZoom(img) {
-    // إزالة الزوم من أي صورة أخرى
-    document.querySelectorAll('.gallery img').forEach(i => {
-      if (i !== img) i.classList.remove('zoomed');
-    });
+  // إزالة الزوم من جميع الصور الأخرى
+  document.querySelectorAll('.gallery img').forEach(i => {
+    if (i !== img) i.classList.remove('zoomed');
+  });
 
-    // تبديل الزوم للصورة الحالية
-    img.classList.toggle('zoomed');
-  }
+  // تبديل الزوم للصورة الحالية
+  img.classList.toggle('zoomed');
+}
   function updateLastBotMessage(content) {
     const messages = document.querySelectorAll('.chat-message.bot');
     if (messages.length > 0) {
