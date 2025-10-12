@@ -135,7 +135,104 @@
         allow="autoplay; encrypted-media"
         allowfullscreen>
       </iframe>
+
     </div>
+
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFsgB9PD0nszKbMJPak0qA-erPgFs01ns",
+    authDomain: "crime-book1.firebaseapp.com",
+    projectId: "crime-book1",
+    storageBucket: "crime-book1.firebasestorage.app",
+    messagingSenderId: "1017769661825",
+    appId: "1:1017769661825:web:e0ccc3b5e9c4a74a9a4480"
+  };
+  firebase.initializeApp(firebaseConfig);
+</script>
+
+<!-- نموذج التسجيل وتسجيل الدخول -->
+<style>
+  .auth-container {
+    margin-top: 30px;
+    background-color: #222;
+    padding: 20px;
+    border: 2px solid #fdd835;
+    border-radius: 10px;
+    color: #fff;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
+  }
+
+  .auth-container input {
+    width: 90%;
+    padding: 10px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  .auth-container button {
+    background-color: #fdd835;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  .auth-container button:hover {
+    background-color: #fff176;
+  }
+</style>
+
+<div class="auth-container">
+  <h3>تسجيل الدخول</h3>
+  <input type="email" id="loginEmail" placeholder="البريد الإلكتروني">
+  <input type="password" id="loginPassword" placeholder="كلمة المرور">
+  <button onclick="login()">دخول</button>
+  <hr style="margin: 20px 0; border-color: #fdd835;">
+  <h3>إنشاء حساب جديد</h3>
+  <input type="email" id="signupEmail" placeholder="البريد الإلكتروني">
+  <input type="password" id="signupPassword" placeholder="كلمة المرور">
+  <button onclick="signup()">تسجيل جديد</button>
+</div>
+
+<script>
+  function signup() {
+    const email = document.getElementById("signupEmail").value;
+    const password = document.getElementById("signupPassword").value;
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+      .then(() => {
+        alert("تم إنشاء الحساب بنجاح!");
+      })
+      .catch(error => {
+        alert("خطأ في التسجيل: " + error.message);
+      });
+  }
+
+  function login() {
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+    firebase.auth().signInWithEmailAndPassword(email, password)
+      .then(() => {
+        window.location.href = "https://dns3uae-glitch.github.io/crime-book/welcome/";
+      })
+      .catch(error => {
+        alert("خطأ في تسجيل الدخول: " + error.message);
+      });
+  }
+</script>
+
+    
   </div>
 
   <footer>
@@ -157,3 +254,4 @@
   </script>
 </body>
 </html>
+
