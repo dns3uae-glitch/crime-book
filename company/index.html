@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Company Intro</title>
   <style>
     html, body {
@@ -15,11 +14,6 @@
       overflow: hidden;
       direction: rtl;
     }
-
-    body.loading {
-      visibility: hidden;
-    }
-
     .page-wrapper {
       width: 100%;
       min-height: 100vh;
@@ -31,7 +25,69 @@
       padding-bottom: clamp(70px, 8vh, 80px);
       box-sizing: border-box;
     }
-
+    .page-flip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #111;
+      z-index: 999;
+      clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+      transition: clip-path 1.2s ease-in-out;
+    }
+    .page-flip.active {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+    header, footer {
+      width: 100%;
+      height: clamp(60px, 8vh, 70px);
+      background-color: #000;
+      color: #fdd835;
+      text-shadow: 1px 1px 2px black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(18px, 2vw, 22px);
+      font-weight: bold;
+      letter-spacing: 1px;
+      border-top: 4px solid #fdd835;
+      border-bottom: 4px solid #fdd835;
+      box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+      position: fixed;
+      z-index: 10;
+    }
+    header {
+      top: 0;
+    }
+    footer {
+      bottom: 0;
+      padding: 0 30px;
+    }
+    .footer-controls {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+    .next-button {
+      position: absolute;
+      left: 80px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .nav-button {
+      background-color: #222;
+      color: #fdd835;
+      border: 2px solid #fdd835;
+      padding: clamp(8px, 2vh, 14px) clamp(16px, 4vw, 24px);
+      font-size: clamp(14px, 2vw, 18px);
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .nav-button:hover {
+      background-color: rgba(255,255,0,0.2);
+    }
     .video-frame {
       width: 95%;
       max-width: 900px;
@@ -45,53 +101,18 @@
       justify-content: center;
       z-index: 1;
     }
-
     iframe {
       width: 96%;
       height: 92%;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(255,255,255,0.2);
     }
-
-    .auth-container {
-      margin-top: 30px;
-      background-color: #222;
-      padding: 20px;
-      border: 2px solid #fdd835;
-      border-radius: 10px;
-      color: #fff;
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
-    }
-
-    .auth-container input {
-      width: 90%;
-      padding: 10px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-
-    .auth-container button {
-      background-color: #fdd835;
-      color: #000;
-      border: none;
-      padding: 10px 20px;
-      margin-top: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    .auth-container button:hover {
-      background-color: #fff176;
+    body.loading {
+      visibility: hidden;
     }
   </style>
-</head>
-<body class="loading">
+
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script>
@@ -107,12 +128,17 @@
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (!user) {
-        window.location.href = "https://dns3uae-glitch.github.io/crime-book/";
+        window.location.href = "../login.html";
       } else {
         document.body.classList.remove("loading");
       }
     });
   </script>
+</head>
+<body class="loading">
+  <header>
+    🕵️‍♂️ إنتاجات مسرح الجريمة
+  </header>
 
   <div class="page-wrapper">
     <div class="video-frame">
@@ -124,43 +150,23 @@
         allowfullscreen>
       </iframe>
     </div>
-
-    <div class="auth-container">
-      <h3>تسجيل الدخول</h3>
-      <input type="email" id="loginEmail" placeholder="البريد الإلكتروني">
-      <input type="password" id="loginPassword" placeholder="كلمة المرور">
-      <button onclick="login()">دخول</button>
-      <hr style="margin: 20px 0; border-color: #fdd835;">
-      <h3>إنشاء حساب جديد</h3>
-      <input type="email" id="signupEmail" placeholder="البريد الإلكتروني">
-      <input type="password" id="signupPassword" placeholder="كلمة المرور">
-      <button onclick="signup()">تسجيل جديد</button>
-    </div>
   </div>
 
-  <script>
-    function signup() {
-      const email = document.getElementById("signupEmail").value;
-      const password = document.getElementById("signupPassword").value;
-      firebase.auth().createUserWithEmailAndPassword(email, password)
-        .then(() => {
-          alert("تم إنشاء الحساب بنجاح!");
-        })
-        .catch(error => {
-          alert("خطأ في التسجيل: " + error.message);
-        });
-    }
+  <footer>
+    <div class="next-button">
+      <button class="nav-button" onclick="flipPage()">⬅️ التالي</button>
+    </div>
+  </footer>
 
-    function login() {
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
-      firebase.auth().signInWithEmailAndPassword(email, password)
-        .then(() => {
-          window.location.href = "https://dns3uae-glitch.github.io/crime-book/welcome/";
-        })
-        .catch(error => {
-          alert("خطأ في تسجيل الدخول: " + error.message);
-        });
+  <div class="page-flip" id="flipEffect"></div>
+
+  <script>
+    function flipPage() {
+      const flip = document.getElementById('flipEffect');
+      flip.classList.add('active');
+      setTimeout(() => {
+        window.location.href = "../welcome/";
+      }, 1200);
     }
   </script>
 </body>
