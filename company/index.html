@@ -122,6 +122,14 @@
   </style>
 </head>
 <body>
+  <script>
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (!user) {
+      // إذا لم يكن مسجل دخول، يرجع لصفحة التسجيل
+      window.location.href = "https://dns3uae-glitch.github.io/crime-book/";
+    }
+  });
+  </script>
   <header>
     🕵️‍♂️ إنتاجات مسرح الجريمة
   </header>
@@ -254,4 +262,5 @@
   </script>
 </body>
 </html>
+
 
