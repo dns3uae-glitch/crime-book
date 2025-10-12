@@ -3,75 +3,7 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Company Intro</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      font-family: 'Georgia', serif;
-      background-color: #111;
-      overflow: hidden;
-      direction: rtl;
-    }
-    body.loading {
-      visibility: hidden;
-    }
-    .page-wrapper {
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding-top: clamp(70px, 8vh, 80px);
-      padding-bottom: clamp(70px, 8vh, 80px);
-      box-sizing: border-box;
-    }
-    .video-frame {
-      width: 95%;
-      max-width: 900px;
-      height: clamp(250px, 50vh, 500px);
-      border: 5px solid #fdd835;
-      box-shadow: 0 0 40px rgba(255, 255, 0, 0.4);
-      border-radius: 14px;
-      background-color: black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1;
-    }
-    iframe {
-      width: 96%;
-      height: 92%;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.2);
-    }
-    .online-users {
-      margin-top: 30px;
-      background-color: #222;
-      padding: 20px;
-      border: 2px solid #fdd835;
-      border-radius: 10px;
-      color: #fff;
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
-    }
-    .online-users ul {
-      list-style: none;
-      padding: 0;
-      margin: 10px 0 0 0;
-    }
-    .online-users li {
-      padding: 5px 0;
-      border-bottom: 1px solid #fdd835;
-    }
-  </style>
-
-  <!-- Firebase SDK -->
+  <title>الطلاب المتصلون الآن</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -80,57 +12,55 @@
       apiKey: "AIzaSyCFsgB9PD0nszKbMJPak0qA-erPgFs01ns",
       authDomain: "crime-book1.firebaseapp.com",
       projectId: "crime-book1",
-      storageBucket: "crime-book1.firebasestorage.app",
+      databaseURL: "https://crime-book1-default-rtdb.firebaseio.com",
+      storageBucket: "crime-book1.appspot.com",
       messagingSenderId: "1017769661825",
       appId: "1:1017769661825:web:e0ccc3b5e9c4a74a9a4480"
     };
     firebase.initializeApp(firebaseConfig);
+  </script>
+  <style>
+    body { font-family: Arial; background-color: #111; color: #fff; text-align: center; padding: 40px; }
+    .user-box { background-color: #222; margin: 10px auto; padding: 10px; border-radius: 8px; width: 300px; }
+  </style>
+</head>
+<body>
+  <h2>الطلاب المتصلون الآن</h2>
+  <div id="onlineList"></div>
 
+  <script>
     firebase.auth().onAuthStateChanged(function(user) {
       if (!user) {
-        window.location.href = "login.html";
+        window.location.href = "../login.html";
       } else {
-        document.body.classList.remove("loading");
-        const userId = user.uid;
-        const userEmail = user.email;
-        const userRef = firebase.database().ref("onlineUsers/" + userId);
-        userRef.set({
-          email: userEmail,
-          status: "online",
-          timestamp: new Date().toISOString()
+        const uid = user.uid;
+        const userRef = firebase.database().ref("users/" + uid);
+        userRef.once("value").then(snapshot => {
+          const fullName = snapshot.val().fullName || "طالب مجهول";
+          firebase.database().ref("onlineUsers/" + uid).set({
+            fullName: fullName,
+            timestamp: new Date().toISOString()
+          });
         });
-        userRef.onDisconnect().remove();
 
-        const onlineListRef = firebase.database().ref("onlineUsers");
-        onlineListRef.on("value", function(snapshot) {
-          const listContainer = document.getElementById("onlineList");
-          listContainer.innerHTML = "";
+        window.addEventListener("beforeunload", function () {
+          firebase.database().ref("onlineUsers/" + uid).remove();
+        });
+
+        const onlineRef = firebase.database().ref("onlineUsers");
+        onlineRef.on("value", function(snapshot) {
+          const list = document.getElementById("onlineList");
+          list.innerHTML = "";
           snapshot.forEach(function(child) {
-            const li = document.createElement("li");
-            li.textContent = child.val().email;
-            listContainer.appendChild(li);
+            const name = child.val().fullName;
+            const div = document.createElement("div");
+            div.className = "user-box";
+            div.textContent = name;
+            list.appendChild(div);
           });
         });
       }
     });
   </script>
-</head>
-<body class="loading">
-  <div class="page-wrapper">
-    <div class="video-frame">
-      <iframe width="100%" height="100%" 
-        src="https://www.youtube.com/embed/KPs2ktUji2Q?autoplay=1&rel=0"
-        title="YouTube video"
-        frameborder="0"
-        allow="autoplay; encrypted-media"
-        allowfullscreen>
-      </iframe>
-    </div>
-
-    <div class="online-users">
-      <h3>الطلاب المتصلون الآن</h3>
-      <ul id="onlineList"></ul>
-    </div>
-  </div>
 </body>
 </html>
