@@ -6,51 +6,6 @@
   <title>الفصل الأول</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
-/* 🎯 تحسين العرض على الشاشات الصغيرة */
-@media (max-width: 768px){
-  .chapter-head {
-    font-size: clamp(1rem, 4vw, 1.4rem);
-    margin-top: 8vh;
-  }
-
-  .hero {
-    width: 92%;
-    padding: 20px 14px;
-    min-height: auto;
-    margin-top: 6vh;
-  }
-
-  .hero h1 {
-    font-size: clamp(1rem, 5vw, 1.5rem);
-    line-height: 1.5;
-  }
-
-  .hero p {
-    font-size: clamp(0.9rem, 4vw, 1rem);
-    line-height: 1.8;
-  }
-
-  footer {
-    flex-direction: column;
-    gap: 8px;
-    padding: 10px 0;
-    position: relative;
-    box-shadow: none;
-    border-top: 1px solid rgba(0,120,255,.35);
-  }
-
-  .academy {
-    order: 3;
-    font-size: 0.85rem;
-  }
-
-  .btn-nav {
-    padding: 10px 18px;
-    font-size: 0.9rem;
-    width: 70%;
-  }
-}
-
     :root{
       --bg-dark:#0a0a0a;
       --blue:#0033A0;         /* الأزرق الشرطي */
@@ -379,9 +334,6 @@ display:flex; align-items:center; justify-content:center; gap:60px;
     const PREV_URL = 'https://dns3uae-glitch.github.io/crime-book/intro/';
     const NEXT_URL = 'https://dns3uae-glitch.github.io/crime-book/ch1-1/';
 
-    // أحداث الأزرار
-    document.getElementById('prevPage').addEventListener('click', ()=> go(PREV_URL,'prev'));
-    document.getElementById('nextPage').addEventListener('click', ()=> go(NEXT_URL,'next'));
   </script>
 
 </body>
