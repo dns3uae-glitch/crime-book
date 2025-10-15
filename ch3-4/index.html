@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1"/>
+<title>📘 الفصل الثاني - قواعد معاينة مسرح الجريمة</title>
+<style>
+:root{
+  --gold:#FFD54A;
+  --blue:#0a6bff;
+  --glass:rgba(255,255,255,0.06);
+}
+
+html, body {height:100%;margin:0;}
+body{
+  display:flex;flex-direction:column;justify-content:space-between;
+  background:radial-gradient(circle at center,#001428 0%,#000 90%);
+  color:var(--gold);
+  font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* حركة الانتقال الأصلية */
+.page{
+  flex:1;width:100%;
+  transform-style:preserve-3d;perspective:2000px;
+  transition:transform 1.6s ease-in-out,box-shadow 1.6s ease-in-out;
+  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:30px;
+}
+.page.flip-next{transform-origin:right center;transform:rotateY(-180deg);box-shadow:-30px 0 80px rgba(0,0,0,.5);}
+.page.flip-prev{transform-origin:left center;transform:rotateY(180deg);box-shadow:30px 0 80px rgba(0,0,0,.5);}
+.page::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(120deg,rgba(0,80,255,.25)0%,rgba(255,255,255,.32)25%,rgba(0,80,255,.25)50%,transparent100%);
+  opacity:0;mix-blend-mode:screen;pointer-events:none;transition:opacity .8s ease-in-out;
+}
+.page.flip-next::after,.page.flip-prev::after{opacity:.75;animation:lightReflection 1.6s ease-in-out;}
+@keyframes lightReflection{
+  0%{transform:translateX(-100%) rotate(0deg);opacity:0}
+  25%{opacity:.85}
+  50%{transform:translateX(0%) rotate(15deg);opacity:.95}
+  100%{transform:translateX(100%) rotate(0);opacity:0}
+}
+
+/* العناوين */
+.chapter-title{
+  font-weight:900;
+  font-size:clamp(1.5rem,3.8vw,2.1rem);
+  color:var(--gold);
+  text-align:center;
+  text-shadow:0 0 18px rgba(255,215,0,.4),0 0 25px rgba(255,215,0,.2);
+  margin-bottom:8px;
+}
+.section-title{
+  font-weight:800;
+  font-size:clamp(1.2rem,2.8vw,1.6rem);
+  text-shadow:0 0 14px rgba(255,215,0,.4),0 0 22px rgba(10,107,255,.3);
+  margin-bottom:32px;
+}
+
+/* الشبكة */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+  max-width: 1050px;
+  width: 92%;
+  margin: 0 auto 48px auto;
+}
+
+/* الصناديق (مصغّرة بدون كسر التنسيق) */
+.info-box{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,215,0,.4);
+  border-radius:14px;
+  box-shadow:0 0 20px rgba(10,107,255,.25),inset 0 0 14px rgba(255,215,0,.15);
+  padding:16px 18px;
+  color:#e8efff;
+  line-height:1.75;
+  font-size:0.95rem;
+  text-align:justify;
+  text-shadow:0 0 6px rgba(0,80,255,.08);
+  animation:glow 5s ease-in-out infinite alternate;
+}
+@keyframes glow{
+  from{box-shadow:0 0 22px rgba(10,107,255,.25),inset 0 0 15px rgba(255,215,0,.15);}
+  to{box-shadow:0 0 30px rgba(10,107,255,.35),inset 0 0 18px rgba(255,215,0,.2);}
+}
+.info-box h3{
+  color:var(--gold);
+  margin:0 0 8px 0;
+  text-shadow:0 0 8px rgba(255,215,0,.4);
+  font-size:1.12rem;
+  font-weight:800;
+}
+
+/* الفوتر */
+footer{
+  width:100%;
+  color:var(--gold);
+  font-size:.9rem;
+  text-align:center;
+  padding:10px 0 14px;
+  background:linear-gradient(180deg,#0a1630 0%,#050b18 100%);
+  border-top:1px solid rgba(0,120,255,.25);
+  box-shadow:inset 0 0 22px rgba(0,120,255,.15),0 0 18px rgba(0,120,255,.12);
+  backdrop-filter:blur(6px);
+}
+.nav-btn{
+  flex:1;
+  background:linear-gradient(145deg,#0d1a35,#000814);
+  color:#FFD54A;
+  border:1px solid rgba(255,215,0,.4);
+  padding:10px 18px;
+  font-size:.95rem;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  letter-spacing:.6px;
+  box-shadow:0 0 16px rgba(10,107,255,.25),inset 0 0 12px rgba(255,215,0,.15);
+  transition:all .35s ease;
+}
+.nav-btn:hover{
+  transform:translateY(-2px);
+  color:#fff;
+  box-shadow:0 0 25px rgba(255,215,0,.5),inset 0 0 15px rgba(10,107,255,.3);
+}
+footer span{
+  font-size:.9rem;
+  color:var(--gold);
+  text-shadow:0 0 6px rgba(255,215,0,.3);
+}
+
+/* تنسيق القوائم داخل الصناديق */
+.info-box ul{margin:0 0 0 0;padding-inline-start:20px;}
+.info-box ul ul{margin-top:6px;}
+</style>
+</head>
+
+<body>
+<div class="page" id="page">
+  <div class="chapter-title">📘 الفصل الثاني</div>
+  <div class="section-title">قواعد معاينة مسرح الجريمة</div>
+
+  <div class="grid-container">
+    <!-- المستطيل الأيسر (المحتوى الكامل كما أرسلته) -->
+    <div class="info-box">
+      <h3>إجراء البحث الدقيق بمسرح الحادث عن البقع الدموية :</h3>
+      <p>
+        يجب إجراء البحث الدقيق بمسرح الحادث عن البقع الدموية، إذ تعتبر أهم الأدلة فى التحقيق الجنائى، حيث لها أهمية بالغة فى كشف غموض معظم الجرائم والتعرف على المجرم، ونظراً لأن الدم قد يعلق على الأشياء أو يتصل بها بطريق التناثر، فإن آثاره تنتشر فى مواضع متعددة قد تمتد إلى التجاويف والثقوب والمسافات غير المرئية، مما يجعلها فى حكم الآثار المخفية، وليس هناك مكان محدد للبحث عن آثار الدم (أنظر الشكل التالى)، فهي تختلف حسب طبيعة كل حادث وظروفه، ولكن بصفة عامة نستطيع أن نجمل نواحى البحث عن البقع الدموية فيما يلى:
+      </p>
+      <ul>
+        <li>الآلات التى يمكن استخدامها فى الاعتداء كالعصى والسكاكين والأسـلحة.</li>
+        <li>المتهم وملابسه وأسفل أظافره، ويمكن استخدام عدسات مكبرة، فقد يعثر بين نسيج الملابس أو تحت الأظافر على بقع دقيقة غير مرئية، وقد يعجز المتهم عن تبرير وجود مثل هذه التلوثات الدموية على ملابسه أو أسفل أظافره.</li>
+        <li>أثار للدم علي الملابس المغسولة حديثاً.</li>
+        <li>مسرح الجريمة وما يتصل به من أماكن وخاصة :
+          <ul>
+            <li>قواعد النوافذ وقطع ألواح الزجاج المكسور وعلى حواف الفتحات المتخلفة عن الكسر.</li>
+            <li>أحواض المياه ومقابض الصنابير والمناشف، وذلك فى حالة قيام الجانى بغسل يديه ومواضع التلوثات من آثار الدماء التى علقت به.</li>
+            <li>الجثة وما عليها من ملابس وتحت الأظافر.</li>
+            <li>حواف الموائد والكراسى وأسفل أدراج الدواليب، نظراً لقيام الجانى بمسح يديه فى هذه الأماكن.</li>
+            <li>إطارات السيارات فى حوادث الدهس.</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <!-- المستطيل الأيمن (المحتوى الكامل كما أرسلته) -->
+    <div class="info-box">
+      <h3>ضوابط معاينة مسرح الجريمة :</h3>
+      <ul>
+        <li>عدم تحريك أى شئ من مكانه إلا إذا كان ضرورياً مع ضمان وجوده على الحالة التي ترك عليها عقب ارتكاب الجريمة مباشرة.</li>
+        <li>إعداد رسم كروكى كاملاً لمسرح الجريمة مشيراً فيه إلى ما هو موجود ومنظور أمامه بالفعل كذلك يثبت ما هو غير موجود مثل حالة ما إذا وجد بقع دموية على حائط الحجرة، أو أن يثبت عدم وجود دم فى الحمام.</li>
+        <li>الإحاطة التامة بمسرح الجريمة، دون إغفال بعض من التفاصيل لتخيله بأنها غير مهم إثباتها.</li>
+        <li>لا يجوز للقائم على المعاينة أن يستعمل دورة المياه، ولا أن يفتح صنابير المياه أو الغاز، ولا أن يستعمل المناشف التى توجد فى مسرح الجريمة لاحتمال قيام الجانى باستخدام الحمام أو المناشف لمسح ما عليه أو ما علي أسلحته من دم.</li>
+        <li>فى حالة ما إذا كان محل المعاينة مسرحاً للقتل، وكان هذا المسرح فى حجرة يجب عليه ان يستدعى إحدى سكان المنزل، تحت سيطرته، وذلك للوقوف على ما أحدثته الجريمة من متغيرات فى تعديل محتويات الحجرة والتعرف على ما يكون من الملابس والأشياء الخاصة بغير المجنى عليه.</li>
+        <li>يجب عليه عدم جمع الشهود مع بعضها أو المشتبه فيهم إن وجد وأن يعزل كل منهما عن الآخر بقدر الإمكان.</li>
+        <li>عليه أن لا يبدى أى نوع من الرأى أو مناقشة أى تفصيلات مع أحد من الموجودين فى محل الحادث، بل عليه أن يثبت ما يتنامى إلى سمعه وما يتراءى إلى بصره.</li>
+        <li>تدوين أسماء الحاضرين من شهود أو أشخاص لهم علاقة بالحادث، ومنع أى شخص من الاقتراب من محل الحادث.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:50px;max-width:800px;margin:0 auto;padding:8px 18px;">
+    <button class="nav-btn" id="prevPage">⬅️ السابق</button>
+    <span>© أكاديمية شرطة الشارقة 2025</span>
+    <button class="nav-btn" id="nextPage">التالي ➡️</button>
+  </div>
+</footer>
+
+<audio id="pageFlip" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_62c8f9853d.mp3"></audio>
+<audio id="woosh" src="https://cdn.pixabay.com/download/audio/2022/03/16/audio_72cf4ac4ff.mp3"></audio>
+<div id="reader-tools-root"></div>
+
+<script>
+const page=document.getElementById('page');
+const pageFlip=document.getElementById('pageFlip');
+const woosh=document.getElementById('woosh');
+function go(target,dir){
+  pageFlip.play().catch(()=>{}); 
+  woosh.play().catch(()=>{});
+  page.classList.add(dir==='next'?'flip-next':'flip-prev');
+  setTimeout(()=>{window.location.href=target;},1800);
+}
+document.getElementById('prevPage').addEventListener('click',()=>go('https://dns3uae-glitch.github.io/crime-book/ch3-3/','prev'));
+document.getElementById('nextPage').addEventListener('click',()=>go('https://dns3uae-glitch.github.io/crime-book/ch3-5/','next'));
+</script>
+<script src="../assets/js/reader-tools.js"></script>
+
+</body>
+</html>

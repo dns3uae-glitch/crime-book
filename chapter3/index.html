@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>الفصل الثاني - قواعد معاينة وفحص مسرح الجريمة</title>
+<style>
+:root{
+  --gold:#FFD54A;
+  --blue:#0a6bff;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: radial-gradient(circle at center, #001428 0%, #000 90%);
+  color: var(--gold);
+  font-family: "Cairo", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* الصفحة */
+.page{
+  flex:1;
+  width:100%;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  perspective:2000px;
+  transform-style:preserve-3d;
+  transition:transform 1.6s ease-in-out, box-shadow 1.6s ease-in-out;
+}
+.page.flip-next{ transform-origin:right center; transform:rotateY(-180deg); box-shadow:-30px 0 80px rgba(0,0,0,.5);}
+.page.flip-prev{ transform-origin:left center; transform:rotateY(180deg); box-shadow:30px 0 80px rgba(0,0,0,.5);}
+
+/* العنوان فوق المستطيل */
+.chapter-title{
+  color: var(--gold);
+  font-size: clamp(1.6rem, 4vw, 2.3rem);
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(255,215,0,.3), 0 0 18px rgba(10,107,255,.3);
+  margin-bottom: 28px;
+  letter-spacing: 0.8px;
+}
+
+/* المستطيل الرئيسي */
+.hero{
+  width:min(90%, 1000px);
+  min-height: 220px;
+  margin:0 auto;
+  border-radius:18px;
+  background: linear-gradient(135deg, rgba(0,40,120,.22), rgba(255,255,255,.04));
+  border:1px solid rgba(0,120,255,.35);
+  box-shadow:
+    0 0 28px rgba(0,120,255,.25),
+    inset 0 0 22px rgba(0,80,255,.12);
+  padding: clamp(20px, 3.5vw, 40px);
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  display:flex;
+  align-items:center; /* ← هذا يجعل النص في منتصف المستطيل عموديًا */
+  justify-content:center; /* ← هذا يجعل النص في المنتصف أفقيًا */
+  animation:fadeInUp .9s ease both .08s;
+}
+
+/* ✨ حركة الهالة الزرقاء الملكية */
+.hero::before{
+  content:"";
+  position:absolute; inset:-30%;
+  background:
+    radial-gradient(35rem 35rem at 20% 30%, rgba(0,120,255,.18), transparent 60%),
+    radial-gradient(28rem 28rem at 80% 70%, rgba(255,213,74,.10), transparent 60%);
+  filter:blur(12px);
+  animation:halo 9s linear infinite;
+  z-index:-2;
+  pointer-events:none;
+}
+@keyframes halo{
+  0%{ transform:translate3d(-2%,-2%,0) rotate(0deg); }
+  50%{ transform:translate3d(2%,2%,0) rotate(180deg); }
+  100%{ transform:translate3d(-2%,-2%,0) rotate(360deg); }
+}
+
+/* 🌊 الشعاع الأزرق الخفيف على الإطار */
+.hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  border:1px solid rgba(10,107,255,.35);
+  box-shadow:
+    0 0 28px rgba(10,107,255,.3),
+    inset 0 0 18px rgba(10,107,255,.25);
+  animation:bluePulse 5s ease-in-out infinite;
+  pointer-events:none;
+  z-index:-1;
+}
+@keyframes bluePulse{
+  0%{opacity:.45; box-shadow:0 0 20px rgba(10,107,255,.25), inset 0 0 10px rgba(10,107,255,.15);}
+  50%{opacity:.9; box-shadow:0 0 40px rgba(10,107,255,.45), inset 0 0 22px rgba(10,107,255,.35);}
+  100%{opacity:.45; box-shadow:0 0 20px rgba(10,107,255,.25), inset 0 0 10px rgba(10,107,255,.15);}
+}
+
+/* النص داخل المستطيل */
+.hero p{
+  color:#d9e5ff;
+  font-size:clamp(1.15rem, 2.6vw, 1.5rem);
+  margin:0;
+  position:relative;
+  z-index:2;
+  font-weight:600;
+  text-shadow:0 0 10px rgba(0,120,255,.25);
+}
+
+@keyframes fadeInUp{
+  from{opacity:0; transform:translateY(14px)}
+  to{opacity:1; transform:translateY(0)}
+}
+
+/* الفوتر */
+footer {
+  width: 100%;
+  color: var(--gold);
+  font-size: .95rem;
+  text-align: center;
+  padding: 12px 0 16px;
+  background: linear-gradient(180deg, #0a1630 0%, #050b18 100%);
+  border-top: 1px solid rgba(0,120,255,.25);
+  box-shadow: inset 0 0 22px rgba(0,120,255,.15), 0 0 18px rgba(0,120,255,.12);
+  backdrop-filter: blur(6px);
+  margin-top: auto;
+}
+
+.nav-btn {
+  flex: 1;
+  background: linear-gradient(145deg, #0d1a35, #000814);
+  color: #FFD54A;
+  border: 1px solid rgba(255,215,0,.4);
+  padding: 12px 22px;
+  font-size: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: .8px;
+  box-shadow: 0 0 20px rgba(10,107,255,.25), inset 0 0 14px rgba(255,215,0,.15);
+  transition: all .35s ease;
+}
+.nav-btn:hover {
+  transform: translateY(-2px);
+  color: #fff;
+  box-shadow: 0 0 28px rgba(255,215,0,.5), inset 0 0 18px rgba(10,107,255,.3);
+}
+
+footer span {
+  font-size: .95rem;
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(255,215,0,.3);
+}
+</style>
+</head>
+
+<body>
+<div class="page" id="page">
+
+  <div class="chapter-title">📘 الفصل الثاني</div>
+
+  <section class="hero" id="hero-box">
+    <p>قواعد معاينة وفحص مسرح الجريمة</p>
+  </section>
+
+</div>
+
+<footer>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:60px;max-width:820px;margin:0 auto;padding:10px 20px;">
+    <button class="nav-btn" id="prevPage">⬅️ السابق</button>
+    <span>© أكاديمية شرطة الشارقة 2025</span>
+    <button class="nav-btn" id="nextPage">التالي ➡️</button>
+  </div>
+</footer>
+
+<audio id="pageFlip" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_62c8f9853d.mp3"></audio>
+<audio id="woosh" src="https://cdn.pixabay.com/download/audio/2022/03/16/audio_72cf4ac4ff.mp3"></audio>
+
+<script>
+const page = document.getElementById('page');
+const pageFlip = document.getElementById('pageFlip');
+const woosh = document.getElementById('woosh');
+
+function go(target, dir){
+  pageFlip.play().catch(()=>{}); 
+  woosh.play().catch(()=>{});
+  page.classList.add(dir==='next' ? 'flip-next' : 'flip-prev');
+  setTimeout(()=>{ window.location.href = target; }, 1800);
+}
+
+document.getElementById('prevPage').addEventListener('click', ()=> 
+  go('https://dns3uae-glitch.github.io/crime-book/chapter2/','prev')
+);
+document.getElementById('nextPage').addEventListener('click', ()=> 
+  go('https://dns3uae-glitch.github.io/crime-book/ch3-1/','next')
+);
+</script>
+</body>
+</html>

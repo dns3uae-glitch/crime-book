@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>اختبار ميداني — قواعد معاينة مسرح الجريمة</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&amp;display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --gold:#FFD54A;
+  --blue:#0a6bff;
+}
+*{box-sizing:border-box}
+html, body {height:100%;margin:0}
+body{
+  display:flex;flex-direction:column;justify-content:space-between;
+  background:radial-gradient(circle at center,#001428 0%,#000 90%);
+  color:var(--gold);
+  font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  min-height:100vh;overflow-x:hidden;
+}
+.page{
+  flex:1;width:100%;
+  transform-style:preserve-3d;perspective:2000px;
+  transition:transform 1.2s ease-in-out,box-shadow 1.2s ease-in-out;
+  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:28px 14px 0;
+}
+.page.flip-next{transform-origin:right center;transform:rotateY(-180deg);box-shadow:-30px 0 80px rgba(0,0,0,.5);}
+.page.flip-prev{transform-origin:left center;transform:rotateY(180deg);box-shadow:30px 0 80px rgba(0,0,0,.5);}
+.page::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(120deg,rgba(0,80,255,.25)0%,rgba(255,255,255,.28)25%,rgba(0,80,255,.25)50%,transparent100%);
+  opacity:0;mix-blend-mode:screen;pointer-events:none;transition:opacity .8s ease-in-out;
+}
+.page.flip-next::after,.page.flip-prev::after{opacity:.75;animation:lightReflection 1.2s ease-in-out;}
+@keyframes lightReflection{
+  0%{transform:translateX(-100%) rotate(0deg);opacity:0}
+  25%{opacity:.85}
+  50%{transform:translateX(0%) rotate(15deg);opacity:.95}
+  100%{transform:translateX(100%) rotate(0);opacity:0}
+}
+.chapter-title{
+  font-weight:900;
+  font-size:clamp(1.6rem,4vw,2.2rem);
+  color:var(--gold);
+  text-align:center;
+  text-shadow:0 0 18px rgba(255,215,0,.4),0 0 25px rgba(255,215,0,.2);
+  margin-bottom:4px;
+}
+.section-title{
+  font-weight:800;
+  font-size:clamp(1.1rem,3.2vw,1.4rem);
+  text-shadow:0 0 14px rgba(255,215,0,.35),0 0 22px rgba(10,107,255,.25);
+  margin-bottom:16px;
+}
+.section{
+  display:none;
+  min-height:calc(100vh - 140px);
+  width:100%;
+  display:none;
+}
+.section.active{display:flex;align-items:center;justify-content:center;animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.card{
+  width:min(1100px,92%);
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,215,0,.4);
+  border-radius:16px;
+  box-shadow:0 0 25px rgba(10,107,255,.25),inset 0 0 18px rgba(255,215,0,.12);
+  color:#ffffff;
+  line-height:1.9;
+  font-size:1.05rem;
+  text-shadow:0 0 8px rgba(0,80,255,.1);
+  backdrop-filter: blur(6px);
+  overflow:hidden;
+}
+.card-body{padding:22px}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;
+  padding:12px 16px;
+  border-bottom:1px solid rgba(255,215,0,.25);
+  background:linear-gradient(145deg,rgba(13,26,53,.35),rgba(0,8,20,.35));
+}
+.header-right{font-weight:900;color:#ffeb9a}
+.header-center{font-weight:800}
+.header-left{display:flex;align-items:center;gap:8px}
+.badge{
+  background:linear-gradient(145deg,#0d1a35,#000814);
+  border:1px solid rgba(255,215,0,.35);
+  color:var(--gold);
+  padding:6px 12px;
+  border-radius:12px;
+  font-weight:800;
+  letter-spacing:.3px;
+  box-shadow:0 0 16px rgba(10,107,255,.25),inset 0 0 12px rgba(255,215,0,.12);
+}
+
+.badge span {
+  color: #fff;           /* اللون الأبيض للأرقام */
+  font-weight: 900;      /* سمك الخط للأرقام */
+}
+
+.timer{font-weight:900;font-size:1.02rem}
+.btn{
+  background:linear-gradient(145deg,#0d1a35,#000814);
+  color:#ffffff;border:1px solid rgba(255,215,0,.4);
+  padding:10px 16px;font-size:.98rem;border-radius:12px;cursor:pointer;font-weight:800;letter-spacing:.4px;
+  box-shadow:0 0 20px rgba(10,107,255,.25),inset 0 0 14px rgba(255,215,0,.15);
+  transition:all .25s ease;
+}
+.btn:hover{transform:translateY(-2px);color:#fff;box-shadow:0 0 28px rgba(255,215,0,.5),inset 0 0 18px rgba(10,107,255,.25);}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn-ghost{background:transparent}
+.start-actions{display:flex;justify-content:center;margin-top:18px}
+.q{
+  background:rgba(255,255,255,0.04);
+  border:1px dashed rgba(255,215,0,.35);
+  border-radius:12px;padding:14px 16px;margin:10px 0;
+}
+.q h4{margin:.2rem 0 .6rem 0;font-size:1.02rem;color:#ffec9c}
+.options{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.opt{
+  padding:8px 12px;border-radius:10px;border:1px solid rgba(255,215,0,.35);
+  background:rgba(10,107,255,.09);cursor:pointer;font-weight:700;color:#ffffff;
+}
+.opt:hover{background:rgba(10,107,255,.16)}
+.opt.selected{outline:2px solid #FFD54A}
+.fill-wrap{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.fill-choice{padding:6px 10px;border:1px solid rgba(255,215,0,.35);border-radius:8px;cursor:pointer;background:rgba(10,107,255,.08);font-weight:700;color:#ffffff}
+.fill-choice:hover{background:rgba(10,107,255,.16)}
+.blank{display:inline-block;min-width:90px;border-bottom:2px dotted #FFD54A;padding:0 4px;margin:0 6px;color:#ffec9c}
+.droppable{display:inline-block;min-width:110px;border-bottom:2px dashed #FFD54A;padding:0 6px;margin:0 6px}
+.dnd-bank{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.draggable{
+  padding:6px 10px;border:1px solid rgba(255,215,0,.35);border-radius:8px;
+  background:rgba(10,107,255,.14);font-weight:800;cursor:grab;color:#ffffff;
+}
+.draggable:active{cursor:grabbing}
+.droppable.over{background:rgba(255,213,74,.1)}
+footer{
+  width:100%;color:var(--gold);font-size:.95rem;text-align:center;padding:12px 0 16px;
+  background:linear-gradient(180deg,#0a1630 0%,#050b18 100%);
+  border-top:1px solid rgba(0,120,255,.25);
+  box-shadow:inset 0 0 22px rgba(0,120,255,.15),0 0 18px rgba(0,120,255,.12);
+  backdrop-filter:blur(6px);margin-top:auto;
+}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:60px;max-width:820px;margin:0 auto;padding:10px 20px;}
+.nav-btn{flex:1}
+.result-line{margin:.4rem 0;background:rgba(255,255,255,.04);border:1px solid rgba(255,215,0,.25);padding:10px;border-radius:10px}
+.score-bar{height:12px;border-radius:12px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:6px}
+.score-bar>span{display:block;height:100%;background:linear-gradient(90deg,#24d26b,#ffd54a);width:0%}
+.small{font-size:.95rem;color:#ffec9c}
+
+.question-type {
+  font-size: 1.05rem;
+  color: var(--gold);
+  font-weight: bold;
+  text-align: right;
+  margin-bottom: 6px;
+  border-right: 4px solid var(--gold);
+  padding-right: 8px;
+}
+</style>
+</head>
+<body>
+<audio id="pageFlip" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_62c8f9853d.mp3"></audio>
+<audio id="woosh" src="https://cdn.pixabay.com/download/audio/2022/03/16/audio_72cf4ac4ff.mp3"></audio>
+<audio id="bgMusic" loop="" src="https://cdn.pixabay.com/download/audio/2023/01/04/audio_e4448e0cdf.mp3?filename=donx27t-look-down-the-basement-true-crime-thriller-loopable-music-132133.mp3"></audio>
+<audio id="sndCorrect" src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_2e9cf9c85a.mp3?filename=correct-2-46134.mp3"></audio>
+<audio id="sndWrong" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_2a4b1b8a2c.mp3?filename=error-126627.mp3"></audio>
+<div class="page" id="page">
+<div class="chapter-title">📘 اختبار ميداني</div>
+<div class="section-title">قواعد معاينة مسرح الجريمة</div>
+<section class="section active" id="start">
+<div class="card">
+<div class="card-header">
+<div class="header-right">جاهز يا بطل؟</div>
+<div class="header-center badge">⏱ الوقت المتبقي: --:--</div>
+<div class="header-left"><span class="small">اضغط الزر بالأسفل للبدء</span></div>
+</div>
+<div class="card-body" style="text-align:center">
+<div class="headline" style="font-size:clamp(1.4rem,3.6vw,2.2rem);font-weight:900;line-height:1.6">
+          مرحبًا بك أيها الطالب الضابط، استعد لخوض اختبار الميدان في معاينة مسرح الجريمة
+        </div>
+<p class="small">ستواجه <b>5 سيناريوهات</b> واقعية. في كل سيناريو لديك <b>دقيقة واحدة</b> للإجابة عن <b>10 أسئلة</b> متدرجة الصعوبة.<br/>يمكنك الانتقال يدويًا عبر زر <b>التالي</b> داخل البطاقة، أو سينتقل النظام تلقائيًا عند انتهاء الوقت.</p>
+<div class="start-actions">
+<button class="btn" id="btnStart" style="min-width:220px">ابدأ التحقيق</button>
+</div>
+</div>
+</div>
+</section>
+<section class="section" id="scene">
+<div class="card">
+<div class="card-header">
+<div class="header-right">السيناريو: <span id="scnIndex">-</span> / 5</div>
+<div class="header-center badge">⏱ الوقت المتبقي: <span id="timer">--:--</span></div>
+<div class="header-left"><button class="btn" disabled="" id="btnNextTop">التالي ⮕</button></div>
+</div>
+<div class="card-body">
+<h3 id="sceneTitle" style="margin-top:0"></h3>
+<p class="small" id="sceneText" style="margin-top:6px"></p>
+<div id="questions"></div>
+</div>
+</div>
+</section>
+<section class="section" id="result">
+<div class="card">
+<div class="card-header">
+<div class="header-right">النتيجة النهائية</div>
+<div class="header-center badge">🎯 تقرير الأداء</div>
+<div class="header-left"><button class="btn" id="btnRetry">🔁 إعادة المحاولة</button></div>
+</div>
+<div class="card-body">
+<p id="finalMsg"></p>
+<div class="score-bar"><span id="scoreFill"></span></div>
+<h3 style="margin-top:18px">مراجعة الأخطاء</h3>
+<div id="wrongList"></div>
+</div>
+</div>
+</section>
+</div>
+<footer>
+<div class="wrap">
+<button class="btn nav-btn" id="prevPage">⬅️ السابق</button>
+<span>© أكاديمية شرطة الشارقة 2025</span>
+<button class="btn nav-btn" id="nextPage">التالي ➡️</button>
+</div>
+</footer>
+<script>
+const page = document.getElementById('page');
+const pageFlip = document.getElementById('pageFlip');
+const woosh = document.getElementById('woosh');
+const bgMusic = document.getElementById('bgMusic');
+bgMusic.volume = 0.15;
+const sndCorrect = document.getElementById('sndCorrect');
+const sndWrong = document.getElementById('sndWrong');
+
+const secStart = document.getElementById('start');
+const secScene = document.getElementById('scene');
+const secResult = document.getElementById('result');
+
+const btnStart = document.getElementById('btnStart');
+const btnNextTop = document.getElementById('btnNextTop');
+const timerEl = document.getElementById('timer');
+const scnIndexEl = document.getElementById('scnIndex');
+const sceneTitleEl = document.getElementById('sceneTitle');
+const sceneTextEl = document.getElementById('sceneText');
+const questionsEl = document.getElementById('questions');
+const wrongListEl = document.getElementById('wrongList');
+const finalMsgEl = document.getElementById('finalMsg');
+const scoreFillEl = document.getElementById('scoreFill');
+
+// ✅ انتقال فعلي للصفحات الخارجية (مع مؤثر القلب)
+document.getElementById('prevPage').addEventListener('click', ()=>{
+  flipTo('https://dns3uae-glitch.github.io/crime-book/ch3-5/','prev');
+});
+document.getElementById('nextPage').addEventListener('click', ()=>{
+  flipTo('https://dns3uae-glitch.github.io/crime-book/agents/','next');
+});
+
+// 🔹 دالة جديدة تقوم بالحركة ثم الانتقال للرابط
+function flipTo(url, dir){
+  speechSynthesis.cancel();
+  page.classList.add(dir==='next' ? 'flip-next' : 'flip-prev');
+  pageFlip.play().catch(()=>{});
+  woosh.play().catch(()=>{});
+  setTimeout(()=>{ window.location.href = url; }, 1000);
+}
+
+
+const SCENES = [
+  { title: "المعاينة الأولية وإثبات الحالة",
+    text: "رؤية مكان الواقعة وإثبات حالته كما تركه الجاني مباشرة؛ وصف الأشخاص والأشياء والأمكنة ذات الصلة بالحادث، مع مراعاة الدقة العلمية لتجميع العناصر التي تكشف كيفية وقوع الجريمة والتوصل للجاني.",
+    questions: [
+      {type:'dnd', q:'يجب إثبات الحالة كما <span class="droppable" data-answer="ترك">؟</span> الجاني المكان بعد ارتكاب الجريمة.', tokens:['ترك','عدّل','نظّف'], a:'ترك'},
+      {type:'mcq', q:'المقصود بالمعاينة هو:', opts:['رؤية المكان فقط','رؤية المكان وإثبات حالته','جمع أقوال الشهود فقط'], a:1},
+      {type:'tof', q:'إثبات الحالة يشمل وصف حالة الأشخاص والأشياء المرتبطة بالحادث.', a:true},
+      {type:'fill', q:'التعريف العلمي للمعاينة: مجموعة عمليات ذات أساليب _____.', choices:['اعتباطية','علمية','مزاجية'], a:'علمية'},
+      {type:'mcq', q:'من أهداف المعاينة:', opts:['إخفاء الأدلة','استظهار كيفية وقوع الجريمة','تعديل مسرح الجريمة'], a:1},
+      {type:'tof', q:'لا حاجة لوصف طبيعة الأرض أو موقع المكان عند إثبات الحالة.', a:false},
+      {type:'mcq', q:'يوصف وضع الجثة وملابسها لأن ذلك يساعد في:', opts:['التسلية','تقدير زمن ومكان وقوع الجريمة','لا شيء'], a:1},
+      {type:'tof', q:'إثبات الحالة لا يشمل تقييم ما إذا كان المجني عليه قادرًا على الكلام.', a:false},
+      {type:'fill', q:'يُراعى وصف بقع _____ في المكان لأنها قد تدل على كيفية وقوع الجريمة.', choices:['الطلاء','الدماء','الماء'], a:'الدماء'},
+      {type:'mcq', q:'وصف الملابس الممزقة قد يدل على:', opts:['مقاومة حدثت','لا يدل على شيء','نظافة المكان'], a:0},
+    ] },
+  { title: "دور الشرطة في الحفاظ على بؤرة الحدث",
+    text: "تمثل بؤرة الحدث نقطة الانطلاق لكل الأدلة؛ على الشرطة سرعة الانتقال، استدعاء الخبراء، ومعاينة وتفتيش المكان، ومنع العبث والدخول غير المصرح.",
+    questions: [
+      {type:'dnd', q:'تشكل بؤرة الحدث نقطة <span class="droppable" data-answer="الانطلاق">؟</span> للبحث.', tokens:['الانطلاق','الختام','التشتيت'], a:'الانطلاق'},
+      {type:'mcq', q:'أول إجراء محوري للشرطة:', opts:['سرعة الانتقال','الاتصال بالعائلة','إغلاق الملف'], a:0},
+      {type:'tof', q:'استدعاء الخبراء جزء رئيسي من الحفاظ على مسرح الجريمة.', a:true},
+      {type:'fill', q:'يجب منع دخول _____ إلى مسرح الجريمة.', choices:['المارة','المتطفلين','المحققين'], a:'المتطفلين'},
+      {type:'mcq', q:'المحافظة على المسرح تساعد على:', opts:['طمس الأدلة','جودة الدليل','تأخير التحقيق'], a:1},
+      {type:'tof', q:'السماح للجميع بالدخول لا يؤثر على سلامة الآثار.', a:false},
+      {type:'mcq', q:'عند الوصول يجب:', opts:['توزيع الجمهور','تأمين المكان','تشغيل الموسيقى'], a:1},
+      {type:'tof', q:'يجب استدعاء الخبراء المناسبين لنوع الحادث.', a:true},
+      {type:'fill', q:'التأمين يمنع _____ المتعمد أو العرضي.', choices:['العبث','التجميل','التعقيم'], a:'العبث'},
+      {type:'mcq', q:'الغرض من سرعة الانتقال:', opts:['التقاط صور تذكارية','حماية الأدلة وإنقاذ الأرواح','زيادة الازدحام'], a:1},
+    ] },
+  { title: "تسجيل الوقت وأهمية سرعة الانتقال",
+    text: "إثبات ساعة الدخول للمسرح ضروري لتقدير زمن ارتكاب الجريمة ومطابقة الملاحظات كحرارة كوب الشاي أو حالة التيبس؛ السرعة تنقذ الأرواح وتمنع العبث.",
+    questions: [
+      {type:'dnd', q:'سرعة الانتقال قد تؤدي إلى <span class="droppable" data-answer="إنقاذ">؟</span> حياة المصابين.', tokens:['إنقاذ','تجاهل','تعريض'], a:'إنقاذ'},
+      {type:'mcq', q:'تسجيل وقت الدخول يساعد في:', opts:['الزينة','تقدير زمن الجريمة','إطالة التحقيق'], a:1},
+      {type:'tof', q:'وجود كوب ساخن قد يدل على حداثة الواقعة.', a:true},
+      {type:'fill', q:'حالة _____ بالجثة قد تساعد في تقدير الزمن.', choices:['التيبس','الراحة','الاسترخاء'], a:'التيبس'},
+      {type:'mcq', q:'من أسباب السرعة:', opts:['القبض المبكر على الجاني','تشتيت الفريق','دخول المتطفلين'], a:0},
+      {type:'tof', q:'عدم تسجيل الوقت يمنح دقة أعلى للتقرير.', a:false},
+      {type:'mcq', q:'السرعة تمنع:', opts:['العبث المتعمد','توثيق الأدلة','إنقاذ المجني عليه'], a:0},
+      {type:'tof', q:'تسجيل الوقت إجراء شكلي غير مهم.', a:false},
+      {type:'fill', q:'تقدير زمن الجريمة يعزز _____ الشهادة لاحقًا.', choices:['عبث','ثقة','فوضى'], a:'ثقة'},
+      {type:'mcq', q:'عند العثور على مصاب:', opts:['تأجيل إسعافه','تقديم الإسعاف اللازم','تركه حتى يأتي الطبيب فقط'], a:1},
+    ] },
+  { title: "البحث عن البقع الدموية وضوابط المعاينة",
+    text: "البقع الدموية من أهم الأدلة: قد تكون دقيقة ومخفية في الشقوق والحواف وتحت الأظافر؛ يجب الالتزام بضوابط المعاينة: عدم تحريك شيء إلا لضرورة، رسم كروكي، عدم استخدام مرافق المكان، عزل الشهود...",
+    questions: [
+      {type:'dnd', q:'قد تنتشر آثار الدم في <span class="droppable" data-answer="التجاويف">؟</span> والثقوب والمسافات غير المرئية.', tokens:['التجاويف','الممرات','الأسقف'], a:'التجاويف'},
+      {type:'mcq', q:'البقع الدموية:', opts:['قليلة الأهمية','أهم الأدلة غالبًا','تُهمل دائمًا'], a:1},
+      {type:'tof', q:'قد توجد آثار دم غير مرئية تحت الأظافر.', a:true},
+      {type:'fill', q:'يجب إعداد رسم _____ كامل للمسرح.', choices:['زخرفي','كروكي','تجريبي'], a:'كروكي'},
+      {type:'mcq', q:'من ضوابط المعاينة:', opts:['استخدام مناشف المكان','عدم تحريك الأشياء إلا للضرورة','فتح صنابير المياه'], a:1},
+      {type:'tof', q:'يجوز جمع الشهود معًا لتوفير الوقت.', a:false},
+      {type:'mcq', q:'تُفحص الملابس المغسولة حديثًا بحثًا عن:', opts:['رائحة عطر','آثار دم','ألوان زاهية'], a:1},
+      {type:'tof', q:'يمكن للمحقق استعمال دورة المياه في المسرح إن لزم.', a:false},
+      {type:'fill', q:'يجب عزل الشهود و_____ بقدر الإمكان.', choices:['المشتبه فيهم','الشرطة','الجيران'], a:'المشتبه فيهم'},
+      {type:'mcq', q:'على المحقق أن:', opts:['يبدي رأيه فورًا','يمتنع عن مناقشة التفاصيل ويثبت ما يرى ويسمع','ينتظر تعليمات الشهود'], a:1},
+    ] },
+  { title: "اعتبارات خاصة: مصاب – جثة – أسلحة نارية",
+    text: "إذا وُجد مصاب تُقدَّم الإسعافات ولو على حساب بعض الأدلة. الجثة تُعايَن دقيقًا دون تحريك قبل الفحص الكامل. الأسلحة تُترك بوضعها وتحمل من مواضع آمنة ولا تُدخل أدوات في الماسورة؛ تُحرَّز الأظرف والمقذوفات كلٌ على حدة.",
+    questions: [
+      {type:'dnd', q:'يُرسم خط <span class="droppable" data-answer="دائري">؟</span> حول الجثة لتحديد موقعها.', tokens:['دائري','مستقيم','متعرج'], a:'دائري'},
+      {type:'mcq', q:'عند وجود مصاب:', opts:['تأجيل الإسعاف','تقديم الإسعافات فورًا','الانشغال بالتصوير أولًا'], a:1},
+      {type:'tof', q:'يجوز تحريك الجثة قبل الفحص المفصل.', a:false},
+      {type:'fill', q:'عند رفع مسدس يُمسك من _____ (واقي الزناد/قنطرة التتك).', choices:['السبطانة','واقي الزناد','المقبض'], a:'واقي الزناد'},
+      {type:'mcq', q:'لا يجوز إدخال أداة في الماسورة لأن ذلك قد:', opts:['يحسن الدليل','يتلف الآثار','يسهل الرفع'], a:1},
+      {type:'tof', q:'الأظرف الفارغة تُحرز كلٌ على حدة.', a:true},
+      {type:'mcq', q:'إن وُجد السلاح بيد القتيل يجب:', opts:['افتراض الانتحار','التحقق من صحة الوضع','إزالته سريعًا'], a:1},
+      {type:'tof', q:'يُفضّل رفع الأظرف بعيدان الثقاب لحفظ الآثار العالقة.', a:true},
+      {type:'fill', q:'وجود آثار دم أو نسيج داخل الماسورة قد يكون ذا قيمة _____.', choices:['جمالية','جنائية','تجارية'], a:'جنائية'},
+      {type:'mcq', q:'عند نقل المصاب:', opts:['عدم مرافقة ضابط','مرافقة ضابط لسماع أي أقوال محتملة','إطفاء الأنوار'], a:1},
+    ] }
+];
+
+let currentScene = -1;
+let timeLeft = 60;
+let timerId = null;
+let answers = [];
+let sceneStarted = false;
+
+let voiceNormal=null;
+function pickVoices(){
+  const voices = speechSynthesis.getVoices();
+  voiceNormal = voices.find(v=>/ar/i.test(v.lang) && /male|ذكر|Abdul|Hamed|Omar|Mehdi|Tariq|Maged/i.test(v.name)) || voices.find(v=>/ar/i.test(v.lang)) || null;
+}
+speechSynthesis.onvoiceschanged = pickVoices;
+pickVoices();
+
+function speak(text, {rate=1, pitch=1, volume=1}={}){
+  return new Promise(res=>{
+    const clean = (text||'').replace(/[_]{2,}/g,' ').replace(/_/g,' ');
+    const u = new SpeechSynthesisUtterance(clean);
+    u.lang = 'ar-AE';
+    u.rate = rate; u.pitch = pitch; u.volume = volume;
+    if(voiceNormal) u.voice = voiceNormal;
+    u.onend = ()=>res();
+    try{ speechSynthesis.speak(u); }catch(e){ res(); }
+  });
+}
+function stopSpeak(){ try{ speechSynthesis.cancel(); }catch(e){} }
+
+let fadeTimer=null;
+function musicFadeTo(target=0.15, ms=800){
+  if(fadeTimer) clearInterval(fadeTimer);
+  const step = (target - bgMusic.volume) / (ms/100);
+  fadeTimer = setInterval(()=>{
+    let v = bgMusic.volume + step;
+    if((step>0 && v>=target) || (step<0 && v<=target)){
+      bgMusic.volume = target; clearInterval(fadeTimer);
+      if(target===0){ bgMusic.pause(); }
+    }else{
+      bgMusic.volume = Math.max(0, Math.min(1, v));
+    }
+  },100);
+}
+
+btnStart.addEventListener('click', async ()=>{
+  stopSpeak();
+  try{ bgMusic.currentTime=0; bgMusic.play(); }catch(e){}
+  musicFadeTo(0.15, 800);
+  await speak("مرحبًا بك أيها الطالب الضابط، استعد لخوض اختبار الميدان في معاينة مسرح الجريمة.", {rate:0.98, pitch:0.9, volume:1});
+  musicFadeTo(0, 800);
+  goNext();
+});
+
+function goNext(){
+  stopSpeak();
+  if(secStart.classList.contains('active')){
+    secStart.classList.remove('active');
+    secScene.classList.add('active');
+    currentScene = -1;
+    nextScene();
+    return;
+  }
+  if(secScene.classList.contains('active')){
+    if(currentScene < SCENES.length-1){
+      nextScene();
+    }else{
+      showResult();
+    }
+    return;
+  }
+}
+function goPrev(){
+  stopSpeak();
+  if(secScene.classList.contains('active') && currentScene>0){
+    currentScene -= 2;
+    nextScene();
+  } else if(secScene.classList.contains('active') && currentScene===0){
+    secScene.classList.remove('active');
+    secStart.classList.add('active');
+    btnNextTop.disabled = true;
+    timerEl.textContent = "--:--";
+    scnIndexEl.textContent = "-";
+  }
+}
+
+function nextScene(){
+  stopSpeak();
+  clearInterval(timerId);
+  timeLeft = 60;
+  btnNextTop.disabled = false;
+  currentScene++;
+  scnIndexEl.textContent = (currentScene+1);
+  sceneStarted = false;
+  try{ bgMusic.currentTime=0; bgMusic.play(); }catch(e){}
+  musicFadeTo(0.15, 700);
+
+  const scn = SCENES[currentScene];
+  sceneTitleEl.textContent = "سيناريو "+(currentScene+1)+" — "+scn.title;
+  sceneTextEl.textContent = scn.text;
+  renderQuestions(scn);
+
+  updateTimer(); timerId = setInterval(tick, 1000);
+
+  setTimeout(async ()=>{
+    sceneStarted = true;
+    musicFadeTo(0.08, 400);
+    await speak(scn.text, {rate:1.0, pitch:1.0, volume:1});
+    musicFadeTo(0.15, 600);
+  }, 6000);
+}
+
+function tick(){
+  timeLeft--;
+  updateTimer();
+  if(timeLeft<=0){
+    clearInterval(timerId);
+    musicFadeTo(0, 700);
+    goNext();
+  }
+}
+function updateTimer(){
+  const m = Math.floor(timeLeft/60).toString().padStart(2,'0');
+  const s = (timeLeft%60).toString().padStart(2,'0');
+  timerEl.textContent = `${m}:${s}`;
+  const startTimer = document.querySelector('#start .card-header .badge');
+  if(startTimer && secStart.classList.contains('active')){
+    startTimer.textContent = `⏱ الوقت المتبقي: ${m}:${s}`;
+  }
+}
+
+btnNextTop.addEventListener('click', ()=>{
+  clearInterval(timerId);
+  musicFadeTo(0, 700);
+  goNext();
+});
+
+function renderQuestions(scn){
+  questionsEl.innerHTML = "";
+  scn.questions.forEach((item, idx)=>{
+    const qDiv = document.createElement('div'); qDiv.className='q';
+    // 🟨 إضافة عنوان نوع السؤال
+    const typeLabel = document.createElement('div');
+    typeLabel.className = 'question-type';
+    if(item.type === 'dnd') typeLabel.textContent = '🟦 سؤال سحب وإفلات';
+    else if(item.type === 'mcq') typeLabel.textContent = '🟥 سؤال اختيار من متعدد';
+    else if(item.type === 'tof') typeLabel.textContent = '🟩 سؤال صح أو خطأ';
+    else if(item.type === 'fill') typeLabel.textContent = '🟨 أكمل الفراغ';
+    else typeLabel.textContent = 'سؤال عام';
+    qDiv.appendChild(typeLabel);
+
+    const qTitle = document.createElement('h4');
+    qTitle.textContent = `س${idx+1}. ${item.q.replace(/<[^>]*>?/gm,'')}`;
+    qDiv.appendChild(qTitle);
+
+    if(item.type==='mcq'){
+      const optsDiv = document.createElement('div'); optsDiv.className='options';
+      item.opts.forEach((op, oi)=>{
+        const b = document.createElement('button'); b.className='opt'; b.textContent = op;
+        b.addEventListener('click',()=>selectMCQ(item, idx, oi, b, op));
+        optsDiv.appendChild(b);
+      });
+      qDiv.appendChild(optsDiv);
+    }else if(item.type==='tof'){
+      const optsDiv = document.createElement('div'); optsDiv.className='options';
+      [['صح',true],['خطأ',false]].forEach(([label,val])=>{
+        const b = document.createElement('button'); b.className='opt'; b.textContent = label;
+        b.addEventListener('click',()=>selectTOF(item, idx, val, b, label));
+        optsDiv.appendChild(b);
+      });
+      qDiv.appendChild(optsDiv);
+    }else if(item.type==='fill'){
+      const p = document.createElement('p');
+      const parts = item.q.split('_____');
+      if(parts.length>1){
+        p.innerHTML = parts[0] + '<span class="blank" id="blank_'+currentScene+'_'+idx+'">؟</span>' + parts[1];
+      }else{
+        p.innerHTML = item.q.replace('كما','كما <span class="blank" id="blank_'+currentScene+'_'+idx+'">؟</span> ');
+      }
+      qDiv.appendChild(p);
+      const wrap = document.createElement('div'); wrap.className='fill-wrap';
+      item.choices.forEach(ch=>{
+        const c = document.createElement('span'); c.className='fill-choice'; c.textContent = ch;
+        c.addEventListener('click',()=>selectFill(item, idx, ch));
+        wrap.appendChild(c);
+      });
+      qDiv.appendChild(wrap);
+    }else if(item.type==='dnd'){
+const p = document.createElement('p');
+p.innerHTML = item.q;
+qDiv.appendChild(p);
+
+// 🔹 نأخّر ربط الأحداث قليلاً حتى تُحمّل العناصر فعليًا في الـ DOM
+setTimeout(()=>{
+  const droppables = qDiv.querySelectorAll('.droppable');
+  droppables.forEach((dropEl)=>{
+    dropEl.addEventListener('dragover', ev=>{
+      ev.preventDefault();
+      dropEl.classList.add('over');
+    });
+
+    dropEl.addEventListener('dragleave', ()=>{
+      dropEl.classList.remove('over');
+    });
+
+    dropEl.addEventListener('drop', ev=>{
+      ev.preventDefault();
+      dropEl.classList.remove('over');
+
+      const tok = ev.dataTransfer.getData('text/plain');
+      dropEl.textContent = tok;
+
+      const correct = (tok === (item.a || dropEl.dataset.answer));
+      if(correct){
+        sndCorrect.currentTime=0; sndCorrect.play().catch(()=>{});
+        speak("إجابتك صحيحة",{rate:1.05, pitch:1.0});
+      } else {
+        sndWrong.currentTime=0; sndWrong.play().catch(()=>{});
+        speak("إجابتك خاطئة",{rate:1.0, pitch:1.0});
+      }
+
+      pushAnswer(currentScene, idx, correct, tok, (item.a || dropEl.dataset.answer), dropEl.parentElement.textContent);
+    });
+  });
+}, 100); // تأخير 100ms لتأكيد تحميل العناصر فعليًا
+
+const bank = document.createElement('div');
+bank.className='dnd-bank';
+
+item.tokens.forEach(tok=>{
+  const t = document.createElement('span');
+  t.className='draggable';
+  t.textContent=tok;
+  t.setAttribute('draggable','true');
+  t.dataset.token = tok;
+  t.addEventListener('dragstart', ev=>{
+    ev.dataTransfer.setData('text/plain', tok);
+  });
+  bank.appendChild(t);
+});
+
+qDiv.appendChild(bank);
+
+      const droppables = p.querySelectorAll('.droppable');
+      droppables.forEach((dropEl)=>{
+        dropEl.addEventListener('dragover', ev=>{ ev.preventDefault(); dropEl.classList.add('over'); });
+        dropEl.addEventListener('dragleave', ()=> dropEl.classList.remove('over'));
+dropEl.addEventListener('drop', ev=>{
+  ev.preventDefault();
+  dropEl.classList.remove('over');
+  const tok = ev.dataTransfer.getData('text/plain');
+  dropEl.textContent = tok;
+  const correct = (tok === (item.a || dropEl.dataset.answer));
+  if(correct){ sndCorrect.currentTime=0; sndCorrect.play().catch(()=>{}); speak("إجابتك صحيحة",{rate:1.05, pitch:1.0}); }
+  else { sndWrong.currentTime=0; sndWrong.play().catch(()=>{}); speak("إجابتك خاطئة",{rate:1.0, pitch:1.0}); }
+  pushAnswer(currentScene, idx, correct, tok, (item.a || dropEl.dataset.answer), dropEl.parentElement.textContent);
+});
+
+      });
+    }
+    questionsEl.appendChild(qDiv);
+  });
+}
+
+let answeredMap = new Map();
+function alreadyAnswered(sceneIdx, qIdx){
+  return answeredMap.has(sceneIdx+"-"+qIdx);
+}
+function pushAnswer(sceneIdx, qIdx, correct, userAnswer, correctAnswer, text){
+  if(alreadyAnswered(sceneIdx,qIdx)) return;
+  const obj = {scene:sceneIdx, idx:qIdx, correct, userAnswer, correctAnswer, text};
+  answers.push(obj);
+  answeredMap.set(sceneIdx+"-"+qIdx,true);
+}
+
+function selectMCQ(item, idx, choiceIndex, btn, text){
+  const correct = (choiceIndex===item.a);
+  if(correct){ sndCorrect.currentTime=0; sndCorrect.play().catch(()=>{}); speak("إجابتك صحيحة",{rate:1.05, pitch:1.0}); }
+  else { sndWrong.currentTime=0; sndWrong.play().catch(()=>{}); speak("إجابتك خاطئة",{rate:1.0, pitch:1.0}); }
+  btn.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  btn.classList.add('selected');
+  pushAnswer(currentScene, idx, correct, text, item.opts[item.a], item.q);
+}
+function selectTOF(item, idx, val, btn, label){
+  const correct = (val===item.a);
+  if(correct){ sndCorrect.currentTime=0; sndCorrect.play().catch(()=>{}); speak("إجابتك صحيحة",{rate:1.05, pitch:1.0}); }
+  else { sndWrong.currentTime=0; sndWrong.play().catch(()=>{}); speak("إجابتك خاطئة",{rate:1.0, pitch:1.0}); }
+  btn.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  btn.classList.add('selected');
+  pushAnswer(currentScene, idx, correct, label, (item.a?'صح':'خطأ'), item.q);
+}
+function selectFill(item, idx, chosen){
+  const blank = document.getElementById('blank_'+currentScene+'_'+idx);
+  if(blank) blank.textContent = chosen;
+  const correct = (chosen===item.a);
+  if(correct){ sndCorrect.currentTime=0; sndCorrect.play().catch(()=>{}); speak("إجابتك صحيحة",{rate:1.05, pitch:1.0}); }
+  else { sndWrong.currentTime=0; sndWrong.play().catch(()=>{}); speak("إجابتك خاطئة",{rate:1.0, pitch:1.0}); }
+  pushAnswer(currentScene, idx, correct, chosen, item.a, item.q);
+}
+
+function showResult(){
+  stopSpeak();
+  secScene.classList.remove('active');
+  secResult.classList.add('active');
+  btnNextTop.disabled = true;
+  timerEl.textContent = "--:--";
+  scnIndexEl.textContent = "-";
+  musicFadeTo(0, 700);
+
+  const totalQs = SCENES.reduce((s,sc)=>s+sc.questions.length,0);
+  const correctCount = answers.filter(a=>a.correct).length;
+  const score = Math.round((correctCount/totalQs)*100);
+
+  finalMsgEl.innerHTML = `درجتك الإجمالية: <b>${score}%</b> — (${correctCount} من ${totalQs})`;
+  scoreFillEl.style.width = score+"%";
+
+  wrongListEl.innerHTML = "";
+  const wrongs = [];
+  SCENES.forEach((sc, si)=>{
+    sc.questions.forEach((q, qi)=>{
+      const a = answers.find(x=>x.scene===si && x.idx===qi);
+      if(!a){
+        const div = document.createElement('div'); div.className='result-line';
+        const correctAns = (q.type==='mcq')? q.opts[q.a] :
+                           (q.type==='tof')? (q.a?'صح':'خطأ') :
+                           (q.type==='fill')? q.a :
+                           (q.type==='dnd')? (q.a || '—') : '—';
+        div.innerHTML = `<div><b>س${qi+1} — ${ (q.q||'').replace(/<[^>]*>?/gm,'') }</b></div>
+        <div class="small">لم تُجب على هذا السؤال — الصحيحة: <span style="color:#9bffb7">${correctAns}</span></div>`;
+        wrongListEl.appendChild(div);
+        wrongs.push({text:(q.q||'').replace(/<[^>]*>?/gm,''), userAnswer:'لم تُجب', correctAnswer:correctAns});
+      }else if(!a.correct){
+        const div = document.createElement('div'); div.className='result-line';
+        div.innerHTML = `<div><b>س${qi+1} — ${a.text}</b></div>
+        <div class="small">إجابتك: <span style="color:#ff9b9b">${a.userAnswer}</span> — الصحيحة: <span style="color:#9bffb7">${a.correctAnswer}</span></div>`;
+        wrongListEl.appendChild(div);
+        wrongs.push(a);
+      }
+    });
+  });
+
+  (async ()=>{
+    if(score<80){
+      await speak("درجتك منخفضة. أنت بحاجة إلى مراجعة الدرس مرة أخرى.", {rate:0.98, pitch:1.0});
+    }else{
+      await speak("أحسنت يا الطالب الضابط. لقد أثبت كفاءتك في معاينة مسرح الجريمة.", {rate:1.0, pitch:1.0});
+    }
+    for(const w of wrongs){
+      await speak("عزيزي الطالب الضابط، "+ (w.userAnswer==='لم تُجب' ? "لم تجب على السؤال التالي." : "إجابتك خاطئة في السؤال التالي.") , {rate:1.0, pitch:1.0});
+      await speak("السؤال: "+w.text, {rate:1.02, pitch:1.0});
+      await speak((w.userAnswer==='لم تُجب' ? "الإجابة الصحيحة هي: " : "إجابتك كانت: "+w.userAnswer+" . بينما الإجابة الصحيحة هي: ") + w.correctAnswer, {rate:1.02, pitch:1.0});
+    }
+  })();
+}
+
+document.getElementById('btnRetry').addEventListener('click', async ()=>{
+  stopSpeak();
+  await speak("فلنبدأ من جديد أيها الطالب الضابط، أظهر قدراتك التحليلية مرة أخرى.", {rate:1.0, pitch:1.0});
+  answers = []; answeredMap.clear();
+  currentScene = -1; timerEl.textContent="--:--"; scnIndexEl.textContent="-";
+  secResult.classList.remove('active');
+  secStart.classList.add('active');
+  btnNextTop.disabled = true;
+});
+
+window.addEventListener('beforeunload', ()=>speechSynthesis.cancel());
+
+</script>
+</body>
+</html>

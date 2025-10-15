@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>مقدمة في مسرح الجريمة</title>
+<style>
+    :root{
+      --gold:#FFD54A;
+      --blue:#0a6bff;
+      --glass:rgba(255,255,255,0.06);
+      --gap:18px;
+    }
+
+    body{
+      margin:0;
+      background: radial-gradient(circle at center, #001428 0%, #000 90%);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      color:var(--gold);
+      font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
+
+    .page{
+      width:100%;
+      transform-style:preserve-3d;
+      perspective:2000px;
+      transition:transform 1.6s ease-in-out, box-shadow 1.6s ease-in-out;
+      position:relative;
+    }
+    .page.flip-next{ transform-origin:right center; transform:rotateY(-180deg); box-shadow:-30px 0 80px rgba(0,0,0,.5);}
+    .page.flip-prev{ transform-origin:left center; transform:rotateY(180deg); box-shadow:30px 0 80px rgba(0,0,0,.5);}
+    .page::after{
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(120deg, rgba(0,80,255,.25) 0%, rgba(255,255,255,.32) 25%, rgba(0,80,255,.25) 50%, transparent 100%);
+      opacity:0; mix-blend-mode:screen; pointer-events:none; transition:opacity .8s ease-in-out;
+    }
+    .page.flip-next::after, .page.flip-prev::after{ opacity:.75; animation:lightReflection 1.6s ease-in-out; }
+    @keyframes lightReflection{
+      0%{ transform:translateX(-100%) rotate(0deg); opacity:0 }
+      25%{ opacity:.85 }
+      50%{ transform:translateX(0%) rotate(15deg); opacity:.95 }
+      100%{ transform:translateX(100%) rotate(0); opacity:0 }
+    }
+
+    .video-box{
+  width: calc(4 * 200px + 3 * 12px + 24px); /* 4 images + 3 gaps + padding */
+  height:230px;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+      width:min(820px,92vw);
+      aspect-ratio:16/9;
+      margin:40px auto 18px;
+      background:var(--glass);
+      border:1px solid rgba(255,215,0,.3);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow: inset 0 0 22px rgba(255,215,74,.24), 0 0 32px rgba(0,80,255,.28);
+      animation:glowPulse 6s ease-in-out infinite alternate;
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+    @keyframes glowPulse{
+      0%{ box-shadow: inset 0 0 18px rgba(255,215,74,.18), 0 0 24px rgba(0,90,255,.22) }
+      50%{ box-shadow: inset 0 0 38px rgba(255,215,74,.38), 0 0 64px rgba(0,120,255,.38) }
+      100%{ box-shadow: inset 0 0 18px rgba(255,215,74,.18), 0 0 24px rgba(0,90,255,.22) }
+    }
+
+    .video-box img {
+      border-radius:12px;
+      box-shadow:0 0 12px rgba(255,215,0,.3);
+      width:180px;
+      height:200px;
+      object-fit:cover;
+    }
+
+    .section-title{
+      width:min(980px,94vw);
+      margin:6px auto 8px;
+      text-align:center;
+      color:var(--gold);
+      font-weight:800;
+      font-size:clamp(1.05rem,3vw,1.4rem);
+      text-shadow:0 0 12px rgba(255,215,0,.25), 0 0 22px rgba(10,107,255,.18);
+    }
+
+    .slider-wrap{ width:min(980px,94vw); margin:10px auto 0; position:relative; }
+    .viewport{ overflow:hidden; padding:6px 8px; }
+    .track{
+      display:flex; gap:var(--gap); align-items:stretch;
+      transition:transform .55s cubic-bezier(.22,.8,.2,1); will-change:transform;
+    }
+    .card{
+      flex:0 0 clamp(260px,30vw,340px);
+      background: radial-gradient(120% 120% at 0% 0%, rgba(10,107,255,.10), rgba(255,255,255,.04)),
+        linear-gradient(180deg, rgba(0,0,0,.38), rgba(0,0,0,.58));
+      border:1px solid rgba(255,215,0,.26);
+      border-radius:14px;
+      padding:14px 14px 16px 14px;
+      color:#e9f2ff;
+      backdrop-filter: blur(8px);
+      box-shadow: inset 0 0 14px rgba(10,107,255,.16), 0 0 22px rgba(0,0,0,.32);
+      position:relative; overflow:hidden;
+      transform:scale(.96); opacity:.88;
+      transition: transform .45s ease, opacity .45s ease, box-shadow .35s ease, border-color .35s ease;
+    }
+    .card.active{ transform:scale(1.02); opacity:1; box-shadow: inset 0 0 24px rgba(10,107,255,.28), 0 0 36px rgba(10,107,255,.34); border-color: rgba(255,215,0,.34);}
+    .card::before{
+      content:""; position:absolute; inset:-25%;
+      background: conic-gradient(from 0deg, rgba(255,255,255,.08), transparent 30%, rgba(10,107,255,.10) 58%, transparent 100%);
+      mix-blend-mode:screen; opacity:.22; animation:spin 18s linear infinite; pointer-events:none;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg);} }
+
+    .title-ar{ color:var(--gold); font-size:clamp(1.02rem,2.2vw,1.24rem); font-weight:800; margin-bottom:6px; text-shadow:0 0 10px rgba(0,0,0,.6); opacity:0; transform:translateY(6px);}
+    .title-en{ color:#dff0ff; opacity:.92; font-size:clamp(.88rem,1.8vw,1rem); margin-bottom:8px; text-shadow:0 0 10px rgba(10,107,255,.22); opacity:0; transform:translateY(6px);}
+    .body-ar,.body-en{ color:#e9f2ff; opacity:.90; line-height:1.65; font-size:clamp(.92rem,1.8vw,1rem); opacity:0; transform:translateY(6px);}
+    .card.active .title-ar{ animation:textFade .5s ease forwards, blueGlow 1.6s ease .12s;}
+    .card.active .title-en{ animation:textFade .5s ease .08s forwards;}
+    .card.active .body-ar{ animation:textFade .5s ease .12s forwards;}
+    .card.active .body-en{ animation:textFade .5s ease .18s forwards;}
+    @keyframes textFade{ to{ opacity:1; transform:translateY(0) } }
+    @keyframes blueGlow{ 0%{ text-shadow:0 0 0 rgba(10,107,255,0) } 40%{ text-shadow:0 0 18px rgba(10,107,255,.55) } 100%{ text-shadow:0 0 10px rgba(10,107,255,.22) } }
+
+    .arrow{
+      position:absolute; top:50%; transform:translateY(-50%);
+      width:48px; height:48px; border-radius:12px;
+      border:1px solid rgba(0,120,255,.45);
+      background:linear-gradient(145deg, rgba(10,20,40,.75), rgba(0,0,0,.92));
+      color:#aad0ff; display:grid; place-items:center;
+box-shadow:0 0 22px rgba(0,120,255,.35), inset 0 0 16px rgba(0,80,255,.18);
+      cursor:pointer; z-index:5; transition:.25s ease; user-select:none;
+    }
+    .arrow:hover{ transform:translateY(-50%) scale(1.05); color:#fff; }
+    .arrow-left{ left:-8px } .arrow-right{ right:-8px }
+
+    footer{
+      width:100%;
+      margin-top:auto;
+      color:var(--gold);
+      font-size:.95rem;
+      text-align:center;
+      padding:12px 0 16px;
+      background: linear-gradient(180deg, #0a1630 0%, #050b18 100%);
+      border-top:1px solid rgba(0,120,255,.25);
+      box-shadow: inset 0 0 22px rgba(0,120,255,.15), 0 0 18px rgba(0,120,255,.12);
+      backdrop-filter: blur(6px);
+    }
+
+    .nav-btn{
+      flex:1;
+      background: linear-gradient(145deg, #0d1a35, #000814);
+      color:#FFD54A;
+      border:1px solid rgba(255,215,0,.4);
+      padding:12px 22px;
+      font-size:1rem;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:600;
+      letter-spacing:.8px;
+      box-shadow:0 0 20px rgba(10,107,255,.25), inset 0 0 14px rgba(255,215,0,.15);
+      transition:all .35s ease;
+    }
+    .nav-btn:hover{
+      transform:translateY(-2px);
+      color:#fff;
+      box-shadow:0 0 28px rgba(255,215,0,.5), inset 0 0 18px rgba(10,107,255,.3);
+    }
+
+    footer span{ font-size:.95rem; color:var(--gold); text-shadow:0 0 8px rgba(255,215,0,.3); }
+
+    @media (max-width:520px){
+      .arrow{ width:42px; height:42px }
+      .arrow-left{ left:-2px } .arrow-right{ right:-2px }
+    }
+  
+.video-box {
+  overflow: visible !important;
+  position: relative;
+  margin-top: 120px;
+}
+
+.video-box img.zoomable {
+  transition: transform 0.4s ease;
+  cursor: zoom-in;
+  position: relative;
+  z-index: 1;
+}
+
+.video-box img.zoomable.zoomed {
+  transform: scale(2.2);
+  z-index: 10;
+}
+</style>
+</head>
+<!-- الصور -->
+<body>
+<div class="page" id="page">
+<div class="video-box">
+<img alt="صورة 1" class="zoomable" src="https://i2-prod.mirror.co.uk/incoming/article29080061.ece/ALTERNATES/n615/0_DSC_0282jpeg.jpg"/>
+<img alt="صورة 2" class="zoomable" src="https://tse3.mm.bing.net/th/id/OIP.JhbLJnKwkT1LX21pC90bhwHaE8?cb=12&amp;rs=1&amp;pid=ImgDetMain&amp;o=7&amp;rm=3"/>
+<img alt="صورة 3" class="zoomable" src="https://ichef.bbci.co.uk/news/640/cpsprodpb/DB23/production/_113699065_116787543_1411508689042892_3568722622051133646_n.jpg"/>
+<img alt="صورة 4" class="zoomable" src="https://assets-natgeotv.techops.disn.io/Photos/25/63266.jpg"/>
+</div>
+<div class="section-title">🔍 أنواع مسرح الجريمة</div>
+<div class="slider-wrap">
+<button class="arrow arrow-left" id="arrowLeft">❮</button>
+<div class="viewport" id="viewport">
+<div class="track" id="track">
+<article class="card"><div class="title-ar">تعريف مسرح الجريمة</div><div class="title-en">Definition of the Crime Scene</div><div class="body-ar">مسرح الجريمة هو أي مكان يمكن الحصول فيه على دليل مادي.</div><div class="body-en">A crime scene is any place where physical evidence can be obtained.</div></article>
+<article class="card"><div class="title-ar">مرحلة تنفيذ الجريمة</div><div class="title-en">Stage of Crime Execution</div><div class="body-ar">المكان أو مجموعة الأماكن التي تشهد مرحلة تنفيذ الجريمة وتحتوي على الآثار المتخلفة عن ارتكابها.</div><div class="body-en">The place or group of places where the crime was carried out and that contain traces left by its commission.</div></article>
+<article class="card"><div class="title-ar">الرقعة المكانية التي حدثت فوقها الواقعة الإجرامية</div><div class="title-en">The Spatial Area of the Criminal Act</div><div class="body-ar">يُقصد بمسرح الجريمة فى رأى البعض الآخر أنه الرقعة المكانية التى حدثت فوقها الواقعة الإجرامية بكافة جزئياتها ومراحلها وخاصة الحدث الإجرامى.</div><div class="body-en">It refers to the spatial area where the criminal act occurred in all its details and stages, particularly the criminal event itself.</div></article>
+<article class="card"><div class="title-ar">مستودع سر الجريمة</div><div class="title-en">The Repository of the Crime’s Secret</div><div class="body-ar">مسرح الجريمة هو مستودع سر الجريمة ، ويمكن تعريف مسرح الجريمة بأنه مكان ارتكاب الركن المادي، إلا أنه قد يكون هناك أكثر من مكان واحد قد يشهد مراحل تنفيذ الركن المادي في الجريمة.</div><div class="body-en">The crime scene is the repository of the crime’s secret; it may include several places witnessing the stages of the physical act.</div></article>
+</div>
+</div>
+<button class="arrow arrow-right" id="arrowRight">❯</button>
+</div>
+<footer>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:60px;max-width:820px;margin:0 auto;padding:10px 20px;">
+<button class="nav-btn" id="prevPage">⬅️ السابق</button>
+<span>© أكاديمية شرطة الشارقة 2025</span>
+<button class="nav-btn" id="nextPage">التالي ➡️</button>
+</div>
+</footer>
+</div>
+<audio id="pageFlip" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_62c8f9853d.mp3"></audio>
+<audio id="woosh" src="https://cdn.pixabay.com/download/audio/2022/03/16/audio_72cf4ac4ff.mp3"></audio>
+<audio id="slideSound" src="https://cdn.pixabay.com/download/audio/2022/01/07/audio_ea449d6cea.mp3"></audio>
+<div id="reader-tools-root"></div>
+
+<script>
+const page = document.getElementById('page');
+const pageFlip = document.getElementById('pageFlip');
+const woosh = document.getElementById('woosh');
+const slideSound = document.getElementById('slideSound');
+const viewport = document.getElementById('viewport');
+const track = document.getElementById('track');
+const cards = Array.from(track.querySelectorAll('.card'));
+const arrowLeft = document.getElementById('arrowLeft');
+const arrowRight = document.getElementById('arrowRight');
+
+let index = 0;
+function clamp(i){ return Math.max(0, Math.min(cards.length-1, i)); }
+function setActive(){ cards.forEach((c,i)=> c.classList.toggle('active', i===index)); }
+function centerCard(smooth=true){
+  const card = cards[index]; if(!card) return;
+  const left = card.offsetLeft;
+  const w = card.offsetWidth;
+  const vp = viewport.clientWidth;
+  const target = left - (vp/2 - w/2);
+  track.style.transition = smooth ? 'transform .55s cubic-bezier(.22,.8,.2,1)' : 'none';
+  track.style.transform = `translateX(${-target}px)`;
+  setActive();
+}
+
+function playSlideSound(){ slideSound.currentTime = 0; slideSound.play().catch(()=>{}); }
+
+arrowLeft.addEventListener('click', ()=>{ index = clamp(index-1); centerCard(); playSlideSound(); });
+arrowRight.addEventListener('click', ()=>{ index = clamp(index+1); centerCard(); playSlideSound(); });
+
+let isDown=false, startX=0, startTx=0;
+viewport.addEventListener('pointerdown', e=>{ isDown=true; startX=e.clientX; startTx=getTx(track); track.style.transition='none'; viewport.setPointerCapture(e.pointerId); });
+viewport.addEventListener('pointermove', e=>{ if(!isDown) return; const dx=e.clientX - startX; track.style.transform = `translateX(${startTx + dx}px)`; });
+viewport.addEventListener('pointerup', e=>{ if(!isDown) return; isDown=false; const dx=e.clientX - startX; if(Math.abs(dx) > 40){ index = clamp(index + (dx<0 ? 1 : -1)); playSlideSound(); } centerCard(); });
+viewport.addEventListener('pointercancel', ()=>{ isDown=false; centerCard(); });
+function getTx(el){
+  const tr = getComputedStyle(el).transform;
+  if (tr === 'none') return 0;
+  const m = new DOMMatrixReadOnly(tr);
+  return m.m41 || 0;
+}
+
+window.addEventListener('load', ()=>{ 
+  setTimeout(()=>{ 
+    index = 1; // يبدأ من البطاقة الثانية
+    centerCard(false); 
+  }, 60); 
+});
+window.addEventListener('resize', ()=> centerCard(false));
+
+function go(target, dir){
+  pageFlip.play().catch(()=>{}); 
+  woosh.play().catch(()=>{});
+  page.classList.add(dir==='next' ? 'flip-next' : 'flip-prev');
+  setTimeout(()=>{ window.location.href = target; }, 1800);
+}
+
+document.getElementById('prevPage').addEventListener('click', ()=> 
+  go('https://dns3uae-glitch.github.io/crime-book/ch1-1/','prev')
+);
+document.getElementById('nextPage').addEventListener('click', ()=> 
+  go('https://dns3uae-glitch.github.io/crime-book/chapter3/','next')
+);
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.video-box img.zoomable').forEach(function(img) {
+    img.addEventListener('click', function() {
+      img.classList.toggle('zoomed');
+    });
+  });
+});
+</script>
+<script src="../assets/js/reader-tools.js"></script>
+
+</body>
+</html>

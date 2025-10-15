@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الصفحة الترحيبية</title>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at center, #001428 0%, #000 90%);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .page {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transform-style: preserve-3d;
+      perspective: 2000px;
+      transition: transform 1.6s ease-in-out, box-shadow 1.6s ease-in-out;
+    }
+
+    /* حركة التالي (يمين ← يسار) */
+    .page.flip-next {
+      transform-origin: right center;
+      transform: rotateY(-180deg);
+      box-shadow: -30px 0 80px rgba(0, 0, 0, 0.5);
+    }
+
+    /* حركة السابق (يسار ← يمين) */
+    .page.flip-prev {
+      transform-origin: left center;
+      transform: rotateY(180deg);
+      box-shadow: 30px 0 80px rgba(0, 0, 0, 0.5);
+    }
+
+    .page::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        120deg,
+        rgba(0, 80, 255, 0.25) 0%,
+        rgba(255, 255, 255, 0.3) 25%,
+        rgba(0, 80, 255, 0.25) 50%,
+        transparent 100%
+      );
+      opacity: 0;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      transition: opacity 0.8s ease-in-out;
+    }
+
+    .page.flip-next::after,
+    .page.flip-prev::after {
+      opacity: 0.7;
+      animation: lightReflection 1.6s ease-in-out;
+    }
+
+    @keyframes lightReflection {
+      0% { transform: translateX(-100%) rotate(0deg); opacity: 0; }
+      25% { opacity: 0.8; }
+      50% { transform: translateX(0%) rotate(15deg); opacity: 0.9; }
+      100% { transform: translateX(100%) rotate(0deg); opacity: 0; }
+    }
+
+    .video-box {
+      position: relative;
+      width: 80vw;
+      max-width: 900px;
+      aspect-ratio: 16/9;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow:
+        inset 0 0 25px rgba(255, 215, 74, 0.25),
+        0 0 35px rgba(0, 80, 255, 0.35);
+      animation: glowPulse 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes glowPulse {
+      0% { box-shadow: inset 0 0 20px rgba(255, 215, 74, 0.2), 0 0 30px rgba(0, 90, 255, 0.25); }
+      50% { box-shadow: inset 0 0 40px rgba(255, 215, 74, 0.4), 0 0 70px rgba(0, 120, 255, 0.45); }
+      100% { box-shadow: inset 0 0 20px rgba(255, 215, 74, 0.2), 0 0 30px rgba(0, 90, 255, 0.25); }
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      width: 80vw;
+      max-width: 900px;
+      margin-top: 25px;
+      gap: 20px;
+    }
+
+    .nav-button {
+      flex: 1;
+      position: relative;
+      background: linear-gradient(145deg, rgba(20,20,20,0.9), rgba(0,0,0,0.95));
+      color: #FFD54A;
+      border: 1px solid rgba(255,215,0,0.3);
+      padding: 12px 0;
+      font-size: 1.2rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: "Cairo", sans-serif;
+      letter-spacing: 1px;
+      box-shadow: 0 0 15px rgba(255,215,0,0.15), inset 0 0 15px rgba(0,80,255,0.25);
+      transition: all 0.35s ease;
+      overflow: hidden;
+    }
+
+    .nav-button::before {
+      content: "";
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(0,120,255,0.4), transparent);
+      transition: all 0.6s ease;
+    }
+
+    .nav-button:hover::before { left: 100%; }
+    .nav-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(0,100,255,0.4), inset 0 0 20px rgba(255,215,0,0.4);
+      color: #fff;
+    }
+
+    footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      color: #FFD54A;
+      font-family: "Segoe UI", sans-serif;
+      font-size: 1em;
+      padding: 12px 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
+      border-top: 1px solid rgba(255,215,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="page" id="page">
+    <div class="video-box">
+      <iframe src="https://www.youtube.com/embed/HqZPo4pvreE?autoplay=1&rel=0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen></iframe>
+    </div>
+
+    <div class="nav-container">
+      <button class="nav-button" onclick="flipToPrevious()">⬅️ السابق</button>
+      <button class="nav-button" onclick="flipToNext()">التالي ➡️</button>
+    </div>
+
+    <footer>© أكاديمية شرطة الشارقة 2025</footer>
+  </div>
+
+  <!-- الأصوات -->
+  <audio id="woosh" src="https://cdn.pixabay.com/download/audio/2022/03/16/audio_72cf4ac4ff.mp3?filename=woosh-150884.mp3"></audio>
+  <audio id="pageFlip" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_62c8f9853d.mp3?filename=book-turn-page-2-92381.mp3"></audio>
+
+  <script>
+    const page = document.getElementById('page');
+    const woosh = document.getElementById('woosh');
+    const pageFlip = document.getElementById('pageFlip');
+
+    function flipToNext() {
+      pageFlip.play().catch(()=>{});
+      woosh.play().catch(()=>{});
+      page.classList.add('flip-next');
+      setTimeout(() => {
+        window.location.href = "https://dns3uae-glitch.github.io/crime-book/intro/index.html";
+      }, 1800);
+    }
+
+    function flipToPrevious() {
+      pageFlip.play().catch(()=>{});
+      woosh.play().catch(()=>{});
+      page.classList.add('flip-prev');
+      setTimeout(() => {
+        window.location.href = "https://dns3uae-glitch.github.io/crime-book/company/index.html";
+      }, 1800);
+    }
+  </script>
+</body>
+</html>

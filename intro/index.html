@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مقدمة في مسرح الجريمة</title>
+  <style>
+    :root{
+      --gold:#FFD54A;
+      --blue:#0a6bff;
+      --glass:rgba(255,255,255,0.06);
+      --gap:18px;
+    }
+
+    /* خلفية وهوية موحّدة */
+    body{
+      margin:0;
+      background: radial-gradient(circle at center, #001428 0%, #000 90%);
+      min-height:100vh;
+      overflow-y:auto;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      color:var(--gold);
+      font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    }
+
+    /* صفحة قابلة للتقليب */
+    .page{
+      width:100%;
+      transform-style:preserve-3d;
+      perspective:2000px;
+      transition:transform 1.6s ease-in-out, box-shadow 1.6s ease-in-out;
+      position:relative;
+      padding-bottom:110px; /* مساحة للأزرار والفوتر */
+    }
+    .page.flip-next{
+      transform-origin:right center;
+      transform:rotateY(-180deg);
+      box-shadow:-30px 0 80px rgba(0,0,0,.5);
+    }
+    .page.flip-prev{
+      transform-origin:left center;
+      transform:rotateY(180deg);
+      box-shadow:30px 0 80px rgba(0,0,0,.5);
+    }
+    /* وميض أزرق أثناء التقليب */
+    .page::after{
+      content:"";
+      position:absolute; inset:0;
+      background:linear-gradient(120deg,
+        rgba(0,80,255,.25) 0%,
+        rgba(255,255,255,.32) 25%,
+        rgba(0,80,255,.25) 50%,
+        transparent 100%);
+      opacity:0;
+      mix-blend-mode:screen;
+      pointer-events:none;
+      transition:opacity .8s ease-in-out;
+    }
+    .page.flip-next::after, .page.flip-prev::after{
+      opacity:.75;
+      animation:lightReflection 1.6s ease-in-out;
+    }
+    @keyframes lightReflection{
+      0%{ transform:translateX(-100%) rotate(0deg); opacity:0 }
+      25%{ opacity:.85 }
+      50%{ transform:translateX(0%) rotate(15deg); opacity:.95 }
+      100%{ transform:translateX(100%) rotate(0deg); opacity:0 }
+    }
+
+    /* الفيديو */
+    .video-box{
+      width:min(820px,92vw);
+      aspect-ratio:16/9;
+      margin:40px auto 18px;
+      background:var(--glass);
+      border:1px solid rgba(255,215,0,.3);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow: inset 0 0 22px rgba(255,215,74,.24), 0 0 32px rgba(0,80,255,.28);
+      animation:glowPulse 6s ease-in-out infinite alternate;
+    }
+    @keyframes glowPulse{
+      0%{ box-shadow: inset 0 0 18px rgba(255,215,74,.18), 0 0 24px rgba(0,90,255,.22) }
+      50%{ box-shadow: inset 0 0 38px rgba(255,215,74,.38), 0 0 64px rgba(0,120,255,.38) }
+      100%{ box-shadow: inset 0 0 18px rgba(255,215,74,.18), 0 0 24px rgba(0,90,255,.22) }
+    }
+    iframe{ width:100%; height:100%; border:none; display:block; }
+
+    /* عنوان */
+    .section-title{
+      width:min(980px,94vw);
+      margin:6px auto 8px;
+      text-align:center;
+      color:var(--gold);
+      font-weight:800;
+      font-size:clamp(1.05rem,3vw,1.4rem);
+      text-shadow:0 0 12px rgba(255,215,0,.25), 0 0 22px rgba(10,107,255,.18);
+    }
+
+    /* سلايدر البطاقات */
+    .slider-wrap{
+      width:min(980px,94vw);
+      margin:10px auto 0;
+      position:relative;
+    }
+    .viewport{ overflow:hidden; padding:6px 8px; }
+    .track{
+      display:flex; gap:var(--gap); align-items:stretch;
+      transition:transform .55s cubic-bezier(.22,.8,.2,1);
+      will-change:transform;
+    }
+    .card{
+      flex:0 0 clamp(260px,30vw,340px);
+      background:
+        radial-gradient(120% 120% at 0% 0%, rgba(10,107,255,.10), rgba(255,255,255,.04)),
+        linear-gradient(180deg, rgba(0,0,0,.38), rgba(0,0,0,.58));
+      border:1px solid rgba(255,215,0,.26);
+      border-radius:14px;
+      padding:14px 14px 16px 14px;
+      color:#e9f2ff;
+      backdrop-filter: blur(8px);
+      box-shadow: inset 0 0 14px rgba(10,107,255,.16), 0 0 22px rgba(0,0,0,.32);
+      position:relative; overflow:hidden;
+      transform:scale(.96); opacity:.88;
+      transition: transform .45s ease, opacity .45s ease, box-shadow .35s ease, border-color .35s ease;
+    }
+    .card.active{
+      transform:scale(1.02); opacity:1;
+      box-shadow: inset 0 0 24px rgba(10,107,255,.28), 0 0 36px rgba(10,107,255,.34);
+      border-color: rgba(255,215,0,.34);
+    }
+    /* انعكاس أزرق شرطي */
+    .card::before{
+      content:""; position:absolute; inset:-25%;
+      background: conic-gradient(from 0deg, rgba(255,255,255,.08), transparent 30%, rgba(10,107,255,.10) 58%, transparent 100%);
+      mix-blend-mode:screen; opacity:.22; animation:spin 18s linear infinite; pointer-events:none;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg);} }
+
+    /* نصوص وبريق أزرق عند الظهور */
+    .title-ar{
+      color:var(--gold); font-size:clamp(1.02rem,2.2vw,1.24rem);
+      font-weight:800; margin-bottom:6px; text-shadow:0 0 10px rgba(0,0,0,.6);
+      opacity:0; transform:translateY(6px);
+    }
+    .title-en{
+      color:#dff0ff; opacity:.92; font-size:clamp(.88rem,1.8vw,1rem);
+      margin-bottom:8px; text-shadow:0 0 10px rgba(10,107,255,.22);
+      opacity:0; transform:translateY(6px);
+    }
+    .body-ar,.body-en{ color:#e9f2ff; opacity:.90; line-height:1.65; font-size:clamp(.92rem,1.8vw,1rem); opacity:0; transform:translateY(6px); }
+
+    .card.active .title-ar{ animation: textFade .5s ease forwards, blueGlow 1.6s ease .12s; }
+    .card.active .title-en{ animation: textFade .5s ease .08s forwards; }
+    .card.active .body-ar{ animation: textFade .5s ease .12s forwards; }
+    .card.active .body-en{ animation: textFade .5s ease .18s forwards; }
+
+    @keyframes textFade{ to{ opacity:1; transform:translateY(0) } }
+    @keyframes blueGlow{
+      0%{ text-shadow:0 0 0 rgba(10,107,255,0) }
+      40%{ text-shadow:0 0 18px rgba(10,107,255,.55) }
+      100%{ text-shadow:0 0 10px rgba(10,107,255,.22) }
+    }
+
+    /* أسهم السلايدر (زجاجي أزرق) */
+    .arrow{
+      position:absolute; top:50%; transform:translateY(-50%);
+      width:48px; height:48px; border-radius:12px;
+      border:1px solid rgba(0,120,255,.45);
+      background:linear-gradient(145deg, rgba(10,20,40,.75), rgba(0,0,0,.92));
+      color:#aad0ff; display:grid; place-items:center;
+      box-shadow:0 0 22px rgba(0,120,255,.35), inset 0 0 16px rgba(0,80,255,.18);
+      cursor:pointer; z-index:5; transition:.25s ease; user-select:none;
+    }
+    .arrow:hover{ transform:translateY(-50%) scale(1.05); color:#fff; }
+    .arrow-left{ left:-8px } .arrow-right{ right:-8px }
+
+    /* أزرار الصفحات (منتصف أسفل) */
+    .page-nav{
+      width:min(820px,92vw);
+      margin:26px auto 0;
+      display:flex; gap:14px; justify-content:space-between;
+    }
+    .btn{
+      flex:1; position:relative;
+      background: linear-gradient(145deg, rgba(20,20,20,.9), rgba(0,0,0,.95));
+      color: var(--gold); border:1px solid rgba(255,215,0,.3);
+      padding:12px 0; font-size:clamp(1rem,2vw,1.12rem);
+      border-radius:12px; cursor:pointer; letter-spacing:.8px;
+      box-shadow: 0 0 14px rgba(255,215,0,.12), inset 0 0 12px rgba(10,107,255,.2);
+      transition:.35s ease; overflow:hidden;
+    }
+    .btn::before{
+      content:""; position:absolute; inset:0; left:-100%;
+      background:linear-gradient(120deg, transparent, rgba(10,107,255,.28), transparent);
+      transition:.62s ease;
+    }
+    .btn:hover::before{ left:100%; }
+    .btn:hover{ transform:translateY(-2px); color:#fff; box-shadow:0 0 26px rgba(10,107,255,.3), inset 0 0 18px rgba(255,215,0,.2); }
+
+    /* Toolbar يسار أسفل */
+    .toolbar-left{
+      position:fixed; left:24px; bottom:64px;
+      display:flex; flex-direction:column; gap:10px;
+      z-index:20;
+    }
+    .tool-pill{
+      min-width:44px; min-height:44px; padding:8px 12px;
+      border-radius:12px; border:1px solid rgba(0,120,255,.45);
+      background:linear-gradient(145deg, rgba(10,20,40,.75), rgba(0,0,0,.92));
+      color:#bfe0ff; font-size:.9rem;
+      box-shadow:0 0 20px rgba(0,120,255,.28), inset 0 0 12px rgba(0,80,255,.16);
+      display:flex; align-items:center; gap:8px; cursor:default;
+    }
+
+    footer{
+      width:100%; text-align:center; color:var(--gold);
+      font-size:.95rem; padding:12px 0 18px;
+      background: rgba(0,0,0,.35); border-top:1px solid rgba(255,215,0,.22);
+      position:sticky; bottom:0; backdrop-filter: blur(6px);
+    }
+
+    @media (max-width:520px){
+      .arrow{ width:42px; height:42px }
+      .arrow-left{ left:-2px } .arrow-right{ right:-2px }
+      .toolbar-left{ left:12px; bottom:60px }
+      .tool-pill{ font-size:.85rem; padding:8px 10px }
+    }
+/* 💡 وميض أزرق شرطي حول الإطار عند الانتقال */
+.page.flip-next::before,
+.page.flip-prev::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: 3px solid rgba(0, 110, 255, 0.3);
+  box-shadow: 0 0 60px rgba(0, 110, 255, 0.4),
+              0 0 120px rgba(0, 110, 255, 0.3),
+              inset 0 0 40px rgba(0, 110, 255, 0.3);
+  opacity: 0;
+  animation: policeFlash 1.6s ease-in-out forwards;
+}
+
+@keyframes policeFlash {
+  0% { opacity: 0; box-shadow: 0 0 0 rgba(0, 110, 255, 0); }
+  25% { opacity: 0.7; box-shadow: 0 0 80px rgba(0, 110, 255, 0.6); }
+  50% { opacity: 1; box-shadow: 0 0 100px rgba(0, 110, 255, 0.8); }
+  100% { opacity: 0; box-shadow: 0 0 0 rgba(0, 110, 255, 0); }
+}
+
+  </style>
+</head>
+<body>
+  <div class="page" id="page">
+
+    <!-- 🎥 الفيديو -->
+    <div class="video-box">
+      <iframe src="https://www.youtube.com/embed/KgbJWrK7FXE?autoplay=1&rel=0"
+        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+
+    <!-- 🔹 عنوان -->
+    <div class="section-title">🔍 مقدمة في مسرح الجريمة</div>
+
+    <!-- 🃏 السلايدر (3 بطاقات جزئية) -->
+    <div class="slider-wrap">
+      <button class="arrow arrow-left" id="arrowLeft" aria-label="السابق">&#10094;</button>
+
+      <div class="viewport" id="viewport">
+        <div class="track" id="track">
+          <!-- 1 -->
+          <article class="card">
+            <div class="title-ar">مفهوم مسرح الجريمة</div>
+            <div class="title-en">Crime Scene Concept</div>
+            <div class="body-ar">مسرح الجريمة هو مستودع سر الجريمة ومكان ارتكاب الركن المادي فيها، لكنه قد يشمل أكثر من موقع يشهد مراحل تنفيذ الجريمة.</div>
+            <div class="body-en">The crime scene is the repository of the crime’s secret and the place where the material element occurred; it may include multiple locations witnessing stages of the crime.</div>
+          </article>
+
+          <!-- 2 -->
+          <article class="card">
+            <div class="title-ar">أهمية مسرح الجريمة</div>
+            <div class="title-en">Importance of the Crime Scene</div>
+            <div class="body-ar">يُعد مسرح الجريمة نقطة البداية في أي تحقيق ناجح، إذ يحتوي على آثار ودلالات تقود إلى الحقيقة وتساعد في تحديد ملابسات الواقعة.</div>
+            <div class="body-en">The crime scene is the starting point of any successful investigation; it contains traces and indicators that lead to the truth and clarify circumstances.</div>
+          </article>
+
+          <!-- 3 -->
+          <article class="card">
+            <div class="title-ar">التحليل الفني</div>
+            <div class="title-en">Forensic Analysis</div>
+            <div class="body-ar">يساهم تحليل الأدلة المادية في رسم صورة دقيقة عن كيفية ارتكاب الجريمة وزمنها وأدواتها، ما يدعم بناء الفرضيات.</div>
+            <div class="body-en">Analyzing physical evidence helps reconstruct how, when, and with what the crime was committed, supporting solid hypotheses.</div>
+          </article>
+
+          <!-- 4 -->
+          <article class="card">
+            <div class="title-ar">التنسيق الميداني</div>
+            <div class="title-en">Field Coordination</div>
+            <div class="body-ar">يتطلب العمل الميداني تنسيقًا فعّالًا بين فرق الضبط الجنائي والخبراء لضمان سلامة الأدلة ودقتها من لحظة جمعها حتى فحصها.</div>
+            <div class="body-en">Effective coordination between crime scene units and experts ensures the integrity and accuracy of evidence from collection to examination.</div>
+          </article>
+
+          <!-- 5 -->
+          <article class="card">
+            <div class="title-ar">التقنيات الحديثة</div>
+            <div class="title-en">Modern Technologies</div>
+            <div class="body-ar">أصبحت التقنيات كالتصوير ثلاثي الأبعاد والذكاء الاصطناعي جزءًا أساسيًا من تحليل مسرح الجريمة وإعادة بناء الأحداث.</div>
+            <div class="body-en">Technologies like 3D imaging and AI are now essential for analyzing crime scenes and reconstructing events.</div>
+          </article>
+        </div>
+      </div>
+
+      <button class="arrow arrow-right" id="arrowRight" aria-label="التالي">&#10095;</button>
+    </div>
+
+    <!-- ⛵ أزرار الصفحات (منتصف أسفل) -->
+    <div class="page-nav">
+      <button class="btn" id="prevPage">⬅️ السابق</button>
+      <button class="btn" id="nextPage">التالي ➡️</button>
+    </div>
+    <footer>© أكاديمية شرطة الشارقة 2025</footer>
+  </div>
+  <!-- 🎧 الأصوات -->
+  <audio id="pageFlip" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_62c8f9853d.mp3?filename=book-turn-page-2-92381.mp3"></audio>
+  <audio id="woosh" src="https://cdn.pixabay.com/download/audio/2022/03/16/audio_72cf4ac4ff.mp3?filename=woosh-150884.mp3"></audio>
+  <audio id="slideSound" src="https://cdn.pixabay.com/download/audio/2022/01/07/audio_ea449d6cea.mp3"></audio>
+<div id="reader-tools-root"></div>
+
+  <script>
+    const page = document.getElementById('page');
+    const pageFlip = document.getElementById('pageFlip');
+    const woosh = document.getElementById('woosh');
+    const slideSound = document.getElementById('slideSound');
+
+    const viewport = document.getElementById('viewport');
+    const track = document.getElementById('track');
+    const cards = Array.from(track.querySelectorAll('.card'));
+    const arrowLeft = document.getElementById('arrowLeft');
+    const arrowRight = document.getElementById('arrowRight');
+
+    let index = 0;
+    function clamp(i){ return Math.max(0, Math.min(cards.length-1, i)); }
+    function setActive(){ cards.forEach((c,i)=> c.classList.toggle('active', i===index)); }
+    function centerCard(smooth=true){
+      const card = cards[index]; if(!card) return;
+      const left = card.offsetLeft;
+      const w = card.offsetWidth;
+      const vp = viewport.clientWidth;
+      const target = left - (vp/2 - w/2);
+      track.style.transition = smooth ? 'transform .55s cubic-bezier(.22,.8,.2,1)' : 'none';
+      track.style.transform = `translateX(${-target}px)`;
+      setActive();
+    }
+
+    function playSlideSound() {
+      slideSound.currentTime = 0;
+      slideSound.play().catch(()=>{});
+    }
+
+    arrowLeft.addEventListener('click', ()=>{
+      index = clamp(index-1);
+      centerCard();
+      playSlideSound();
+    });
+
+    arrowRight.addEventListener('click', ()=>{
+      index = clamp(index+1);
+      centerCard();
+      playSlideSound();
+    });
+
+    // سحب بالإصبع/الماوس
+    let isDown=false, startX=0, startTx=0;
+    viewport.addEventListener('pointerdown', e=>{
+      isDown=true; startX=e.clientX; startTx=getTx(track);
+      track.style.transition='none';
+      viewport.setPointerCapture(e.pointerId);
+    });
+    viewport.addEventListener('pointermove', e=>{
+      if(!isDown) return;
+      const dx=e.clientX - startX;
+      track.style.transform = `translateX(${startTx + dx}px)`;
+    });
+    viewport.addEventListener('pointerup', e=>{
+      if(!isDown) return; isDown=false;
+      const dx=e.clientX - startX;
+      if(Math.abs(dx) > 40){
+        index = clamp(index + (dx<0 ? 1 : -1));
+        playSlideSound();
+      }
+      centerCard();
+    });
+    viewport.addEventListener('pointercancel', ()=>{ isDown=false; centerCard(); });
+    function getTx(el){
+      const tr=getComputedStyle(el).transform;
+      if(tr==='none') return 0;
+      const m=new DOMMatrixReadOnly(tr);
+      return m.m41||0;
+    }
+
+    window.addEventListener('load', ()=>{
+      setTimeout(()=>{ index = (cards.length>1?1:0); centerCard(false); }, 60);
+    });
+    window.addEventListener('resize', ()=> centerCard(false));
+
+    // انتقال الصفحات بنفس حركة التقليب
+    function go(target, dir){
+      pageFlip.play().catch(()=>{});
+      woosh.play().catch(()=>{});
+      page.classList.add(dir==='next' ? 'flip-next' : 'flip-prev');
+      setTimeout(()=>{ window.location.href = target; }, 1800);
+    }
+    document.getElementById('prevPage').addEventListener('click', ()=>{
+      go('https://dns3uae-glitch.github.io/crime-book/company/index.html','prev');
+    });
+    document.getElementById('nextPage').addEventListener('click', ()=>{
+      go('https://dns3uae-glitch.github.io/crime-book/chapter1/','next');
+    });
+  </script>
+<script src="../assets/js/reader-tools.js"></script>
+
+</body>
+</html>
