@@ -1379,15 +1379,12 @@ function renderTimer(){
 }
 
 /* ===== Investigation logic ===== */
-/* ===== Investigation logic ===== */
 let _lastDownTs = 0;
 function onScenePointer(e){
-  // 🎯 ديباونس بسيط لمنع تكرار اللمسة الواحدة
   const now = Date.now();
   if (now - _lastDownTs < 250) return;
   _lastDownTs = now;
 
-  // 📍 إحداثيات موحّدة (pointer events تضمن clientX/Y)
   const clientX = e.clientX;
   const clientY = e.clientY;
   const pt = clientToPercent(clientX, clientY);
@@ -1395,7 +1392,6 @@ function onScenePointer(e){
   let hitIndex = -1;
   let minDist = Infinity;
 
-  // 🔹 نحسب أقرب شكل أو نقطة مطابقة
   shapes.forEach((s, idx) => {
     if (s.found) return;
     if (pointInPoly(pt.x, pt.y, s.points)) {
@@ -1410,21 +1406,22 @@ function onScenePointer(e){
     }
   });
 
-  // 🔹 نحدد إذا فعلاً الضغط قريب كفاية
   const r = bg.getBoundingClientRect();
-  const pxThreshold = 20; // حوالي 20px
+  const pxThreshold = 20;
   const percentThreshold = Math.min(pxThreshold / r.width * 100, pxThreshold / r.height * 100);
   const didHit = (minDist <= percentThreshold);
 
   if (didHit && hitIndex >= 0) {
     handleCorrectShape(hitIndex);
-    return; // ✅ وقف التنفيذ بعد العثور
+    return;
   }
 
-  // ❌ لو ما في دليل
   showToast("لا يوجد دليل هنا، ابحث في مكان آخر.");
   speak("لا يوجد دليل هنا، ابحث في مكان آخر.");
 }
+
+/* ربط الحدث */
+overlay.addEventListener('pointerdown', onScenePointer);
 
 
     // else compute minimum distance to polygon edges (in percent units)
@@ -1559,6 +1556,7 @@ window.addEventListener("load", simulateLoading);
 </script>
 </body>
 </html>
+
 
 
 
