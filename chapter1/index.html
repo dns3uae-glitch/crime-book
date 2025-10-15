@@ -1,340 +1,229 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>الفصل الأول</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root{
-      --bg-dark:#0a0a0a;
-      --blue:#0033A0;         /* الأزرق الشرطي */
-      --gold:#FFD54A;         /* الذهبي */
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0}
-body{
-  color:#fff;
-  font-family:'Noto Naskh Arabic',serif;
-  line-height:1.9;
-  background:
-radial-gradient(circle at center, #121418 0%, #0b0d12 80%, #000 100%),
-    radial-gradient(50rem 50rem at 85% 10%, rgba(0,80,255,.1), transparent 70%);
-  overflow-x:hidden;
-  perspective:1200px; /* لتحسين 3D في التقليب */
-  position:relative;
-}
-/* تحريك العنوان للأسفل قليلاً */
-.chapter-head {
-  margin-top: 10vh; /* بدلاً من أن يكون ملاصق للأعلى */
-  text-align: center;
-  font-size: clamp(1.2rem, 2.8vw, 1.6rem);
-  color: var(--gold);
-  text-shadow: 0 0 12px rgba(255,215,0,0.35);
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>الفصل الثاني - قواعد معاينة وفحص مسرح الجريمة</title>
+<style>
+:root{
+  --gold:#FFD54A;
+  --blue:#0a6bff;
 }
 
-/* جعل المستطيل في منتصف الصفحة عموديًا */
-.hero {
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 55vh; /* يجعل القسم في منتصف الصفحة تقريبًا */
+  justify-content: space-between;
+  background: radial-gradient(circle at center, #001428 0%, #000 90%);
+  color: var(--gold);
+  font-family: "Cairo", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* الصفحة */
+.page{
+  flex:1;
+  width:100%;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  perspective:2000px;
+  transform-style:preserve-3d;
+  transition:transform 1.6s ease-in-out, box-shadow 1.6s ease-in-out;
+}
+.page.flip-next{ transform-origin:right center; transform:rotateY(-180deg); box-shadow:-30px 0 80px rgba(0,0,0,.5);}
+.page.flip-prev{ transform-origin:left center; transform:rotateY(180deg); box-shadow:30px 0 80px rgba(0,0,0,.5);}
+
+/* العنوان خارج المستطيل */
+.chapter-head{
+  color: var(--gold);
+  font-size: clamp(1.6rem, 4vw, 2.3rem);
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(255,215,0,.3), 0 0 18px rgba(10,107,255,.3);
+  margin-bottom: 30px;
+  letter-spacing: 0.8px;
   text-align: center;
-  padding: 20px;
-  margin-top: 5vh;
 }
 
-/* ✨ ضوء أكاديمي خافت بالأعلى */
-body::before{
-  content:'';
-  position:fixed;
-  top:0; left:0; right:0;
-  height:25vh;
-  background:linear-gradient(180deg, rgba(0,80,255,.12), transparent 70%);
-  pointer-events:none;
-  z-index:0;
-}
-
-/* 💡 انعكاس أبيض خفيف */
-/* 💡 انعكاس أبيض خفيف (أخفّ) */
-body::after{
-  content:'';
-  position:fixed;
-  top:30%;
-  left:0; right:0;
-  height:40%;
-  background:radial-gradient(circle at center, rgba(255,255,255,0.035), transparent 70%);
-  pointer-events:none;
-  z-index:1;
-}
-
-/* ✨ إشعاع ناعم حول الصندوق */
-.hero {
-  position: relative;
-  z-index: 2;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 215, 0, 0.25);
-  border-radius: 16px;
-  padding: 30px 20px;
-  box-shadow:
-    0 0 18px rgba(255, 215, 0, 0.12),
-    0 0 40px rgba(0, 120, 255, 0.08),
-    inset 0 0 25px rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(6px);
-  transition: box-shadow 0.5s ease-in-out;
-}
-
-.hero:hover {
-  box-shadow:
-    0 0 25px rgba(255, 215, 0, 0.25),
-    0 0 55px rgba(0, 120, 255, 0.15),
-    inset 0 0 25px rgba(255, 255, 255, 0.04);
-}
-
-/* 💫 وميض ذهبي متحرك على الحواف */
-body::backdrop{
-  content:'';
-  position:fixed;
-  top:0; left:0; right:0; bottom:0;
-  border:2px solid rgba(255,215,0,0.15);
-  border-radius:12px;
-  box-shadow:
-    0 0 25px rgba(255,215,0,0.15),
-    inset 0 0 25px rgba(255,215,0,0.05);
-  pointer-events:none;
-  z-index:999;
-  animation: goldPulse 6s ease-in-out infinite;
-}
-/* 🔵 توهج أزرق خفيف أسفل الصفحة */
-body::footerlight{
-  content:'';
-  position:fixed;
-  bottom:0; left:0; right:0;
-  height:20vh;
-  background:linear-gradient(0deg, rgba(0,120,255,.15), transparent 80%);
-  pointer-events:none;
-  z-index:1;
-}
-
-
-@keyframes goldPulse{
-  0%,100%{ box-shadow:0 0 25px rgba(255,215,0,0.15), inset 0 0 25px rgba(255,215,0,0.05); }
-  50%{ box-shadow:0 0 40px rgba(255,215,0,0.35), inset 0 0 40px rgba(255,215,0,0.1); }
-}
-
-
-@keyframes goldPulse{
-  0%,100%{ box-shadow:0 0 25px rgba(255,215,0,0.15), inset 0 0 25px rgba(255,215,0,0.05); }
-  50%{ box-shadow:0 0 40px rgba(255,215,0,0.35), inset 0 0 40px rgba(255,215,0,0.1); }
-}
-
-
-    /* عنوان أعلى الصفحة */
-    .chapter-head{
-      width:%; max-width:1100px; margin:40px auto 18px; padding:0 16px;
-      text-align:center;
-      color:var(--gold);
-      font-weight:700; font-size:clamp(1.2rem, 2.5vw, 1.6rem);
-      text-shadow:0 0 10px rgba(255,213,74,.35);
-      animation:fadeInDown .8s ease both;
-    }
-
-    /* بطاقة المقدّمة (محتوى الصفحة) */
+/* المستطيل الرئيسي */
 .hero{
-  width:min(95%, 1100px);
-  margin:0 auto 65px;  /* تقليل المسافة بين الصندوق والفوتر */
-  border-radius:16px;
+  width:min(90%, 900px);
+  min-height: 300px;
+  margin:0 auto;
+  border-radius:18px;
   background: linear-gradient(135deg, rgba(0,40,120,.22), rgba(255,255,255,.04));
   border:1px solid rgba(0,120,255,.35);
-  box-shadow:0 0 24px rgba(0,120,255,.18), inset 0 0 18px rgba(0,80,255,.12);
-  padding: clamp(18px, 4vw, 36px);
+  box-shadow:
+    0 0 28px rgba(0,120,255,.25),
+    inset 0 0 22px rgba(0,80,255,.12);
+  padding: clamp(20px, 3.5vw, 40px);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
   text-align:center;
   position:relative;
   overflow:hidden;
   isolation:isolate;
   animation:fadeInUp .9s ease both .08s;
-      /* تجهيز التقليب */
-      transform-style:preserve-3d;
-      will-change: transform, opacity;
-    }
-
-    /* هالات خافتة ثابتة */
-    .hero::before{
-      content:"";
-      position:absolute; inset:-30%;
-      background:
-        radial-gradient(35rem 35rem at 20% 30%, rgba(0,120,255,.18), transparent 60%),
-        radial-gradient(28rem 28rem at 80% 70%, rgba(255,213,74,.10), transparent 60%);
-      filter:blur(12px);
-      animation:halo 9s linear infinite;
-      z-index:-2;
-      pointer-events:none;
-    }
-
-    /* شريط وميض أزرق (يمر على البطاقة لحظة التقليب) */
-    .shine{
-      position:absolute; inset:-20% -40%;
-      background: linear-gradient(120deg,
-                  transparent 0%,
-                  rgba(140,190,255,0.00) 30%,
-                  rgba(140,190,255,0.55) 50%,
-                  rgba(140,190,255,0.00) 70%,
-                  transparent 100%);
-      filter: blur(10px);
-      transform: translateX(-130%) skewX(-18deg);
-      opacity: 0;
-      z-index:-1;
-      pointer-events:none;
-    }
-    /* تفعيل الوميض حسب اتجاه التقليب */
-    #page.flip-next .shine{ animation: shineLTR 1.2s ease forwards .15s; }
-    #page.flip-prev .shine{ animation: shineRTL 1.2s ease forwards .15s; }
-
-    @keyframes shineLTR{
-      0%{ transform:translateX(-130%) skewX(-18deg); opacity:0; }
-      15%{ opacity:.8; }
-      70%{ opacity:.25; }
-      100%{ transform:translateX(130%) skewX(-18deg); opacity:0; }
-    }
-    @keyframes shineRTL{
-      0%{ transform:translateX(130%) skewX(18deg); opacity:0; }
-      15%{ opacity:.8; }
-      70%{ opacity:.25; }
-      100%{ transform:translateX(-130%) skewX(18deg); opacity:0; }
-    }
-
-    .hero h1{
-      color:#eaeefc;
-      font-size:clamp(1.35rem, 3.2vw, 2rem);
-      font-weight:700;
-      text-shadow:0 0 8px rgba(0,120,255,.25);
-      margin-bottom:10px;
-    }
-    .hero p{
-      color:#d9e5ff;
-      font-size:clamp(1rem, 2.2vw, 1.15rem);
-      margin:0;
-    }
-
-    /* فوتر الأكاديمية */
-    footer{
-  position:fixed; bottom:0; left:0; right:0;
-  background:rgba(10,10,10,.92);
-  border-top:1px solid rgba(0,120,255,.35);
-  box-shadow:0 -8px 28px rgba(0,80,255,.25);
-display:flex; align-items:center; justify-content:center; gap:60px;
-  gap:390px;
-  padding:14px clamp(40px, 6vw, 60px);
-  z-index:1000;
-}
-    .btn-nav{
-      background:transparent; color:var(--gold);
-      border:1px solid rgba(255,215,0,.45);
-      padding:10px 18px; border-radius:10px; cursor:pointer;
-      font-size:clamp(.9rem, 2.2vw, 1rem);
-      transition:.25s;
-      box-shadow: inset 0 0 12px rgba(0,80,255,.22);
-      min-width:104px;
-      text-decoration:none; text-align:center;
-      user-select:none;
-    }
-    .btn-nav:hover{color:#fff; transform:translateY(-1px); box-shadow:0 0 18px rgba(255,215,0,.45)}
-    .academy{
-      color:var(--gold); font-weight:700;
-      text-shadow:0 0 8px rgba(255,215,0,.35);
-      font-size:clamp(.9rem, 2.2vw, 1rem);
-      text-align:center; white-space:nowrap;
-    }
-
-    /* أنيميشن التقليب الأفقي (Y) */
-    .flip-next{ animation: flipNext 1.8s ease forwards; transform-origin:right center; }
-    .flip-prev{ animation: flipPrev 1.8s ease forwards; transform-origin:left center; }
-@keyframes flipNext{
-  0%{transform:rotateY(0deg); opacity:1;}
-  50%{transform:rotateY(90deg); opacity:.8;}
-  100%{transform:rotateY(180deg); opacity:0;}
-}
-@keyframes flipPrev{
-  0%{transform:rotateY(0deg); opacity:1;}
-  50%{transform:rotateY(-90deg); opacity:.8;}
-  100%{transform:rotateY(-180deg); opacity:0;}
 }
 
+/* ✨ حركة الهالة الزرقاء الملكية */
+.hero::before{
+  content:"";
+  position:absolute; inset:-30%;
+  background:
+    radial-gradient(35rem 35rem at 20% 30%, rgba(0,120,255,.18), transparent 60%),
+    radial-gradient(28rem 28rem at 80% 70%, rgba(255,213,74,.10), transparent 60%);
+  filter:blur(12px);
+  animation:halo 9s linear infinite;
+  z-index:-2;
+  pointer-events:none;
+}
+@keyframes halo{
+  0%{ transform:translate3d(-2%,-2%,0) rotate(0deg); }
+  50%{ transform:translate3d(2%,2%,0) rotate(180deg); }
+  100%{ transform:translate3d(-2%,-2%,0) rotate(360deg); }
+}
 
-    /* حركات دخول عامة */
-    @keyframes halo{ 0%{transform:translate3d(-2%,-2%,0) rotate(0deg)}
-                     50%{transform:translate3d(2%,2%,0) rotate(180deg)}
-                     100%{transform:translate3d(-2%,-2%,0) rotate(360deg)} }
-    @keyframes fadeInDown{from{opacity:0; transform:translateY(-12px)} to{opacity:1; transform:translateY(0)}}
-    @keyframes fadeInUp{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)}}
+/* 🌊 الشعاع الأزرق الخفيف على الإطار */
+.hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  border:1px solid rgba(10,107,255,.35);
+  box-shadow:
+    0 0 28px rgba(10,107,255,.3),
+    inset 0 0 18px rgba(10,107,255,.25);
+  animation:bluePulse 5s ease-in-out infinite;
+  pointer-events:none;
+  z-index:-1;
+}
+@keyframes bluePulse{
+  0%{opacity:.45; box-shadow:0 0 20px rgba(10,107,255,.25), inset 0 0 10px rgba(10,107,255,.15);}
+  50%{opacity:.9; box-shadow:0 0 40px rgba(10,107,255,.45), inset 0 0 22px rgba(10,107,255,.35);}
+  100%{opacity:.45; box-shadow:0 0 20px rgba(10,107,255,.25), inset 0 0 10px rgba(10,107,255,.15);}
+}
 
-    /* تحسينات للجوال */
-    @media (max-width:600px){
-      footer{padding:10px 16px}
-      .btn-nav{padding:9px 14px; min-width:96px}
-    }
+/* النص داخل المستطيل */
+.hero h1{
+  color: var(--gold);
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+  font-weight: 800;
+  margin-bottom: 16px;
+  text-shadow: 0 0 12px rgba(255,215,0,.3), 0 0 20px rgba(10,107,255,.25);
+}
 
-  </style>
+.hero p{
+  color:#d9e5ff;
+  font-size:clamp(1rem, 2.4vw, 1.3rem);
+  margin:0;
+  position:relative;
+  z-index:2;
+  font-weight:600;
+  text-shadow:0 0 10px rgba(0,120,255,.25);
+}
+
+@keyframes fadeInUp{
+  from{opacity:0; transform:translateY(14px)}
+  to{opacity:1; transform:translateY(0)}
+}
+
+/* الفوتر */
+footer {
+  width: 100%;
+  color: var(--gold);
+  font-size: .95rem;
+  text-align: center;
+  padding: 12px 0 16px;
+  background: linear-gradient(180deg, #0a1630 0%, #050b18 100%);
+  border-top: 1px solid rgba(0,120,255,.25);
+  box-shadow: inset 0 0 22px rgba(0,120,255,.15), 0 0 18px rgba(0,120,255,.12);
+  backdrop-filter: blur(6px);
+  margin-top: auto;
+}
+
+.nav-btn {
+  flex: 1;
+  background: linear-gradient(145deg, #0d1a35, #000814);
+  color: #FFD54A;
+  border: 1px solid rgba(255,215,0,.4);
+  padding: 12px 22px;
+  font-size: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: .8px;
+  box-shadow: 0 0 20px rgba(10,107,255,.25), inset 0 0 14px rgba(255,215,0,.15);
+  transition: all .35s ease;
+}
+.nav-btn:hover {
+  transform: translateY(-2px);
+  color: #fff;
+  box-shadow: 0 0 28px rgba(255,215,0,.5), inset 0 0 18px rgba(10,107,255,.3);
+}
+
+footer span {
+  font-size: .95rem;
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(255,215,0,.3);
+}
+</style>
 </head>
+
 <body>
-<br></p>
-  <div class="chapter-head">📘 الفصل الأول</div>
+  <div class="page">
+    <div class="chapter-head">📘 الفصل الأول</div>
 
-  <!-- محتوى الصفحة (سيُقلب كصفحة واحدة) -->
-  <section class="hero" id="page" aria-label="مقدمة الفصل الأول">
-    <div class="shine" aria-hidden="true"></div>
-    <h1>تعريف مسرح الجريمة وأنواعه</h1>
-<br></p>
-    <p>
-      سوف نتعرف في هذا الفصل على تعريف مسرح الجريمة من وجهة نظر الفقهاء والمتخصصين
-      بالإضافة إلى الأنواع المختلفة لمسرح الجريمة.
-    </p>
-  </section>
+    <section class="hero" id="page" aria-label="مقدمة الفصل الأول">
+      <div>
+        <h1>تعريف مسرح الجريمة وأنواعه</h1>
+        <p>
+          سوف نتعرف في هذا الفصل على تعريف مسرح الجريمة من وجهة نظر الفقهاء والمتخصصين
+          بالإضافة إلى الأنواع المختلفة لمسرح الجريمة.
+        </p>
+      </div>
+    </section>
+  </div>
 
-  <!-- فوتر الأكاديمية -->
   <footer>
-    <!-- السابق على اليمين -->
-    <a id="prevPage" class="btn-nav" role="button" href="javascript:void(0)">السابق</a>
-
-    <!-- اسم الأكاديمية في المنتصف -->
-    <div class="academy">© أكاديمية شرطة الشارقة 2025</div>
-
-    <!-- التالي على اليسار -->
-    <a id="nextPage" class="btn-nav" role="button" href="javascript:void(0)">التالي</a>
-
-    <!-- الصوتان الأصليّان (نفس الملف المعتمد) -->
-    <audio id="pageFlip" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_62c8f9853d.mp3?filename=book-turn-page-2-92381.mp3" preload="auto"></audio>
-    <audio id="woosh"    src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_b3b9c6b0cf.mp3" preload="auto"></audio>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:60px;max-width:820px;margin:0 auto;padding:10px 20px;">
+      <button class="nav-btn" id="prevPage">السابق</button>
+      <span>© أكاديمية شرطة الشارقة 2025</span>
+      <button class="nav-btn" id="nextPage">التالي</button>
+    </div>
   </footer>
 
+  <audio id="pageFlip" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_62c8f9853d.mp3"></audio>
+  <audio id="woosh" src="https://cdn.pixabay.com/download/audio/2022/03/16/audio_72cf4ac4ff.mp3"></audio>
+
   <script>
-    // عناصر
-    const page    = document.getElementById('page');
-    const pageFlip= document.getElementById('pageFlip');
-    const woosh  = document.getElementById('woosh');
+  const page = document.getElementById('page');
+  const pageFlip = document.getElementById('pageFlip');
+  const woosh = document.getElementById('woosh');
 
-    // دالة الانتقال (من ملفك الأصلي: صوت + تقليب أفقي + وميض أزرق)
-    function go(target, dir){
-      try{ pageFlip.currentTime = 0; pageFlip.play(); }catch(e){}
-      try{ woosh.currentTime   = 0; woosh.play();    }catch(e){}
+  function go(target, dir){
+    pageFlip.play().catch(()=>{}); 
+    woosh.play().catch(()=>{});
+    page.classList.add(dir==='next' ? 'flip-next' : 'flip-prev');
+    setTimeout(()=>{ window.location.href = target; }, 1800);
+  }
 
-      page.classList.remove('flip-next','flip-prev'); // إعادة الضبط
-      // إجبار إعادة حساب النمط لبدء الأنيميشن من جديد
-      void page.offsetWidth;
-
-      // إضافة اتجاه التقليب
-      page.classList.add(dir === 'next' ? 'flip-next' : 'flip-prev');
-
-      // الانتقال بعد اكتمال الحركة (نفس مدتك الأصلية 1.8s)
-      setTimeout(()=>{ window.location.href = target; }, 1800);
-    }
-
-    // روابط التصفّح المعتمدة
-    const PREV_URL = 'https://dns3uae-glitch.github.io/crime-book/intro/';
-    const NEXT_URL = 'https://dns3uae-glitch.github.io/crime-book/ch1-1/';
-
+  document.getElementById('prevPage').addEventListener('click', ()=> 
+    go('https://dns3uae-glitch.github.io/crime-book/intro/','prev')
+  );
+  document.getElementById('nextPage').addEventListener('click', ()=> 
+    go('https://dns3uae-glitch.github.io/crime-book/ch1-1/','next')
+  );
   </script>
-
 </body>
 </html>
