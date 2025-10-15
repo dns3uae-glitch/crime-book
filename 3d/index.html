@@ -147,6 +147,42 @@ footer span {
   color: var(--gold);
   text-shadow: 0 0 8px rgba(255,215,0,.3);
 }
+
+
+
+
+/* 📱 إظهار أزرار السابق والتالي بوضوح في الجوال العمودي */
+@media (max-width: 700px) {
+  iframe {
+    height: 65vh; /* 🔹 تقليل ارتفاع المشهد حتى يظهر الفوتر */
+  }
+
+  footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* 🔹 ضمان أنه فوق الـiframe */
+  }
+
+  footer div {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .nav-btn {
+    flex: 1;
+    width: 45%;
+    font-size: 0.9rem;
+    padding: 10px 0;
+  }
+
+  footer span {
+    display: none; /* 🔹 إخفاء النص © لتوفير مساحة */
+  }
+}
+
+  
 </style>
 </head>
 
@@ -217,5 +253,6 @@ document.getElementById('enterFullscreenBtn').addEventListener('click', () => {
 </script>
 </body>
 </html>
+
 
 
