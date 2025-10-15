@@ -162,6 +162,99 @@
       .arrow{ width:42px; height:42px }
       .arrow-left{ left:-2px } .arrow-right{ right:-2px }
     }
+
+    /* 📱 تحسين التوافق الكامل لجميع الأجهزة */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 90px; /* مسافة آمنة للفوتر */
+  }
+
+  .video-box {
+    width: 95vw;
+    margin: 20px auto;
+    aspect-ratio: 16/10; /* تقليل الارتفاع قليلاً على الجوال */
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    margin-top: 10px;
+  }
+
+  .slider-wrap {
+    width: 95vw;
+    margin-top: 10px;
+  }
+
+  .card {
+    flex: 0 0 80%;
+    font-size: 0.9rem;
+    padding: 12px;
+  }
+
+  .title-ar {
+    font-size: 1.1rem;
+  }
+
+  .title-en {
+    font-size: 0.9rem;
+  }
+
+  .arrow {
+    width: 38px;
+    height: 38px;
+    top: auto;
+    bottom: -40px;
+  }
+  .arrow-left {
+    left: 10%;
+  }
+  .arrow-right {
+    right: 10%;
+  }
+
+  footer {
+    position: fixed;     /* يثبّت الفوتر في أسفل الصفحة */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 8px 0;
+  }
+
+  footer div {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nav-btn {
+    width: 80%;
+    font-size: 1rem;
+    padding: 12px 0;
+  }
+
+  footer span {
+    display: none; /* لإفساح المجال للأزرار على الشاشات الصغيرة */
+  }
+}
+
+/* للأجهزة الصغيرة جدًا مثل iPhone SE أو Galaxy Mini */
+@media (max-width: 400px) {
+  .nav-btn {
+    width: 90%;
+    font-size: 0.9rem;
+    padding: 10px 0;
+  }
+
+  .card {
+    flex: 0 0 90%;
+    font-size: 0.85rem;
+  }
+
+  .title-ar {
+    font-size: 1rem;
+  }
+}
+
   </style>
 </head>
 
@@ -258,4 +351,5 @@ document.getElementById('nextPage').addEventListener('click', ()=> go('https://d
 
 </body>
 </html>
+
 
