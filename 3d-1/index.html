@@ -162,6 +162,17 @@ a:focus, button:focus { outline:2px solid rgba(255,215,74,.25); outline-offset:3
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 0.25; transform: translateY(0); }
 }
+/* 📱 تحسين وضع الزر في الجوال العمودي */
+@media (max-width: 600px) {
+  #startBtn {
+    position: fixed;       /* يثبت الزر في أسفل الصفحة */
+    bottom: 20px;          /* المسافة من أسفل الشاشة */
+    left: 50%;             /* توسيط أفقي */
+    transform: translateX(-50%);
+    width: 80%;            /* عرض مناسب للجوال */
+    z-index: 10;           /* فوق أي عناصر أخرى */
+  }
+}
 
 
 </style>
@@ -1500,5 +1511,6 @@ window.addEventListener("load", simulateLoading);
 </script>
 </body>
 </html>
+
 
 
