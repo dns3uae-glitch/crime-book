@@ -136,13 +136,34 @@ a:focus, button:focus { outline:2px solid rgba(255,215,74,.25); outline-offset:3
   bottom: 170px;
   width: 360px;
   height: 440px;
-  background: url('https://cityupload.io/2025/10/saluting-soldier-silhouette-vector-isolated-on-white-background-military-man-in-parade-700-291560853.png') 
+  background: url('https://cityupload.io/2025/10/saluting-soldier-silhouette-vector-isolated-on-white-background-military-man-in-parade-700-291560853.png')
               no-repeat center bottom;
   background-size: contain;
   opacity: 0.25;
   filter: drop-shadow(0 0 30px rgba(255,213,74,0.35)) brightness(3);
   animation: fadeInSoldier 2.5s ease forwards;
+  z-index: 0; /* الصورة خلف كل العناصر */
 }
+
+#intro .intro-text,
+#intro #startBtn {
+  position: relative;
+  z-index: 2; /* النص والزر فوق الصورة */
+}
+
+/* 📱 معالجة خاصة للجوال */
+@media (max-width: 600px) {
+  #intro::after {
+    bottom: 60px; /* نحرك الصورة للأسفل */
+    width: 240px;
+    height: 280px;
+    opacity: 0.18;
+  }
+  #startBtn {
+    margin-top: 12px;
+  }
+}
+
 @keyframes fadeInSoldier {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 0.25; transform: translateY(0); }
@@ -1508,5 +1529,6 @@ window.addEventListener("load", simulateLoading);
 </script>
 </body>
 </html>
+
 
 
