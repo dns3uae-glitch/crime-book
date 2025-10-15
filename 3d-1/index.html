@@ -1432,12 +1432,15 @@ function onScenePointer(e){
     }
   }
 
-  if(didHit && hitIndex>=0){
-    handleCorrectShape(hitIndex);
-  } else {
-    showToast("لا يوجد دليل هنا، ابحث في مكان آخر.");
-    speak("لا يوجد دليل هنا، ابحث في مكان آخر.");
-  }
+  if (didHit && hitIndex >= 0) {
+  handleCorrectShape(hitIndex);
+  return; // ✅ يوقف التنفيذ بعد العثور على الدليل الصحيح
+}
+
+// 🔹 فقط في حال عدم العثور على أي دليل
+showToast("لا يوجد دليل هنا، ابحث في مكان آخر.");
+speak("لا يوجد دليل هنا، ابحث في مكان آخر.");
+
 }
 
 function handleCorrectShape(idx){
@@ -1529,6 +1532,7 @@ window.addEventListener("load", simulateLoading);
 </script>
 </body>
 </html>
+
 
 
 
