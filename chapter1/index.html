@@ -181,17 +181,15 @@ footer span {
 </head>
 
 <body>
-  <div class="page">
+  <div class="page" id="page">
     <div class="chapter-head">📘 الفصل الأول</div>
 
-    <section class="hero" id="page" aria-label="مقدمة الفصل الأول">
-      <div>
-        <h1>تعريف مسرح الجريمة وأنواعه</h1>
-        <p>
-          سوف نتعرف في هذا الفصل على تعريف مسرح الجريمة من وجهة نظر الفقهاء والمتخصصين
-          بالإضافة إلى الأنواع المختلفة لمسرح الجريمة.
-        </p>
-      </div>
+    <section class="hero" aria-label="مقدمة الفصل الأول">
+      <h1>تعريف مسرح الجريمة وأنواعه</h1>
+      <p>
+        سوف نتعرف في هذا الفصل على تعريف مسرح الجريمة من وجهة نظر الفقهاء والمتخصصين
+        بالإضافة إلى الأنواع المختلفة لمسرح الجريمة.
+      </p>
     </section>
   </div>
 
@@ -214,8 +212,10 @@ footer span {
   function go(target, dir){
     pageFlip.play().catch(()=>{}); 
     woosh.play().catch(()=>{});
+    page.classList.remove('flip-next','flip-prev'); // إزالة الحالات القديمة
+    void page.offsetWidth; // لإعادة تشغيل الأنيميشن كل مرة
     page.classList.add(dir==='next' ? 'flip-next' : 'flip-prev');
-    setTimeout(()=>{ window.location.href = target; }, 1800);
+    setTimeout(()=>{ window.location.href = target; }, 1600);
   }
 
   document.getElementById('prevPage').addEventListener('click', ()=> 
@@ -226,4 +226,6 @@ footer span {
   );
   </script>
 </body>
+
 </html>
+
