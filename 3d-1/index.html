@@ -147,6 +147,27 @@ a:focus, button:focus { outline:2px solid rgba(255,215,74,.25); outline-offset:3
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 0.25; transform: translateY(0); }
 }
+/* ✅ اجعل الـ overlay دائمًا يغطي الصورة بنفس الحجم بالضبط */
+#overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  z-index: 120;
+  object-fit: cover;
+  aspect-ratio: auto;
+}
+
+/* 🧭 تعديل إضافي لتحسين دقة الضغط في الوضع العمودي */
+@media (orientation: portrait) {
+  #sceneWrap img,
+  #overlay {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+}
 
 </style>
 </head>
@@ -1339,7 +1360,10 @@ function renderTimer(){
 /* ===== Investigation logic ===== */
 function enableInvestigation(){
   // click on sceneWrap
-  document.getElementById('sceneWrap').addEventListener('pointerdown', onScenePointer, {passive:true});
+// ✅ يدعم اللمس في جميع الأجهزة (موبايل/تابلت/كمبيوتر)
+['pointerdown','touchstart','click'].forEach(evt=>{
+  document.getElementById('sceneWrap').addEventListener(evt, onScenePointer, {passive:true});
+});
 }
 
 function onScenePointer(e){
@@ -1484,4 +1508,5 @@ window.addEventListener("load", simulateLoading);
 </script>
 </body>
 </html>
+
 
