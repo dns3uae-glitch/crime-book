@@ -1395,33 +1395,37 @@ function onScenePointer(e){
   let hitIndex = -1;
   let minDist = Infinity;
 
+  // 🔹 نحسب أقرب شكل أو نقطة مطابقة
   shapes.forEach((s, idx) => {
     if (s.found) return;
-    // direct inside?
     if (pointInPoly(pt.x, pt.y, s.points)) {
-      hitIndex = idx; 
+      hitIndex = idx;
       minDist = 0;
       return;
     }
-    // else compute minimum distance to polygon edges (in percent units)
     for (let i = 0; i < s.points.length; i++) {
       const a = s.points[i], b = s.points[(i + 1) % s.points.length];
-      const d = pointToSegmentDistance(pt.x, pt.y, a.x, a.y, b.x, b.y);
+      const d = distPointToSeg(pt.x, pt.y, a.x, a.y, b.x, b.y);
       if (d < minDist) { minDist = d; hitIndex = idx; }
     }
   });
 
-  const didHit = (minDist <= 1.5); // sensitivity threshold
+  // 🔹 نحدد إذا فعلاً الضغط قريب كفاية
+  const r = bg.getBoundingClientRect();
+  const pxThreshold = 20; // حوالي 20px
+  const percentThreshold = Math.min(pxThreshold / r.width * 100, pxThreshold / r.height * 100);
+  const didHit = (minDist <= percentThreshold);
 
   if (didHit && hitIndex >= 0) {
     handleCorrectShape(hitIndex);
-    return; // ✅ توقف هنا ولا تشغّل صوت "لا يوجد دليل"
+    return; // ✅ وقف التنفيذ بعد العثور
   }
 
-  // ❌ لو ما لقى أي دليل
+  // ❌ لو ما في دليل
   showToast("لا يوجد دليل هنا، ابحث في مكان آخر.");
   speak("لا يوجد دليل هنا، ابحث في مكان آخر.");
 }
+
 
     // else compute minimum distance to polygon edges (in percent units)
     for(let i=0,j=s.points.length-1;i<s.points.length;j=i++){
@@ -1555,6 +1559,7 @@ window.addEventListener("load", simulateLoading);
 </script>
 </body>
 </html>
+
 
 
 
