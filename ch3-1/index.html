@@ -113,6 +113,97 @@ footer span{
   color:var(--gold);
   text-shadow:0 0 8px rgba(255,215,0,.3);
 }
+  /* 🌍 ضبط تام للتناسب مع جميع الأجهزة */
+@media (max-width: 900px) {
+  .video-box {
+    width: 95vw;
+    margin: 20px auto 10px;
+    aspect-ratio: 16/10;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    margin-top: 8px;
+  }
+
+  .slider-wrap {
+    width: 95vw;
+    margin-top: 10px;
+  }
+
+  .card {
+    flex: 0 0 85%;
+    font-size: 0.9rem;
+    padding: 12px;
+  }
+
+  .arrow {
+    width: 40px;
+    height: 40px;
+    bottom: -45px;
+    top: auto;
+  }
+  .arrow-left { left: 10%; }
+  .arrow-right { right: 10%; }
+
+  footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background: linear-gradient(180deg, #0a1630 0%, #050b18 100%);
+    padding: 8px 0;
+  }
+
+  footer div {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .nav-btn {
+    width: 80%;
+    font-size: 1rem;
+    padding: 12px 0;
+  }
+
+  footer span {
+    display: none;
+  }
+}
+
+/* 📱 تحسين إضافي للشاشات الصغيرة جداً */
+@media (max-width: 480px) {
+  body {
+    overflow-y: auto; /* يسمح بالتمرير إذا ضاقت الشاشة */
+  }
+
+  .video-box {
+    aspect-ratio: 16/12;
+    margin: 10px auto;
+  }
+
+  .card {
+    flex: 0 0 90%;
+    font-size: 0.85rem;
+  }
+
+  .title-ar { font-size: 1rem; }
+  .title-en { font-size: 0.9rem; }
+
+  .arrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nav-btn {
+    width: 90%;
+    font-size: 0.9rem;
+    padding: 10px 0;
+  }
+}
+
 </style>
 </head>
 
@@ -170,4 +261,5 @@ document.getElementById('nextPage').addEventListener('click',()=>go('https://dns
 </script>
 </body>
 </html>
+
 
