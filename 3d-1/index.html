@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>مهمة جمع الأدلة</title>
+<title>مهمة جمع الأدلة — النسخة الملكية v9</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root { --gold:#FFD54A; --ink:#0b1226; --red:#ff2a2a; --green:#00e676; }
@@ -44,7 +44,7 @@ html,body { height:100%; margin:0; font-family:"Cairo",system-ui,Segoe UI,Roboto
 }
 #scene.show { display:block; }
 #scene.visible { opacity:1; }
-.scene-wrap { position:absolute; inset:0; touch-action: manipulation; }
+.scene-wrap { position:absolute; inset:0; }
 .scene-wrap img {
   position:absolute; inset:0; width:100%; height:100%; object-fit:cover; /* فول سكرين بدون قص ثابت */
 }
@@ -136,58 +136,16 @@ a:focus, button:focus { outline:2px solid rgba(255,215,74,.25); outline-offset:3
   bottom: 170px;
   width: 360px;
   height: 440px;
-  background: url('https://cityupload.io/2025/10/saluting-soldier-silhouette-vector-isolated-on-white-background-military-man-in-parade-700-291560853.png')
+  background: url('https://cityupload.io/2025/10/saluting-soldier-silhouette-vector-isolated-on-white-background-military-man-in-parade-700-291560853.png') 
               no-repeat center bottom;
   background-size: contain;
   opacity: 0.25;
   filter: drop-shadow(0 0 30px rgba(255,213,74,0.35)) brightness(3);
   animation: fadeInSoldier 2.5s ease forwards;
-  z-index: 0; /* الصورة خلف كل العناصر */
 }
-
-#intro .intro-text,
-#intro #startBtn {
-  position: relative;
-  z-index: 2; /* النص والزر فوق الصورة */
-}
-
-/* 📱 معالجة خاصة للجوال */
-@media (max-width: 600px) {
-  #intro::after {
-    bottom: 60px; /* نحرك الصورة للأسفل */
-    width: 240px;
-    height: 280px;
-    opacity: 0.18;
-  }
-  #startBtn {
-    margin-top: 12px;
-  }
-}
-
 @keyframes fadeInSoldier {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 0.25; transform: translateY(0); }
-}
-/* ✅ اجعل الـ overlay دائمًا يغطي الصورة بنفس الحجم بالضبط */
-#overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: auto;
-  z-index: 120;
-  object-fit: cover;
-  aspect-ratio: auto;
-}
-
-/* 🧭 تعديل إضافي لتحسين دقة الضغط في الوضع العمودي */
-@media (orientation: portrait) {
-  #sceneWrap img,
-  #overlay {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-  }
 }
 
 </style>
@@ -231,7 +189,7 @@ a:focus, button:focus { outline:2px solid rgba(255,215,74,.25); outline-offset:3
     <p id="endText">أحسنت يا ضابط، لقد حددت جميع الأدلة بنجاح!</p>
     <div class="actions">
       <a class="secondary" href="https://dns3uae-glitch.github.io/crime-book/3d/index.html">🔁 إعادة المهمة</a>
-      <a href="https://dns3uae-glitch.github.io/crime-book/3d-2/">⏭️ المرحلة التالية</a>
+      <a href="https://dns3uae-glitch.github.io/crime-book/3d-2/index.html">⏭️ المرحلة التالية</a>
     </div>
   </div>
 </div>
@@ -1379,51 +1337,24 @@ function renderTimer(){
 }
 
 /* ===== Investigation logic ===== */
-let _lastDownTs = 0;
+function enableInvestigation(){
+  // click on sceneWrap
+  document.getElementById('sceneWrap').addEventListener('pointerdown', onScenePointer, {passive:true});
+}
+
 function onScenePointer(e){
-  const now = Date.now();
-  if (now - _lastDownTs < 250) return;
-  _lastDownTs = now;
-
-  const clientX = e.clientX;
-  const clientY = e.clientY;
+  const clientX = e.clientX, clientY = e.clientY;
   const pt = clientToPercent(clientX, clientY);
-
   let hitIndex = -1;
   let minDist = Infinity;
 
   shapes.forEach((s, idx) => {
-    if (s.found) return;
-    if (pointInPoly(pt.x, pt.y, s.points)) {
-      hitIndex = idx;
-      minDist = 0;
+    if(s.found) return;
+    // direct inside?
+    if(pointInPoly(pt.x, pt.y, s.points)){
+      hitIndex = idx; minDist = 0;
       return;
     }
-    for (let i = 0; i < s.points.length; i++) {
-      const a = s.points[i], b = s.points[(i + 1) % s.points.length];
-      const d = distPointToSeg(pt.x, pt.y, a.x, a.y, b.x, b.y);
-      if (d < minDist) { minDist = d; hitIndex = idx; }
-    }
-  });
-
-  const r = bg.getBoundingClientRect();
-  const pxThreshold = 20;
-  const percentThreshold = Math.min(pxThreshold / r.width * 100, pxThreshold / r.height * 100);
-  const didHit = (minDist <= percentThreshold);
-
-  if (didHit && hitIndex >= 0) {
-    handleCorrectShape(hitIndex);
-    return;
-  }
-
-  showToast("لا يوجد دليل هنا، ابحث في مكان آخر.");
-  speak("لا يوجد دليل هنا، ابحث في مكان آخر.");
-}
-
-/* ربط الحدث */
-overlay.addEventListener('pointerdown', onScenePointer);
-
-
     // else compute minimum distance to polygon edges (in percent units)
     for(let i=0,j=s.points.length-1;i<s.points.length;j=i++){
       const d = distPointToSeg(pt.x, pt.y, s.points[j].x, s.points[j].y, s.points[i].x, s.points[i].y);
@@ -1456,15 +1387,12 @@ overlay.addEventListener('pointerdown', onScenePointer);
     }
   }
 
-  if (didHit && hitIndex >= 0) {
-  handleCorrectShape(hitIndex);
-  return; // ✅ يوقف التنفيذ بعد العثور على الدليل الصحيح
-}
-
-// 🔹 فقط في حال عدم العثور على أي دليل
-showToast("لا يوجد دليل هنا، ابحث في مكان آخر.");
-speak("لا يوجد دليل هنا، ابحث في مكان آخر.");
-
+  if(didHit && hitIndex>=0){
+    handleCorrectShape(hitIndex);
+  } else {
+    showToast("لا يوجد دليل هنا، ابحث في مكان آخر.");
+    speak("لا يوجد دليل هنا، ابحث في مكان آخر.");
+  }
 }
 
 function handleCorrectShape(idx){
@@ -1556,10 +1484,3 @@ window.addEventListener("load", simulateLoading);
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
