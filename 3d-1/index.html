@@ -44,7 +44,7 @@ html,body { height:100%; margin:0; font-family:"Cairo",system-ui,Segoe UI,Roboto
 }
 #scene.show { display:block; }
 #scene.visible { opacity:1; }
-.scene-wrap { position:absolute; inset:0; }
+.scene-wrap { position:absolute; inset:0; touch-action: manipulation; }
 .scene-wrap img {
   position:absolute; inset:0; width:100%; height:100%; object-fit:cover; /* فول سكرين بدون قص ثابت */
 }
@@ -1379,27 +1379,50 @@ function renderTimer(){
 }
 
 /* ===== Investigation logic ===== */
-function enableInvestigation(){
-  // click on sceneWrap
-// ✅ يدعم اللمس في جميع الأجهزة (موبايل/تابلت/كمبيوتر)
-['pointerdown','touchstart','click'].forEach(evt=>{
-  document.getElementById('sceneWrap').addEventListener(evt, onScenePointer, {passive:true});
-});
-}
-
+/* ===== Investigation logic ===== */
+let _lastDownTs = 0;
 function onScenePointer(e){
-  const clientX = e.clientX, clientY = e.clientY;
+  // 🎯 ديباونس بسيط لمنع تكرار اللمسة الواحدة
+  const now = Date.now();
+  if (now - _lastDownTs < 250) return;
+  _lastDownTs = now;
+
+  // 📍 إحداثيات موحّدة (pointer events تضمن clientX/Y)
+  const clientX = e.clientX;
+  const clientY = e.clientY;
   const pt = clientToPercent(clientX, clientY);
+
   let hitIndex = -1;
   let minDist = Infinity;
 
   shapes.forEach((s, idx) => {
-    if(s.found) return;
+    if (s.found) return;
     // direct inside?
-    if(pointInPoly(pt.x, pt.y, s.points)){
-      hitIndex = idx; minDist = 0;
+    if (pointInPoly(pt.x, pt.y, s.points)) {
+      hitIndex = idx; 
+      minDist = 0;
       return;
     }
+    // else compute minimum distance to polygon edges (in percent units)
+    for (let i = 0; i < s.points.length; i++) {
+      const a = s.points[i], b = s.points[(i + 1) % s.points.length];
+      const d = pointToSegmentDistance(pt.x, pt.y, a.x, a.y, b.x, b.y);
+      if (d < minDist) { minDist = d; hitIndex = idx; }
+    }
+  });
+
+  const didHit = (minDist <= 1.5); // sensitivity threshold
+
+  if (didHit && hitIndex >= 0) {
+    handleCorrectShape(hitIndex);
+    return; // ✅ توقف هنا ولا تشغّل صوت "لا يوجد دليل"
+  }
+
+  // ❌ لو ما لقى أي دليل
+  showToast("لا يوجد دليل هنا، ابحث في مكان آخر.");
+  speak("لا يوجد دليل هنا، ابحث في مكان آخر.");
+}
+
     // else compute minimum distance to polygon edges (in percent units)
     for(let i=0,j=s.points.length-1;i<s.points.length;j=i++){
       const d = distPointToSeg(pt.x, pt.y, s.points[j].x, s.points[j].y, s.points[i].x, s.points[i].y);
@@ -1532,6 +1555,7 @@ window.addEventListener("load", simulateLoading);
 </script>
 </body>
 </html>
+
 
 
 
