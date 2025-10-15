@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>إعادة بناء مسرح الجريمة </title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#020615; --bg2:#07122b;
+    --gold:#FFD54A; --gold-deep:#b78f2a;
+    --accent:#22ddff; --ink:#0b1020;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:"Cairo",system-ui,Segoe UI,Roboto,Arial;background:
+    radial-gradient(900px 400px at 12% 18%, rgba(34,221,255,.05), transparent 12%),
+    linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 100%); color:var(--gold); overflow:hidden}
+
+  /* canvas particles */
+  canvas#particles{ position:fixed; inset:0; z-index:0; display:block; }
+
+  /* golden breath glow */
+  .gold-aura{
+    position:fixed; inset:0; pointer-events:none; z-index:1;
+    background: radial-gradient(700px 420px at 88% 82%, rgba(255,213,74,.15), transparent 60%),
+                radial-gradient(600px 360px at 10% 16%, rgba(255,213,74,.08), transparent 60%);
+    animation: aura 6s ease-in-out infinite alternate;
+  }
+  @keyframes aura{
+    0%{ filter:brightness(1) blur(0px) opacity:.8 }
+    100%{ filter:brightness(1.15) blur(1px) opacity:1 }
+  }
+
+  /* stage card */
+  .stage{ position:relative; z-index:2; height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .card{
+    width:min(1100px,94vw); min-height:480px; border-radius:20px; padding:28px;
+    display:grid; grid-template-columns: 1fr 420px; gap:20px; align-items:center;
+    background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.018));
+    border:1px solid rgba(255,213,74,.10);
+    box-shadow: 0 30px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.02);
+    backdrop-filter: blur(6px);
+    transform:translateY(10px); opacity:0; transition:all .9s cubic-bezier(.2,.9,.2,1) .12s;
+  }
+  .card.show{ transform:none; opacity:1; }
+
+  .badge{
+    position:absolute; left:18px; top:18px; z-index:3;
+    background:linear-gradient(90deg,var(--gold), var(--gold-deep));
+    color:#081026; padding:8px 12px; border-radius:10px; font-weight:900;
+    box-shadow:0 6px 30px rgba(212,175,55,.16)
+  }
+
+  /* hero */
+  .hero{ padding:18px 18px 18px 32px; }
+  h1{ margin:0 0 12px 0; font-size:clamp(1.6rem,4.8vw,2.8rem); line-height:1.05; font-weight:900; letter-spacing:.6px;
+      color:var(--gold); text-shadow:0 8px 30px rgba(255,213,74,.08); }
+  p.lead{ color:#dfe8ff; margin:8px 0 18px 0; font-size:clamp(.95rem,2.2vw,1.12rem); line-height:1.7; opacity:.95; }
+
+  .scanner{
+    display:inline-block; padding:8px 14px; border-radius:10px; font-weight:800;
+    background:rgba(0,0,0,.45); color:var(--accent);
+    border:1px solid rgba(34,221,255,.10);
+    box-shadow:0 6px 30px rgba(34,221,255,.10), inset 0 0 18px rgba(34,221,255,.04);
+    animation: glowText 3s ease-in-out infinite;
+  }
+  @keyframes glowText{
+    0%,100%{ text-shadow: 0 0 6px #22ddff, 0 0 10px #22ddff55 }
+    50%{ text-shadow: 0 0 14px #22ddff, 0 0 24px #22ddff99 }
+  }
+  .pulse{ display:inline-block; width:8px;height:8px;border-radius:50%; background:var(--accent);
+          box-shadow:0 0 14px rgba(34,221,255,.45); margin-inline-start:8px; vertical-align:middle; }
+
+  .cta{ margin-top:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .btn{
+    padding:12px 20px; border-radius:12px; border:none; font-weight:900; cursor:pointer;
+    background: linear-gradient(90deg,var(--gold), #e0b83a); color:var(--ink);
+    box-shadow:0 10px 30px rgba(255,213,74,.18);
+    transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+  }
+.btn.secondary{
+  background:linear-gradient(90deg, rgba(34,221,255,0.12), rgba(34,221,255,0.04));
+  border:1px solid rgba(34,221,255,0.25);
+  color:#dfe8ff;
+  font-weight:800;
+  box-shadow:0 0 12px rgba(34,221,255,0.15), inset 0 0 10px rgba(34,221,255,0.05);
+  transition:all .3s ease;
+}
+.btn.secondary:hover{
+  background:linear-gradient(90deg, rgba(34,221,255,0.25), rgba(34,221,255,0.08));
+  box-shadow:0 0 25px rgba(34,221,255,0.3), inset 0 0 14px rgba(34,221,255,0.15);
+  border-color:rgba(34,221,255,0.45);
+}
+
+  .btn:active{ transform:translateY(2px) scale(.995) }
+
+  /* flash on press */
+  @keyframes flash{ 0%{box-shadow:0 0 0 rgba(255,213,74,0)} 50%{box-shadow:0 0 30px rgba(255,213,74,.95)} 100%{box-shadow:0 0 0 rgba(255,213,74,0)} }
+  .btn.flash{ animation: flash .8s ease-out; }
+
+  /* preview */
+  .preview{
+    position:relative; height:380px; border-radius:12px; overflow:hidden;
+    background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.25));
+    border:1px solid rgba(255,255,255,.06);
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+  }
+  .wire{ width:92%; height:78%; transform-style:preserve-3d; display:flex; align-items:center; justify-content:center; perspective:1200px; }
+  .cube{ width:92%; height:68%; transform-style:preserve-3d; animation: slowturn 9s linear infinite; }
+  @keyframes slowturn{ from{transform:rotateX(8deg) rotateY(0deg)} to{transform:rotateX(8deg) rotateY(360deg)} }
+  .wireline{ position:absolute; inset:0; pointer-events:none; background:
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size:40px 40px, 40px 40px; mix-blend-mode:overlay; opacity:.35;
+  }
+  .small{ position:absolute; bottom:12px; left:24px; color:rgba(255,255,255,.16); font-size:12px; z-index:3 }
+
+  /* responsive */
+  @media (max-width:880px){
+    .card{ grid-template-columns:1fr; min-height:auto; padding:18px; gap:12px }
+    .preview{ order:-1; height:260px }
+    .hero{ padding:8px }
+  }
+</style>
+</head>
+<body>
+
+<div class="badge">وحدة إعادة البناء · تمهيد تفاعلي</div>
+<canvas id="particles" aria-hidden="true"></canvas>
+<div class="gold-aura" aria-hidden="true"></div>
+
+<section class="stage" role="main" aria-labelledby="heroTitle">
+  <div class="card" id="card">
+    <div class="hero">
+      <h1 id="heroTitle">إعادة بناء مسرح الجريمة — تجربة استنتاجية متقدمة</h1>
+      <div class="scanner" id="scanner">تحليل المشهد الإجرامي — جارٍ التحضير <span class="pulse" aria-hidden="true"></span></div>
+      <p class="lead">
+        سنعيد تركيب الأحداث خطوة بخطوة، نُطابق الأدلة، ونركّب السرد الجنائي. هذه المقدّمة تصحبك إلى قلب النظام التحليلي
+        قبل الدخول إلى مشهد إعادة البناء ثلاثي الأبعاد.
+      </p>
+
+      <div class="cta" role="region" aria-label="خيارات">
+        <button class="btn" id="btnStart">🔧 ابدأ بناء المسرح الآن</button>
+        <button class="btn secondary" id="btnPreview">معاينة سريعة</button>
+      </div>
+
+      <div class="meta" id="meta" style="margin-top:12px; font-size:.98rem; color:#cfe1ff; opacity:.9;">
+        انقر للبدء أو انتظر لعرض التمهيد التلقائي.
+      </div>
+    </div>
+
+    <div class="preview" aria-label="معاينة ثلاثية الأبعاد">
+      <div class="wire">
+        <svg class="cube" viewBox="0 0 200 140" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#22ddff"/><stop offset="1" stop-color="#ffd54a"/></linearGradient>
+          </defs>
+          <g fill="none" stroke="url(#g1)" stroke-width="0.9" opacity="0.95" stroke-linejoin="round">
+            <path d="M20 120 L60 20 L140 20 L180 120 Z" stroke-opacity="0.18"/>
+            <path d="M60 20 L60 80 L140 80 L140 20" stroke-opacity="0.25"/>
+            <path d="M20 120 L60 80 L140 80 L180 120" stroke-opacity="0.22"/>
+            <g id="rot" transform="translate(0,0)">
+              <path d="M60 20 L100 7 L140 20" stroke-opacity="0.32"/>
+              <path d="M100 7 L100 80" stroke-opacity="0.16"/>
+            </g>
+            <circle cx="60" cy="20" r="1.4" fill="#ffd54a"/>
+            <circle cx="140" cy="20" r="1.4" fill="#22ddff"/>
+            <circle cx="100" cy="7" r="1.6" fill="#fff"/>
+          </g>
+        </svg>
+        <div class="wireline" aria-hidden="true"></div>
+      </div>
+      <div style="padding:12px;width:100%;text-align:center;color:#dfe8ff;font-weight:700">
+        معاينة المشهد — حركة ديناميكية ومؤشرات زمنية
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="small">© أكاديمية الشارقة للعلوم الشرطية — اعادة بناء مسرح الجريمة</div>
+
+<!-- الأصوات (روابطك المباشرة) -->
+<audio id="initTone"  src="https://cdn.pixabay.com/download/audio/2025/09/08/audio_b80f55a35a.mp3?filename=beep-401570.mp3" preload="auto"></audio>
+<audio id="whoosh"    src="https://cdn.pixabay.com/download/audio/2025/07/18/audio_1b80f67556.mp3?filename=whoosh-cinematic-sound-effect-376889.mp3" preload="auto"></audio>
+
+<script>
+/* -------- particles background -------- */
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let W,H,parts=[];
+function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+addEventListener('resize', resize); resize();
+function addParticles(n=95){
+  for(let i=0;i<n;i++){
+    parts.push({x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-0.5)*0.25, vy:(Math.random()-0.5)*0.25, r:Math.random()*1.6+.3});
+  }
+}
+addParticles();
+function loop(){
+  ctx.clearRect(0,0,W,H);
+  const g=ctx.createRadialGradient(W*.55,H*.45,20,W*.55,H*.45,Math.max(W,H));
+  g.addColorStop(0,'rgba(34,221,255,.02)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  for(const p of parts){
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<-10) p.x=W+10; if(p.x>W+10) p.x=-10; if(p.y<-10) p.y=H+10; if(p.y>H+10) p.y=-10;
+    ctx.beginPath(); ctx.fillStyle=`rgba(180,210,255,${0.06+p.r*0.06})`; ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+  }
+  ctx.beginPath();
+  for(let i=0;i<8;i++){
+    const a=parts[Math.random()*parts.length|0], b=parts[Math.random()*parts.length|0];
+    ctx.moveTo(W*.5+(a.x-W*.5)*.35, H*.45+(a.y-H*.45)*.35);
+    ctx.lineTo(W*.5+(b.x-W*.5)*.35, H*.45+(b.y-H*.45)*.35);
+  }
+  ctx.strokeStyle='rgba(34,221,255,.03)'; ctx.lineWidth=.8; ctx.stroke();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* -------- entrance & wobble -------- */
+const card = document.getElementById('card'); setTimeout(()=>card.classList.add('show'),120);
+const rot = document.querySelector('#rot');
+(function wobble(){
+  const t=performance.now()/1000, dx=Math.sin(t*.9)*2;
+  if(rot) rot.setAttribute('transform',`translate(0,0) rotate(${dx})`);
+  requestAnimationFrame(wobble);
+})();
+
+/* -------- start & redirect -------- */
+const btnStart   = document.getElementById('btnStart');
+const btnPreview = document.getElementById('btnPreview');
+const initTone   = document.getElementById('initTone');
+const systemOn   = document.getElementById('systemOn');
+const whoosh     = document.getElementById('whoosh');
+const TARGET     = "https://dns3uae-glitch.github.io/crime-book/3d-3";
+
+function startSequence(userTriggered=true){
+  document.getElementById('scanner').textContent = 'جارٍ تهيئة نموذج المشهد...';
+  btnStart.classList.add('flash');
+
+  const p = userTriggered ? initTone.play().catch(()=>{}) : Promise.resolve();
+  // بعد 1.5 ثانية: صوت "النظام جاهز"
+  setTimeout(()=> systemOn.play().catch(()=>{}), 1500);
+
+  p.then(()=>{
+    setTimeout(()=>{
+      whoosh.play().catch(()=>{});
+document.querySelector('.badge').style.transition='opacity 1.8s ease';
+document.querySelector('.badge').style.opacity='0';
+
+      // حركة اختفاء ناعمة
+      card.style.transition='transform 1.8s cubic-bezier(.2,.9,.2,1), opacity 1.8s';
+      card.style.transform='scale(.86) translateY(-8px)';
+      card.style.opacity='0.02';
+      setTimeout(()=> location.href = TARGET, 4000);
+    }, 800);
+  });
+}
+
+btnStart.addEventListener('click', (e)=>{ e.stopPropagation(); startSequence(true); });
+btnPreview.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  initTone.play().catch(()=>{});
+  document.querySelector('.meta').textContent='معاينة: النظام جاهز — اضغط ابدأ للدخول.';
+});
+
+// السماح بالنقر بأي مكان للبدء مرة واحدة
+//document.addEventListener('click', function onceStart(e){
+  //if(e.target===btnPreview) return;
+  //if(!card.classList.contains('started')){
+   // card.classList.add('started');
+   // startSequence(true);
+   // document.removeEventListener('click', onceStart);
+ // }
+//}, { once:true });
+
+// فولباك: إن ما صار تفاعل، انتقال تلقائي بعد 12 ثانية (بدون صوت)
+//setTimeout(()=>{
+ // if(!card.classList.contains('started')){
+  //  document.getElementById('scanner').textContent='التمهيد اكتمل — الانتقال تلقائيًا...';
+   // card.classList.add('started');
+   // card.style.transition='transform .9s, opacity .9s';
+   // card.style.transform='scale(.92)'; card.style.opacity='0.06';
+  //  setTimeout(()=> location.href = TARGET, 1400);
+ // }
+//}, 12000);
+
+// إمكانية البدء بزر Enter
+addEventListener('keydown', (e)=>{ if(e.key==='Enter') btnStart.click(); });
+</script>
+<script>
+/* === القارئ الصوتي الملكي === */
+function speakIntro(txt){
+  try{
+    const s = window.speechSynthesis;
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = 'ar-SA';   // اللغة: عربية سعودية (أقرب لهجة رسمية فخمة)
+    u.rate = 0.92;      // سرعة القراءة
+    u.pitch = 1.0;      // درجة الصوت
+    u.volume = 1.0;     // مستوى الصوت
+    s.cancel();
+    s.speak(u);
+  }catch(e){}
+}
+
+// يشغل الصوت بعد ثانيتين من تحميل الصفحة
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    speakIntro("في إعادة بناء مسرح الجريمة، لا نعيد ترتيب الأدلة فقط، بل نُعيد إحياء لحظة الحقيقة... خطوة بخطوة، لتتكلم الأشياء قبل الشهود.");
+  }, 2000);
+});
+</script>
+
+</body>
+</html>
