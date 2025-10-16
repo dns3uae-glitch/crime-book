@@ -1,295 +1,378 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>منصة التعليم الإلكتروني التفاعلي</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      overflow: hidden;
-      background: #000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #fff7c0;
-      font-family: "Segoe UI", sans-serif;
-      position: relative;
-      perspective: 2000px;
-      transform-style: preserve-3d;
-      transition: transform 1.8s ease-in-out;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>التدشين  — Crime-Book AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#020615; --bg2:#07122b;
+    --gold:#FFD54A; --gold-deep:#b78f2a; --sky:#22ddff; --ink:#0b1020;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:"Cairo",system-ui,Segoe UI,Roboto,Arial;background:
+    radial-gradient(1000px 500px at 15% 18%, rgba(34,221,255,.06), transparent 20%),
+    linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 100%); color:#eef4ff; overflow:hidden}
 
-    /* 💫 مؤثر قلب الصفحة */
-    body.page-flip {
-      transform-origin: right center;
-      position: relative;
-      overflow: hidden;
-    }
-    body.page-flip.active {
-      transform: rotateY(120deg);
-      filter: brightness(0.6);
-    }
+  /* Layers */
+  #stars, #fx {position:fixed; inset:0; display:block; z-index:0}
+  .aura {position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(800px 480px at 85% 78%, rgba(255,213,74,.15), transparent 60%),
+      radial-gradient(700px 440px at 10% 16%, rgba(255,213,74,.08), transparent 60%);
+    animation:aura 6s ease-in-out infinite alternate}
+  @keyframes aura{0%{opacity:.8;filter:brightness(1)}100%{opacity:1;filter:brightness(1.15)}}
 
-    /* ✨ وميض ذهبي أثناء القلب */
-    body::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: radial-gradient(circle at center,
-        rgba(255, 230, 160, 0.0) 0%,
-        rgba(255, 230, 160, 0.25) 20%,
-        rgba(255, 200, 100, 0.4) 40%,
-        transparent 70%);
-      opacity: 0;
-      transition: opacity 0.8s ease-in-out;
-      z-index: 1000;
-    }
-    body.page-flip.active::after {
-      opacity: 0.6;
-      animation: goldFlash 1.4s ease-in-out;
-    }
+  /* Header badge */
+  .badge{
+    position:fixed; right:14px; top:14px; z-index:4;
+    background:linear-gradient(90deg,var(--gold),var(--gold-deep));
+    color:#081026; padding:8px 14px; border-radius:12px; font-weight:900;
+    box-shadow:0 8px 36px rgba(212,175,55,.22)
+  }
 
-    @keyframes goldFlash {
-      0% { opacity: 0; transform: scale(0.8); }
-      50% { opacity: 0.7; transform: scale(1.1); }
-      100% { opacity: 0; transform: scale(1.3); }
-    }
+  /* Center Stage */
+  .stage{ position:relative; z-index:3; height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .card{
+    width:min(1100px,94vw); min-height:520px; border-radius:22px; padding:28px;
+    display:grid; grid-template-columns: 1.05fr .95fr; gap:24px; align-items:center;
+    background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.018));
+    border:1px solid rgba(255,213,74,.10);
+    box-shadow: 0 30px 90px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.02);
+    backdrop-filter: blur(6px);
+    transform:translateY(10px) scale(.98); opacity:0; transition:all 1s cubic-bezier(.2,.9,.2,1) .12s;
+  }
+  .card.show{ transform:none; opacity:1; }
 
-    /* المربع الزجاجي */
-    :root {
-      --glass-opacity: 0.08;
-    }
-    .glass-box {
-      position: relative;
-      background: rgba(255, 255, 255, var(--glass-opacity));
-      border: 1px solid rgba(255, 215, 100, 0.25);
-      box-shadow: 0 0 25px rgba(255, 215, 74, 0.1);
-      backdrop-filter: blur(15px) saturate(140%);
-      -webkit-backdrop-filter: blur(15px) saturate(140%);
-      border-radius: 18px;
-      padding: 40px 60px;
-      text-align: center;
-      max-width: 90%;
-      width: 480px;
-      overflow: hidden;
-      animation: fadeGlass 2.5s ease-out forwards;
-    }
+  .hero{ padding:10px 22px 10px 32px; }
+  h1{ margin:0 0 10px 0; font-size:clamp(1.6rem,4.8vw,2.9rem); line-height:1.06; font-weight:900; letter-spacing:.6px;
+      color:var(--gold); text-shadow:0 8px 30px rgba(255,213,74,.08); }
+  p.lead{ color:#dfe8ff; margin:10px 0 16px 0; font-size:clamp(.98rem,2.2vw,1.15rem); line-height:1.8; opacity:.95; }
 
-    /* ✨ لمعة الضوء تمر بخفة عبر المربع */
-    .glass-box::before {
-      content: "";
-      position: absolute;
-      top: -100%;
-      left: -100%;
-      width: 300%;
-      height: 300%;
-      background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.25) 50%, transparent 70%);
-      transform: rotate(25deg);
-      animation: shimmer 6s ease-in-out infinite;
-      pointer-events: none;
-      mix-blend-mode: overlay;
-    }
+  /* typing line */
+  .typing{
+    --c: #22ddff;
+    display:inline-block; padding:8px 14px; border-radius:10px; font-weight:800;
+    background:rgba(0,0,0,.45); color:var(--c);
+    border:1px solid rgba(34,221,255,.18);
+    box-shadow:0 6px 30px rgba(34,221,255,.10), inset 0 0 18px rgba(34,221,255,.05);
+    position:relative; min-height:42px;
+  }
+  .cursor{ width:12px; height:1.25em; background:linear-gradient(180deg, var(--c), #9ae9ff);
+           display:inline-block; vertical-align:middle; margin-inline-start:6px; animation:blink 1s steps(1) infinite }
+  @keyframes blink{50%{opacity:0}}
 
-    @keyframes shimmer {
-      0% { transform: translateX(-120%) rotate(25deg); opacity: 0.3; }
-      50% { transform: translateX(0%) rotate(25deg); opacity: 0.6; }
-      100% { transform: translateX(120%) rotate(25deg); opacity: 0.3; }
-    }
+  .cta{ margin-top:16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .btn{
+    padding:13px 22px; border-radius:14px; border:none; font-weight:900; cursor:pointer;
+    background: linear-gradient(90deg,var(--gold), #e0b83a); color:var(--ink);
+    box-shadow:0 10px 30px rgba(255,213,74,.20);
+    transition:transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .18s ease;
+  }
+  .btn:active{ transform:translateY(2px) scale(.995) }
 
-    @keyframes fadeGlass {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
+  .btn.secondary{
+    background:linear-gradient(90deg, rgba(34,221,255,0.16), rgba(34,221,255,0.05));
+    border:1px solid rgba(34,221,255,0.28);
+    color:#dfe8ff; font-weight:800;
+    box-shadow:0 0 14px rgba(34,221,255,0.18), inset 0 0 12px rgba(34,221,255,0.06);
+    transition:all .3s ease;
+  }
+  .btn.secondary:hover{
+    background:linear-gradient(90deg, rgba(34,221,255,0.28), rgba(34,221,255,0.09));
+    box-shadow:0 0 28px rgba(34,221,255,0.33), inset 0 0 16px rgba(34,221,255,0.16);
+    border-color:rgba(34,221,255,0.5);
+  }
 
-    /* الخلفية */
-    .bg {
-      position: fixed;
-      inset: 0;
-      background: url('https://dns3uae-glitch.github.io/crime-book/assets/crime-scene.jpg') center/cover no-repeat;
-      animation: bgZoom 25s ease-in-out infinite alternate;
-      filter: brightness(0.35) blur(0.5px);
-      opacity: 0.85;
-      z-index: -3;
-    }
+  /* flash on press */
+  @keyframes flash{ 0%{box-shadow:0 0 0 rgba(255,213,74,0)} 50%{box-shadow:0 0 34px rgba(255,213,74,.98)} 100%{box-shadow:0 0 0 rgba(255,213,74,0)} }
+  .btn.flash{ animation: flash .9s ease-out; }
 
-    @keyframes bgZoom {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.1); }
-    }
+  /* right column — preview ring + crest */
+  .preview{
+    position:relative; height:420px; border-radius:14px; overflow:hidden;
+    background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.24));
+    border:1px solid rgba(255,255,255,.06);
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+  }
+.preview::before{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    url("https://cityupload.io/2025/10/saluting-soldier-silhouette-vector-isolated-on-white-background-military-man-in-parade-700-291560853.png")
+    center/contain no-repeat;
+  opacity:0.18;            /* شفافية ناعمة داخل الكرة */
+  filter:brightness(1.1);
+  z-index:1;
+}
 
-    /* ضوء الشرطة */
-    .lights::before,
-    .lights::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      opacity: 0;
-      pointer-events: none;
-      mix-blend-mode: screen;
-      animation: flash 4s infinite alternate;
-      z-index: -2;
-    }
+  .ring{ position:absolute; width:84%; aspect-ratio:1/1; border-radius:50%;
+         box-shadow: inset 0 0 70px rgba(255,213,74,.22), 0 0 90px rgba(34,221,255,.15);
+         background:
+           radial-gradient(circle at 50% 50%, rgba(255,213,74,.20) 0%, transparent 42%),
+           conic-gradient(from 0deg, rgba(255,213,74,.25), rgba(34,221,255,.25), rgba(255,213,74,.25));
+         animation:ringspin 12s linear infinite }
+  @keyframes ringspin{ to{ transform:rotate(360deg) } }
 
-    .lights::before {
-      background: radial-gradient(circle at 25% 50%, rgba(255,0,0,0.25), transparent 70%);
-      animation-delay: 0s;
-    }
+  .seal{ position:relative; z-index:2; text-align:center; }
+  .seal h2{ margin:0; color:#fff; font-weight:900; letter-spacing:1px; }
+  .seal small{ opacity:.75 }
+.seal h2 {
+  margin:0;
+  color:#fff;
+  font-weight:900;
+  letter-spacing:1px;
+  text-shadow:0 0 12px rgba(255,213,74,.35);
+  animation:glowtext 3.8s ease-in-out infinite alternate;
+}
+@keyframes glowtext {
+  0%{text-shadow:0 0 12px rgba(255,213,74,.3);}
+  100%{text-shadow:0 0 28px rgba(255,213,74,.8);}
+}
 
-    .lights::after {
-      background: radial-gradient(circle at 75% 50%, rgba(0,0,255,0.25), transparent 70%);
-      animation-delay: 2s;
-    }
+  .meta{ margin-top:12px; font-size:.98rem; color:#cfe1ff; opacity:.9; }
+  .foot{ position:fixed; bottom:10px; left:14px; color:rgba(255,255,255,.22); font-size:12px; z-index:3 }
 
-    @keyframes flash {
-      0%, 80%, 100% { opacity: 0; }
-      40%, 60% { opacity: 1; }
-    }
+  /* responsive */
+  @media (max-width:960px){
+    .card{ grid-template-columns:1fr; min-height:auto; padding:18px; gap:12px }
+    .preview{ order:-1; height:300px }
+    .hero{ padding:8px 14px }
+  }
 
-    /* النصوص */
-    h1 {
-      font-size: 2.5em;
-      text-shadow: 0 0 20px #FFD54A;
-      margin-bottom: 20px;
-      animation: fadeIn 2.5s ease-in;
-    }
+.hbadge {
+  display: inline-flex; gap: 10px; align-items: center;
+  padding: 8px 14px; border: 1px solid var(--gold-soft);
+  border-radius: 999px; background: rgba(0,0,0,.35);
+  box-shadow: 0 0 40px rgba(255,213,74,.25);
+  font-weight: 900; margin-bottom: 10px;
+}
 
-    .intro {
-      font-size: 1.4em;
-      opacity: 0;
-      transform: scale(0.7);
-      animation: zoomText 3s ease-out forwards;
-      text-shadow: 0 0 15px rgba(255, 213, 74, 0.7);
-    }
-
-    @keyframes zoomText {
-      0% { opacity: 0; transform: scale(0.7); }
-      50% { opacity: 0.9; transform: scale(1.05); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* الزر */
-    .btn {
-      margin-top: 50px;
-      background: linear-gradient(90deg, #FFD54A, #b8921d);
-      color: #000;
-      border: none;
-      padding: 12px 34px;
-      border-radius: 10px;
-      font-size: 1.15em;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 0 25px #FFD54A;
-      transition: transform 0.4s, box-shadow 0.4s;
-      animation: pulse 2s infinite alternate;
-    }
-
-    .btn:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 40px #FFD54A;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 12px #FFD54A; }
-      100% { box-shadow: 0 0 28px #b8921d; }
-    }
-
-    /* تفاعل النص مع أضواء الشرطة */
-    h1, .intro {
-      background: linear-gradient(90deg, #FFD54A 0%, #ff4d4d 25%, #FFD54A 50%, #4d6dff 75%, #FFD54A 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-size: 400%;
-      animation: policeLightText 6s ease-in-out infinite;
-      text-shadow: 0 0 15px rgba(255, 215, 74, 0.3);
-    }
-
-    @keyframes policeLightText {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-  </style>
+</style>
 </head>
 <body>
-  <div class="bg"></div>
-  <div class="lights"></div>
 
-  <div class="glass-box">
-    <h1>مسرح الجريمة</h1>
-    <div class="intro">مرحبًا بك في منصة التعليم الإلكتروني التفاعلي...</div>
-    <button class="btn" onclick="start()">ابدأ التحقيق</button>
+<div class="badge">حفل التدشين · Crime-Book AI</div>
+<canvas id="stars" aria-hidden="true"></canvas>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="aura" aria-hidden="true"></div>
+
+<section class="stage" role="main" aria-labelledby="heroTitle">
+  <div class="card" id="card">
+    <div class="hero">
+<div class="hbadge">تحت رعاية سمو حاكم الشارقة</div>
+
+<h1 id="heroTitle">
+  <span style="font-size:0.6em;">أكاديمية الشارقة للعلوم الشرطية</span>
+  <span style="font-size:0.6em;"> تدشين الكتاب التفاعلي</span>
+</h1>
+      <div class="typing" id="typing">
+        <span id="typed"></span><span class="cursor" aria-hidden="true"></span>
+      </div>
+
+      <p class="lead">
+        نعلن اليوم انطلاقة التحول الذكي نحو التعليم الإلكتروني المتكامل، حيث تتحد التقنية بالمعرفة لتصنع جيلًا من الضباط القادرين على القيادة والتحليل في بيئات رقمية متطورة
+      </p>
+
+      <div class="cta" role="region" aria-label="خيارات">
+<button class="btn secondary" id="btnPreview">استعراض المشروع</button>
+      </div>
+
+      <div class="meta" id="meta">اضغط للبدء — الأزرار فقط تفعّل التفاعل.</div>
+    </div>
+
+    <div class="preview" aria-label="معاينة الطاقة التحليلية">
+      <div class="ring" aria-hidden="true"></div>
+      <div class="seal">
+        <h2>أكاديمية شرطة الشارقة</h2>
+        <small>وحدة نظم التحقيق الذكي</small>
+      </div>
+    </div>
   </div>
+</section>
 
-  <!-- أصوات -->
-    <!-- 🎧 الأصوات -->
-  <audio id="bgSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_61cb724272.mp3?filename=police-sirens-71133.mp3" loop></audio>
-  <audio id="clickSound" src="https://cdn.pixabay.com/download/audio/2025/03/14/audio_ca4a3becec.mp3?filename=beep-313342.mp3"></audio>
-  <audio id="pageFlipSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_62c8f9853d.mp3?filename=book-turn-page-2-92381.mp3"></audio>
+<div class="foot">© أكاديمية الشارقة للعلوم الشرطية — Sharjah Police Academy</div>
 
-  <script>
-  const bgSound = document.getElementById('bgSound');
-  const clickSound = document.getElementById('clickSound');
-  const flipSound = document.getElementById('pageFlipSound');
-  bgSound.volume = 0.25;
+<!-- أصوات (يمكنك تغيير الروابط عند الحاجة) -->
+<audio id="initTone"  src="https://cdn.pixabay.com/download/audio/2025/09/08/audio_b80f55a35a.mp3?filename=beep-401570.mp3" preload="auto"></audio>
+<audio id="systemOn"  src="https://cdn.pixabay.com/download/audio/2025/07/18/audio_1b80f67556.mp3?filename=whoosh-cinematic-sound-effect-376889.mp3" preload="auto"></audio>
 
-  document.addEventListener('click', enableAudio);
-  document.addEventListener('touchstart', enableAudio);
-  function enableAudio() {
-    bgSound.play().catch(() => {});
-    document.removeEventListener('click', enableAudio);
-    document.removeEventListener('touchstart', enableAudio);
-  }
+<script>
+/* ===== 3D Starfield with Warp ===== */
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let W,H,stars=[], warp=0;
+function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+addEventListener('resize', resize); resize();
 
-  function speakArabic(text, callback) {
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'ar-SA';
-    utter.onend = callback;
-    speechSynthesis.speak(utter);
-  }
-
-  function start() {
-    clickSound.play();
-    bgSound.play();
-
-    // 🔊 خفض صوت الخلفية تدريجيًا
-    let vol = bgSound.volume;
-    const fade = setInterval(() => {
-      if (vol > 0.01) {
-        vol -= 0.02;
-        bgSound.volume = vol;
-      } else {
-        clearInterval(fade);
-        bgSound.pause();
-      }
-    }, 100);
-
-    // 🗣️ بعد انتهاء الجملة الصوتية نضيف صوت تقليب الصفحة ثم الانتقال
-    speakArabic("هيا بنا لننطلق نحو التعليم الإلكتروني التفاعلي", () => {
-      // تشغيل صوت قلب الصفحة قبل الحركة
-      flipSound.play();
-
-      // بدء حركة القلب بعد صوت الصفحة مباشرة
-      setTimeout(() => {
-        document.body.classList.add('page-flip', 'active');
-      }, 500);
-
-      // الانتقال بعد انتهاء الحركة
-      setTimeout(() => {
-        window.location.href = "https://dns3uae-glitch.github.io/crime-book/company/";
-      }, 2200);
+function spawnStars(n=900){
+  stars.length=0;
+  for(let i=0;i<n;i++){
+    stars.push({
+      x:(Math.random()-0.5)*2, // -1..1
+      y:(Math.random()-0.5)*2,
+      z:Math.random()*1,       // 0..1 (قريب..بعيد)
+      spd: 0.0007 + Math.random()*0.0015,
+      hue: Math.random()<0.2 ? 50+Math.random()*10 : 195+Math.random()*20 // ذهبي/سماوي
     });
   }
-  </script>
+}
+spawnStars();
+
+function starLoop(t){
+  ctx.clearRect(0,0,W,H);
+  const cx=W*0.5, cy=H*0.46, f = Math.min(W,H)*0.9; // focal
+  for(const s of stars){
+    // تقدم بالزمن + warp boost
+    s.z -= (s.spd * (1 + warp*2.2));
+    if(s.z<=0.001){ // أعد للعمق
+      s.x=(Math.random()-0.5)*2; s.y=(Math.random()-0.5)*2; s.z=1;
+    }
+    // إسقاط منظور
+    const k = f / (s.z*f + 1);
+    const sx = cx + s.x*k, sy = cy + s.y*k;
+    const alpha = Math.min(1, (1-s.z)*1.3 + warp*0.2);
+    const r = Math.max(0.4, (1-s.z)*1.8 + warp*0.8);
+
+    ctx.beginPath();
+    ctx.fillStyle = `hsla(${s.hue}, 100%, 65%, ${alpha*0.75})`;
+    ctx.arc(sx, sy, r, 0, Math.PI*2);
+    ctx.fill();
+
+    // خطوط سرعة خفيفة عند الـWarp
+    if(warp>0.2){
+      ctx.beginPath();
+      ctx.strokeStyle = `hsla(${s.hue}, 100%, 75%, ${alpha*0.25})`;
+      ctx.lineWidth = Math.max(0.3, r*0.6);
+      ctx.moveTo(sx,sy);
+      ctx.lineTo(sx - (s.x*k)*0.02*warp*f*0.0008, sy - (s.y*k)*0.02*warp*f*0.0008);
+      ctx.stroke();
+    }
+  }
+  requestAnimationFrame(starLoop);
+}
+requestAnimationFrame(starLoop);
+
+/* ===== Light rays / flare layer ===== */
+const fx = document.getElementById('fx');
+const g = fx.getContext('2d');
+function resizeFx(){ fx.width=innerWidth; fx.height=innerHeight; }
+addEventListener('resize', resizeFx); resizeFx();
+
+(function flare(){
+  g.clearRect(0,0,fx.width,fx.height);
+  // هالة وسطية ناعمة
+  const cx=fx.width*.5, cy=fx.height*.46, R=Math.max(fx.width,fx.height)*.6;
+  const grad = g.createRadialGradient(cx,cy,0, cx,cy,R);
+  grad.addColorStop(0,'rgba(255,213,74,.08)');
+  grad.addColorStop(.25,'rgba(34,221,255,.06)');
+  grad.addColorStop(1,'rgba(0,0,0,0)');
+  g.fillStyle=grad; g.fillRect(0,0,fx.width,fx.height);
+
+  // أشعة خفيفة دورانية
+  g.save();
+  g.translate(cx,cy); g.rotate(performance.now()/4000);
+  for(let i=0;i<7;i++){
+    g.rotate(Math.PI*2/7);
+    g.beginPath();
+    g.moveTo(0,0);
+    g.quadraticCurveTo(R*0.08, -R*0.02, R*0.28, 0);
+    g.lineWidth=2; g.strokeStyle='rgba(255,213,74,.07)'; g.stroke();
+  }
+  g.restore();
+  requestAnimationFrame(flare);
+})();
+
+/* ===== Typing line ===== */
+const typingEl = document.getElementById('typed');
+const message = "بدء تدشين الكتاب التطبيقي التفاعلي لمسرح الجريمة تمهيدا لبدء انطلاق التعليم الافتراضي المبني على السيناريوهات.";
+let i=0;
+function typeNext(){
+  if(i<=message.length){ typingEl.textContent = message.slice(0,i++); setTimeout(typeNext, 80); }
+}
+setTimeout(typeNext, 500);
+
+/* ===== Speech (Arabic) ===== */
+function speakIntro(txt){
+  try{
+    const s = window.speechSynthesis, u = new SpeechSynthesisUtterance(txt);
+    u.lang='ar-SA'; u.rate=0.92; u.pitch=1.0; u.volume=1.0;
+    s.cancel(); s.speak(u);
+  }catch(e){}
+}
+// حاول القراءة بعد التحميل (قد تُحظر على iOS حتى يحدث تفاعل)
+addEventListener('load', ()=> {
+  setTimeout(()=>{
+    speakIntro("بسم الله الرحمن الرحيم. تحت رعاية صاحب السمو الشيخ الدكتور سلطان بن محمد القاسمي، عضو المجلس الأعلى، حاكم إمارة الشارقة. تتشرف أكاديمية الشارقة للعلوم الشرطية، بتدشين الكتاب التفاعلي التطبيقي، لمسرح الجريمة.");
+  }, 1800);
+});
+
+/* ===== Controls & Launch ===== */
+const card      = document.getElementById('card');
+const badge     = document.querySelector('.badge');
+const btnPrev   = document.getElementById('btnPreview');
+const initTone  = document.getElementById('initTone');
+const systemOn  = document.getElementById('systemOn');
+const whoosh    = document.getElementById('whoosh');
+const TARGET    = "https://dns3uae-glitch.github.io/crime-book/"; // عدّل الوجهة إذا رغبت
+
+// دخول الكارد
+setTimeout(()=>card.classList.add('show'), 150);
+
+// تشغيل متسلسل عند الضغط على البدء
+function startSequence(){
+  if(card.classList.contains('started')) return;
+  card.classList.add('started');
+
+  // صوت البداية + بعده النظام جاهز
+  initTone.play().catch(()=>{});
+  setTimeout(()=> systemOn.play().catch(()=>{}), 1500);
+
+  // تفعيل Warp تدريجي
+  let t0 = performance.now();
+  (function warpUp(){
+    const k = Math.min(1, (performance.now()-t0)/1200);
+    warp = k; // 0->1
+    if(k<1) requestAnimationFrame(warpUp);
+  })();
+
+  // تلاشي العناصر
+  const fadeDur = 2000;
+  badge.style.transition = `opacity ${fadeDur}ms ease`; badge.style.opacity=0;
+  card.style.transition  = `transform ${fadeDur}ms cubic-bezier(.2,.9,.2,1), opacity ${fadeDur}ms`;
+  card.style.transform   = 'scale(.88) translateY(-10px)'; card.style.opacity='0.02';
+
+
+  // التحويل
+  setTimeout(()=> location.href = TARGET, fadeDur+600);
+}
+
+// زر الاستعراض (لا تحويل، فقط وميض تنبيهي)
+function previewPing(){
+  btnPrev.disabled = true;
+  btnPrev.style.opacity = .8;
+  initTone.play().catch(()=>{});
+  setTimeout(()=> systemOn.play().catch(()=>{}), 1500);
+
+  // تلاشي بسيط قبل التحويل
+  badge.style.transition = 'opacity 1.8s ease';
+  badge.style.opacity = 0;
+  card.style.transition = 'opacity 1.8s ease, transform 1.8s ease';
+  card.style.opacity = 0.05;
+  card.style.transform = 'scale(.9)';
+  
+  setTimeout(()=> location.href = "https://dns3uae-glitch.github.io/crime-book/book", 2500);
+}
+
+
+// ربط الأزرار فقط (لا يوجد مستمع عام للنقر على الصفحة)
+btnPrev .addEventListener('click', previewPing);
+
+// اختصار لوحة المفاتيح
+addEventListener('keydown', (e)=>{ if(e.key==='Enter') startSequence(); });
+</script>
 
 </body>
 </html>
-
