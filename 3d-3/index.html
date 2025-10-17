@@ -320,7 +320,7 @@ input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid
 <!-- البداية بالصوت + زر يعمل دائمًا -->
 <div id="overlayStart">
   <div>مرحبًا بكم في إعادة بناء مسرح الجريمة<br>اضغط للبدء</div>
-  <button id="btnStart" onclick="startApp()">ابدأ</button>
+<button id="btnStart" onclick="startApp()">ابدأ</button>
 </div>
 
 <!-- HUD -->
@@ -477,10 +477,21 @@ input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid
 </div>
 
 <div class="toast" id="toast"></div>
+<script>
+function startApp(){
+  if (typeof window.startAppReal === "function") {
+    window.startAppReal();
+  } else {
+    alert("لم يتم تحميل النظام بعد، أعد المحاولة بعد ثوانٍ");
+  }
+}
+</script>
 
 <script>
+
+  
 /* ===== بدء التطبيق ===== */
-window.startApp = function(){
+window.startAppReal = function(){
   const ov = document.getElementById('overlayStart');
   if(ov){ ov.style.transition='opacity .6s ease'; ov.style.opacity='0'; setTimeout(()=> ov.remove(),650); }
 try{
@@ -1247,6 +1258,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+
 
 
 
