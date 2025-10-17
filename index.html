@@ -294,27 +294,49 @@ function typeNext(){
 }
 setTimeout(typeNext, 500);
 
-/* ===== Intro Voice (MP3 Autoplay on First Interaction) ===== */
-window.addEventListener('load', () => {
+/* ===== Intro Voice (MP3 Autoplay on First Interaction - FIXED VERSION) ===== */
+window.addEventListener("load", () => {
+  // إنشاء الصوت وربطه
   const intro = new Audio("https://dns3uae-glitch.github.io/crime-book/assets/audio/uae_google_intro.mp3");
   intro.preload = "auto";
 
-  // محاولة التشغيل الصامت أولاً (قد يُسمح به في بعض المتصفحات)
-  intro.muted = true;
-  intro.play().then(() => {
-    intro.pause();
-    intro.muted = false;
-  }).catch(()=>{});
+  // إنشاء لافتة صغيرة تخبر المستخدم أن الصوت جاهز
+  const notice = document.createElement("div");
+  notice.textContent = "🎧 اضغط لتشغيل التدشين الصوتي";
+  Object.assign(notice.style, {
+    position: "fixed",
+    bottom: "20px",
+    right: "20px",
+    background: "rgba(0,0,0,0.65)",
+    color: "var(--gold)",
+    padding: "10px 18px",
+    borderRadius: "12px",
+    fontWeight: "700",
+    fontSize: "14px",
+    zIndex: 9999,
+    backdropFilter: "blur(4px)",
+    cursor: "pointer",
+    transition: "opacity 0.4s ease",
+  });
+  document.body.appendChild(notice);
 
-  // عند أول تفاعل من المستخدم (نقرة أو لمس) شغّل الصوت
+  // بمجرد الضغط أو اللمس: تشغيل الصوت وحذف اللافتة
   const unlockAudio = () => {
-    intro.play().catch(()=>{});
-    document.removeEventListener('click', unlockAudio);
-    document.removeEventListener('touchstart', unlockAudio);
+    intro.play()
+      .then(() => {
+        notice.style.opacity = "0";
+        setTimeout(() => notice.remove(), 500);
+      })
+      .catch(() => {
+        notice.textContent = "⚠️ لم يُسمح بتشغيل الصوت — اضغط مرة أخرى";
+      });
+
+    document.removeEventListener("click", unlockAudio);
+    document.removeEventListener("touchstart", unlockAudio);
   };
 
-  document.addEventListener('click', unlockAudio, { once: true });
-  document.addEventListener('touchstart', unlockAudio, { once: true });
+  document.addEventListener("click", unlockAudio, { once: true });
+  document.addEventListener("touchstart", unlockAudio, { once: true });
 });
 
 
