@@ -386,14 +386,25 @@ function musicFadeTo(target=0.15, ms=800){
   },100);
 }
 
+// 🎧 صوت المقدمة الجديد
+const introAudio = new Audio("https://dns3uae-glitch.github.io/crime-book/assets/audio/quiz.mp3");
+
 btnStart.addEventListener('click', async ()=>{
   stopSpeak();
-  try{ bgMusic.currentTime=0; bgMusic.play(); }catch(e){}
+  try{ bgMusic.currentTime = 0; bgMusic.play(); }catch(e){}
   musicFadeTo(0.15, 800);
-  await speak("مرحبًا بك أيها الطالب الضابط، استعد لخوض اختبار الميدان في معاينة مسرح الجريمة.", {rate:0.98, pitch:0.9, volume:1});
-  musicFadeTo(0, 800);
-  goNext();
+
+  // شغّل الصوت الجديد
+  introAudio.volume = 1;
+  introAudio.play().catch(()=>{});
+
+  // بعد انتهاء الصوت، انتقل للمرحلة التالية
+  introAudio.onended = () => {
+    musicFadeTo(0, 800);
+    goNext();
+  };
 });
+
 
 function goNext(){
   stopSpeak();
