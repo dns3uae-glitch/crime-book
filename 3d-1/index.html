@@ -1335,9 +1335,21 @@ function afterLoading(){
   loader.classList.add('fade-hide');
   setTimeout(()=> loader.style.display='none', 650);
   intro.classList.add('show');
-  speakAwait("عزيزي الطالب الضابط، بعد الانتهاء من معاينة مسرح الجريمة الثلاثي الأبعاد، الآن جاء الوقت لاختبارك بتحديد الأدلة الموجودة في مسرح الجريمة. اضغط ابدأ جمع الأدلة.").then(()=>{
+// تشغيل الصوت الخارجي بدل الصوت الآلي
+function afterLoading(){
+  loader.classList.add('fade-hide');
+  setTimeout(()=> loader.style.display='none', 650);
+  intro.classList.add('show');
+
+  // 🎧 تشغيل الصوت من الرابط
+  const introAudio = new Audio("https://dns3uae-glitch.github.io/crime-book/assets/audio/3d-1.mp3");
+  introAudio.volume = 1;
+  introAudio.play().catch(()=>{});
+
+  // بعد انتهاء الصوت، أظهر زر "ابدأ جمع الأدلة"
+  introAudio.onended = () => {
     startBtn.classList.add('show');
-  });
+  };
 }
 
 /* preloads image then start progress */
@@ -1514,6 +1526,7 @@ window.addEventListener("load", simulateLoading);
 </script>
 </body>
 </html>
+
 
 
 
