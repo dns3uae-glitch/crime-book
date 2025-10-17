@@ -249,45 +249,41 @@
     document.removeEventListener('touchstart', enableAudio);
   }
 
-  function speakArabic(text, callback) {
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = 'ar-SA';
-    utter.onend = callback;
-    speechSynthesis.speak(utter);
-  }
+ function start() {
+  clickSound.play();
+  bgSound.play();
 
-  function start() {
-    clickSound.play();
-    bgSound.play();
+  // 🔊 خفض صوت الخلفية تدريجيًا
+  let vol = bgSound.volume;
+  const fade = setInterval(() => {
+    if (vol > 0.01) {
+      vol -= 0.02;
+      bgSound.volume = vol;
+    } else {
+      clearInterval(fade);
+      bgSound.pause();
+    }
+  }, 100);
 
-    // 🔊 خفض صوت الخلفية تدريجيًا
-    let vol = bgSound.volume;
-    const fade = setInterval(() => {
-      if (vol > 0.01) {
-        vol -= 0.02;
-        bgSound.volume = vol;
-      } else {
-        clearInterval(fade);
-        bgSound.pause();
-      }
-    }, 100);
+  // 🎧 تشغيل الصوت المسجّل بدل النطق الآلي
+  const introVoice = new Audio("https://dns3uae-glitch.github.io/crime-book/assets/audio/book.mp3");
+  introVoice.preload = "auto";
+  introVoice.play().catch(()=>{});
 
-    // 🗣️ بعد انتهاء الجملة الصوتية نضيف صوت تقليب الصفحة ثم الانتقال
-    speakArabic("هيا بنا لننطلق نحو التعليم الإلكتروني التفاعلي", () => {
-      // تشغيل صوت قلب الصفحة قبل الحركة
-      flipSound.play();
+  // عند انتهاء الصوت، تشغيل مؤثر الصفحة والانتقال
+  introVoice.addEventListener("ended", () => {
+    flipSound.play();
 
-      // بدء حركة القلب بعد صوت الصفحة مباشرة
-      setTimeout(() => {
-        document.body.classList.add('page-flip', 'active');
-      }, 500);
+    setTimeout(() => {
+      document.body.classList.add("page-flip", "active");
+    }, 500);
 
-      // الانتقال بعد انتهاء الحركة
-      setTimeout(() => {
-        window.location.href = "https://dns3uae-glitch.github.io/crime-book/company/";
-      }, 2200);
-    });
-  }
+    setTimeout(() => {
+      window.location.href = "https://dns3uae-glitch.github.io/crime-book/company/";
+    }, 2200);
+  });
+}
+
   </script>
 
 </body>
