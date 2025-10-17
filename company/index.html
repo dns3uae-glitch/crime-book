@@ -67,9 +67,11 @@
 
   <div class="video-box" id="videoBox">
     <div class="camera-flash" id="cameraFlash"></div>
-      <iframe src="https://www.youtube.com/embed/KPs2ktUji2Q?autoplay=1&rel=0"
-        allow="autoplay; encrypted-media"
-        allowfullscreen></iframe>
+<iframe id="ytplayer"
+  src="https://www.youtube.com/embed/KPs2ktUji2Q?autoplay=1&rel=0&enablejsapi=1"
+  allow="autoplay; encrypted-media"
+  allowfullscreen></iframe>
+
 
   </div>
 
@@ -94,20 +96,20 @@
     document.addEventListener('click', startSequence, {once:true});
     document.addEventListener('touchstart', startSequence, {once:true, passive:true});
 
-    function startSequence(){
-      startup.volume = 0.4;
-      startup.play().then(()=>{
-        // انتظر حتى تنتهي النغمة (~2 ثانية) قبل تشغيل الفيديو
-        setTimeout(()=>{
-          const iframe = document.getElementById('ytplayer');
-          iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-        }, 2000);
-      }).catch(()=>{
-        // لو فشل التشغيل التلقائي، شغل الفيديو فورًا
-        const iframe = document.getElementById('ytplayer');
-        iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-      });
-    }
+function startSequence() {
+  startup.volume = 0.4;
+  startup.play().catch(()=>{});
+
+  setTimeout(() => {
+    const iframe = document.getElementById('ytplayer');
+
+    // ▶️ تشغيل الفيديو + فك الكتم + رفع الصوت
+    iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+    iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}', '*');
+  }, 1500);
+}
+
 
     // تحميل واجهة YouTube API
     const tag = document.createElement('script');
