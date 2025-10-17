@@ -484,13 +484,10 @@ input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid
 window.startApp = function(){
   const ov = document.getElementById('overlayStart');
   if(ov){ ov.style.transition='opacity .6s ease'; ov.style.opacity='0'; setTimeout(()=> ov.remove(),650); }
-  try{
-    if('speechSynthesis' in window){
-      const u=new SpeechSynthesisUtterance('مرحبًا بك في إعادة بناء مسرح الجريمة');
-      u.lang='ar'; speechSynthesis.cancel(); speechSynthesis.speak(u);
-    }
-  }catch(e){}
-};
+try{
+  // تم تعطيل الصوت الترحيبي
+}catch(e){}
+
 
 const sidebar = document.getElementById('sidebar');
 document.getElementById('btnOpen').onclick  = ()=> sidebar.classList.remove('hidden');
@@ -1251,4 +1248,5 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+
 
