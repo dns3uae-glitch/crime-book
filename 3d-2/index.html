@@ -291,26 +291,22 @@ addEventListener('keydown', (e)=>{ if(e.key==='Enter') btnStart.click(); });
 </script>
 <script>
 /* === القارئ الصوتي الملكي === */
-function speakIntro(txt){
-  try{
-    const s = window.speechSynthesis;
-    const u = new SpeechSynthesisUtterance(txt);
-    u.lang = 'ar-SA';   // اللغة: عربية سعودية (أقرب لهجة رسمية فخمة)
-    u.rate = 0.92;      // سرعة القراءة
-    u.pitch = 1.0;      // درجة الصوت
-    u.volume = 1.0;     // مستوى الصوت
-    s.cancel();
-    s.speak(u);
-  }catch(e){}
-}
-
-// يشغل الصوت بعد ثانيتين من تحميل الصفحة
+/* === صوت المقدمة الرسمي من ملف خارجي === */
 window.addEventListener('load', ()=>{
   setTimeout(()=>{
-    speakIntro("في إعادة بناء مسرح الجريمة، لا نعيد ترتيب الأدلة فقط، بل نُعيد إحياء لحظة الحقيقة... خطوة بخطوة، لتتكلم الأشياء قبل الشهود.");
+    const introAudio = new Audio("https://dns3uae-glitch.github.io/crime-book/assets/audio/3d-2.mp3");
+    introAudio.volume = 1;
+    introAudio.play().catch(()=>{});
+
+    // 💡 بعد انتهاء الصوت، يمكنك تنفيذ أي تأثير أو وميض إن أردت
+    introAudio.onended = () => {
+      console.log("انتهى صوت المقدمة.");
+    };
   }, 2000);
 });
+
 </script>
 
 </body>
 </html>
+
