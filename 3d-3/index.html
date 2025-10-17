@@ -320,7 +320,7 @@ input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid
 <!-- البداية بالصوت + زر يعمل دائمًا -->
 <div id="overlayStart">
   <div>مرحبًا بكم في إعادة بناء مسرح الجريمة<br>اضغط للبدء</div>
-<button id="btnStart" onclick="startApp()">ابدأ</button>
+  <button id="btnStart" onclick="startApp()">ابدأ</button>
 </div>
 
 <!-- HUD -->
@@ -460,6 +460,7 @@ input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid
   <button class="cam-btn" data-cam="yawR">⟳</button>
 </div>
 
+</div>
 
 <!-- نافذة إدخال الملاحظة -->
 <div id="noteModal">
@@ -477,27 +478,14 @@ input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid
 </div>
 
 <div class="toast" id="toast"></div>
-<script>
-function startApp(){
-  if (typeof window.startAppReal === "function") {
-    window.startAppReal();
-  } else {
-    alert("لم يتم تحميل النظام بعد، أعد المحاولة بعد ثوانٍ");
-  }
-}
-</script>
 
 <script>
-
-  
 /* ===== بدء التطبيق ===== */
-window.startAppReal = function(){
+window.startApp = function(){
   const ov = document.getElementById('overlayStart');
   if(ov){ ov.style.transition='opacity .6s ease'; ov.style.opacity='0'; setTimeout(()=> ov.remove(),650); }
-try{
-  // تم تعطيل الصوت الترحيبي
-}catch(e){}
 
+};
 
 const sidebar = document.getElementById('sidebar');
 document.getElementById('btnOpen').onclick  = ()=> sidebar.classList.remove('hidden');
@@ -816,12 +804,12 @@ document.querySelectorAll('#cameraPanel .cam-btn').forEach(btn=>{
   const start = ()=>{
     const step = stepVal();
     moveInterval = setInterval(()=>{
-      if(act==='up')   moveCam(0, +step*3, 0);
-      if(act==='down') moveCam(0, -step*3, 0);
-      if(act==='left') moveCam(-step*3, 0, 0);
-      if(act==='right')moveCam(+step*3, 0, 0);
-      if(act==='fwd')  moveCam(0, 0, -step*3);
-      if(act==='back') moveCam(0, 0, +step*3);
+      if(act==='up')   moveCam(0, +step*6, 0);
+      if(act==='down') moveCam(0, -step*6, 0);
+      if(act==='left') moveCam(-step*6, 0, 0);
+      if(act==='right')moveCam(+step*6, 0, 0);
+      if(act==='fwd')  moveCam(0, 0, -step*6);
+      if(act==='back') moveCam(0, 0, +step*6);
       if(act==='yawL') yawCam(-12);
       if(act==='yawR') yawCam(+12);
     }, 50);
@@ -1258,7 +1246,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-
-
-
 
