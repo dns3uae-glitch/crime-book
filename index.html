@@ -294,20 +294,29 @@ function typeNext(){
 }
 setTimeout(typeNext, 500);
 
-/* ===== Speech (Arabic) ===== */
-function speakIntro(txt){
-  try{
-    const s = window.speechSynthesis, u = new SpeechSynthesisUtterance(txt);
-    u.lang='ar-SA'; u.rate=0.92; u.pitch=1.0; u.volume=1.0;
-    s.cancel(); s.speak(u);
-  }catch(e){}
-}
-// حاول القراءة بعد التحميل (قد تُحظر على iOS حتى يحدث تفاعل)
-addEventListener('load', ()=> {
-  setTimeout(()=>{
-    speakIntro("بسم الله الرحمن الرحيم. تحت رعاية صاحب السمو الشيخ الدكتور سلطان بن محمد القاسمي، عضو المجلس الأعلى، حاكم إمارة الشارقة. تتشرف أكاديمية الشارقة للعلوم الشرطية، بتدشين الكتاب التفاعلي التطبيقي، لمسرح الجريمة.");
-  }, 1800);
+/* ===== Intro Voice (MP3 Autoplay on First Interaction) ===== */
+window.addEventListener('load', () => {
+  const intro = new Audio("https://dns3uae-glitch.github.io/crime-book/assets/audio/uae_google_intro.mp3");
+  intro.preload = "auto";
+
+  // محاولة التشغيل الصامت أولاً (قد يُسمح به في بعض المتصفحات)
+  intro.muted = true;
+  intro.play().then(() => {
+    intro.pause();
+    intro.muted = false;
+  }).catch(()=>{});
+
+  // عند أول تفاعل من المستخدم (نقرة أو لمس) شغّل الصوت
+  const unlockAudio = () => {
+    intro.play().catch(()=>{});
+    document.removeEventListener('click', unlockAudio);
+    document.removeEventListener('touchstart', unlockAudio);
+  };
+
+  document.addEventListener('click', unlockAudio, { once: true });
+  document.addEventListener('touchstart', unlockAudio, { once: true });
 });
+
 
 /* ===== Controls & Launch ===== */
 const card      = document.getElementById('card');
