@@ -8,7 +8,7 @@
  * - Export whole book as a single HTML file (post-edit)
  * ========================================================== */
 (function(){
-  const CDN_TINYMCE = 'https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js';
+const CDN_TINYMCE = 'https://cdn.tiny.cloud/1/wfzywll71fp456j62a7ol96ku7o9qekq2zfkdhlljs0i4mwn/tinymce/6/tinymce.min.js';
   const CDN_LANG_AR = 'https://cdn.jsdelivr.net/npm/tinymce@6-i18n/langs/ar.js';
   const GF_TAJAWAL  = 'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap';
   const LS_PREFIX   = 'royaledx_page_';   // autosave per page
