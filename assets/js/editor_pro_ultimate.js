@@ -231,6 +231,8 @@ const CDN_TINYMCE = 'https://cdn.tiny.cloud/1/wfzywll71fp456j62a7ol96ku7o9qekq2z
       statusbar: true,
       branding: false,
       height: '100%',
+  zindex: 99999,
+  fixed_toolbar_container: false,
       skin: 'oxide',
       content_css: 'default',
       content_style: `
