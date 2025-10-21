@@ -167,19 +167,87 @@ async function openPopup(){
  if(!pages.length){alert('لا توجد صفحات لتحريرها');return;}
  const ui=buildPopup(pages);
 
- tinymce.init({
-  selector:`#${ui.editorId}`,language:'ar',directionality:'rtl',
-  menubar:true,statusbar:true,branding:false,height:'100%',
-  zindex:99999,skin:'oxide',content_css:'default',
-  content_style:`@import url('${GF_TAJAWAL}');
-   html,body{font-family:Tajawal,system-ui,Arial;direction:rtl;}
-   p{line-height:1.9;font-size:16px;color:#333}
-   h1,h2,h3{font-weight:700}
-   img{max-width:100%;height:auto}`,plugins:'lists link image media table code fullscreen',
-  toolbar:'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | alignright aligncenter alignleft alignjustify | bullist numlist | link image media table | removeformat fullscreen code'
- }).then(editors=>{
-  const ed=editors[0];bindLogic(ui,ed);
- });
+tinymce.init({
+  selector: `#${ui.editorId}`,
+  language: 'ar',
+  directionality: 'rtl',
+  menubar: false,
+  statusbar: false,
+  branding: false,
+  height: '100%',
+  zindex: 99999,
+  skin: 'oxide',
+  content_css: 'default',
+
+  // ✅ نفس تصميم الورقة الحقيقي
+  content_style: `
+    @import url('${GF_TAJAWAL}');
+    html,body {
+      font-family: 'Tajawal', system-ui, Arial;
+      direction: rtl;
+      background: repeating-linear-gradient(
+        to bottom,
+        #ffffff 0px,
+        #ffffff 26px,
+        rgba(0,0,0,0.025) 27px
+      );
+      padding: 22px 28px;
+      box-sizing: border-box;
+      margin: 0;
+      width: 500px;
+      height: 580px;
+      border: 1px solid #e3e3e3;
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.04);
+      border-radius: 6px;
+    }
+    p {
+      line-height: 1.9;
+      font-size: 16px;
+      color: #333;
+    }
+    h1,h2,h3 {
+      font-weight: 700;
+      margin-top: 0;
+      color: #111;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    table, td, th {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+  `,
+
+  // ✅ نفس أدوات التنسيق المهمة فقط
+  plugins: 'lists link image media table code fullscreen',
+  toolbar: 'undo redo | bold italic underline | forecolor backcolor | alignright aligncenter alignleft | bullist numlist | link image media table | removeformat fullscreen code',
+
+  setup: (editor) => {
+    editor.on('init', () => {
+      // 🧩 ضبط حجم الإطار الداخلي ليحاكي الورقة الأصلية
+      const iframe = editor.iframeElement;
+      if (iframe) {
+        iframe.style.width = '500px';
+        iframe.style.height = '580px';
+        iframe.style.border = '1px solid #ddd';
+        iframe.style.borderRadius = '8px';
+        iframe.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+        iframe.style.background = '#fff';
+      }
+    });
+  }
+}).then(editors => {
+  const ed = editors[0];
+  bindLogic(ui, ed);
+});
+
 }
 
 function bindLogic(ui,ed){
