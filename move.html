@@ -63,6 +63,22 @@ select,input{
   <a-entity light="type:directional;color:#fff;intensity:0.6" position="0 10 10"></a-entity>
 
 <!-- 🎥 الكاميرا ثابتة على الأرض وتتحرك بالأسهم فقط -->
+<!-- 🔹 نموذج متحرك فعلي من Mixamo/Fox -->
+<a-entity
+  gltf-model="url(https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Fox/glTF-Binary/Fox.glb)"
+  animation-mixer="clip: Survey; loop: repeat"
+  position="0 0 -3"
+  scale="0.03 0.03 0.03">
+</a-entity>
+
+<!-- 🔹 نموذج man2.glb الخاص بك (للتجربة بعد التأكد من الحركة) -->
+<a-entity
+  gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/man2.glb)"
+  animation-mixer="clip: mixamo.com; loop: repeat"
+  position="2 0 -3"
+  scale="1 1 1">
+</a-entity>
+
 <a-entity id="rig"
           position="-12.450000000000019 0.92 -18.400000000000002"
           rotation="0 0 0"
