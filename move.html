@@ -264,28 +264,36 @@ function camRot(dx,dy,dz){
 
 /* ===== تشغيل أي أنميشن تلقائيًا ===== */
 /* ===== تشغيل أي أنميشن تلقائيًا (إصدار نهائي محسّن) ===== */
+/* ===== تشغيل أي أنميشن تلقائيًا (إصدار نهائي مؤكد العمل مع Mixamo) ===== */
 function activateAnimations(ent, url){
   ent.addEventListener("model-loaded", (e) => {
-    const root = e.detail.model;
-    if (root && root.animations && root.animations.length > 0) {
-      const clipName = root.animations[0].name || "*";
-      // إنشاء mixer يدوي وتحديثه كل فريم لضمان الحركة
-      const mixer = new THREE.AnimationMixer(root);
-      const action = mixer.clipAction(root.animations[0]);
+    const model = e.detail.model;
+    if (!model) return;
+
+    if (model.animations && model.animations.length > 0) {
+      const clip = model.animations[0];
+      const mixer = new THREE.AnimationMixer(model);
+      const action = mixer.clipAction(clip);
       action.play();
 
-      // نضيف التحديث اليدوي على كل tick
+      // 🔁 تحديث الميكسِر كل فريم
       ent.sceneEl.addEventListener("tick", (ev) => {
-        const delta = ent.sceneEl.clock.getDelta ? ent.sceneEl.clock.getDelta() : 0.016;
+        const delta = ev.detail.delta / 1000; // بالثواني
         mixer.update(delta);
+
+        // ✅ إصلاح مشكلة الجمود في Mixamo (Skinned Mesh Update)
+        model.traverse((obj) => {
+          if (obj.isSkinnedMesh) obj.skeleton.pose();
+        });
       });
 
-      console.log("🎬 تم تفعيل الأنميشن يدويًا:", clipName, "في", url);
+      console.log("🎬 حركة Mixamo مفعلة في:", url);
     } else {
       console.warn("⚠️ لا توجد حركات في:", url);
     }
   });
 }
+
 
 
 
