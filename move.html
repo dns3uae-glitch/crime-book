@@ -264,37 +264,44 @@ function camRot(dx,dy,dz){
 
 /* ===== تشغيل أي أنميشن تلقائيًا ===== */
 /* ===== تشغيل أي أنميشن تلقائيًا (إصدار نهائي محسّن) ===== */
-/* ===== تشغيل أي أنميشن تلقائيًا (إصدار نهائي مؤكد العمل مع Mixamo) ===== */
+
+/* ===== تشغيل أي أنميشن تلقائيًا (إصدار بصري مؤكد لـ Mixamo) ===== */
 function activateAnimations(ent, url){
   ent.addEventListener("model-loaded", (e) => {
     const model = e.detail.model;
     if (!model) return;
 
+    // التحقق من وجود المقاطع
     if (model.animations && model.animations.length > 0) {
       const clip = model.animations[0];
       const mixer = new THREE.AnimationMixer(model);
       const action = mixer.clipAction(clip);
       action.play();
 
-      // 🔁 تحديث الميكسِر كل فريم
-      ent.sceneEl.addEventListener("tick", (ev) => {
-        const delta = ev.detail.delta / 1000; // بالثواني
-        mixer.update(delta);
+      // ✅ رفع النموذج فوق الأرض قليلًا (لضمان ظهور الحركة)
+      model.position.y = 0.02;
+      model.scale.set(1, 1, 1);
 
-        // ✅ إصلاح مشكلة الجمود في Mixamo (Skinned Mesh Update)
-        model.traverse((obj) => {
-          if (obj.isSkinnedMesh) obj.skeleton.pose();
-        });
+      // ✅ تحديث الميكسِر باستمرار
+      ent.sceneEl.addEventListener("tick", (ev) => {
+        const delta = ev.detail.delta / 1000;
+        mixer.update(delta);
       });
 
-      console.log("🎬 حركة Mixamo مفعلة في:", url);
+      // ✅ تصحيح اتجاه الجذر (أحيانًا Mixamo يحفظه داخل Group)
+      model.traverse((obj) => {
+        if (obj.isSkinnedMesh) {
+          obj.frustumCulled = false; // يمنع اختفاؤه خارج الكاميرا
+          obj.skeleton.pose();
+        }
+      });
+
+      console.log("🎬 حركة Mixamo مفعّلة بالكامل:", clip.name, "في", url);
     } else {
       console.warn("⚠️ لا توجد حركات في:", url);
     }
   });
 }
-
-
 
 
 /* Scene load */
