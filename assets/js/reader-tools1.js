@@ -1191,12 +1191,30 @@ document.getElementById('rt-speak').onclick = ()=>{
       boxShadow:'0 0 18px rgba(0,120,255,.3)',
       transition:'opacity .3s'
     });
-    document.body.appendChild(t);
-    setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); },1500);
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); },1500);
   }
   
-});
+  /* ============================================================
+     🧠 تفعيل NotebookLM داخل أدوات القارئ
+     ============================================================ */
+  document.addEventListener('DOMContentLoaded', () => {
+    const openBtn = document.getElementById('openNotebookCine');
+    if (openBtn) {
+      openBtn.addEventListener('click', () => {
+        if (typeof openNotebookCinematic === 'function') {
+          openNotebookCinematic(); // يستدعي البوابة السينمائية الأصلية
+        } else {
+          alert('⚠️ لم يتم تحميل كود NotebookLM بعد.');
+        }
+      });
+    }
+  });
 
 })();
+
+
+})();
+
 
 
