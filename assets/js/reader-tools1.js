@@ -1198,7 +1198,7 @@ document.getElementById('rt-speak').onclick = ()=>{
   /* ============================================================
      🧠 تفعيل NotebookLM داخل أدوات القارئ
      ============================================================ */
-  document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
     const openBtn = document.getElementById('openNotebookCine');
     if (openBtn) {
       openBtn.addEventListener('click', () => {
@@ -1212,6 +1212,7 @@ document.getElementById('rt-speak').onclick = ()=>{
   });
 
 })();
+
 
 
 
