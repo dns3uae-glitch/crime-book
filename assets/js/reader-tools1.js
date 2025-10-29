@@ -56,9 +56,16 @@
   .rt-fab{
     position:fixed; bottom:28px; ${document.dir==='ltr'?'left:22px;':'right:22px;'}
     background:linear-gradient(145deg,rgba(60,60,65,.9),rgba(20,20,25,.95));
-color:#fff;
-border:1px solid rgba(255,255,255,.15);
-box-shadow:0 0 25px rgba(255,255,255,.15), inset 0 0 12px rgba(255,255,255,.08);
+color:transparent;
+background: linear-gradient(180deg, #f7d978, #d4af37);
+-webkit-background-clip:text;
+background-clip:text;
+text-shadow:
+  0px 1px 0px rgba(255,255,255,.55),     /* اللمعة العليا */
+  0px -1px 0px rgba(0,0,0,.5),           /* الحفر السفلي */
+  0.5px 0.5px 0 rgba(0,0,0,.6),          /* ظل خفيف خارجي */
+  -0.5px -0.5px 0 rgba(255,255,255,.18); /* بروز بسيط */
+filter: drop-shadow(0 1px 0 rgba(255,255,255,.08));
 
     cursor:pointer; z-index:99991; transition:.3s
   }
@@ -1185,4 +1192,5 @@ document.getElementById('rt-speak').onclick = ()=>{
     setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); },1500);
   }
 })();
+
 
