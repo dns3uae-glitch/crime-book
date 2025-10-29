@@ -1194,4 +1194,16 @@ document.getElementById('rt-speak').onclick = ()=>{
     document.body.appendChild(t);
     setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); },1500);
   }
+   /* ============================================================
+   🎬 تفعيل بوابة NotebookLM السينمائية داخل أدوات القارئ
+   ============================================================ */
+document.getElementById('openNotebookCine').addEventListener('click', ()=>{
+  if (typeof openNotebookCinematic === 'function') {
+    openNotebookCinematic();
+  } else {
+    alert('⚠️ لم يتم تحميل كود NotebookLM بعد.');
+  }
+});
+
 })();
+
