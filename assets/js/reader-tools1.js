@@ -221,17 +221,19 @@ document.head.appendChild(style);
   document.body.appendChild(fab);
 
   const panel = el('div','rt-panel',`
-    <div class="rt-head">
-      <button class="rt-tab active" data-tab="hl">⭐ التظليلات</button>
-      <button class="rt-tab" data-tab="notes">📒 الملاحظات</button>
-      <button class="rt-tab" data-tab="voice">🔊 الصوت</button>
-      <button class="rt-tab" data-tab="search">🔎 البحث</button>
-      <button class="rt-tab" data-tab="translate">🌍 الترجمة</button>
-      <button class="rt-tab" data-tab="define">📘 شرح المصطلحات</button>
-          <button class="rt-tab" data-tab="summary">🧠 التلخيص</button>
-         <button class="rt-tab" data-tab="quiz">🧩 اختبر نفسك</button>
-     <button class="rt-tab" data-tab="ai">🤖 Ask AI</button>
-    </div>
+<div class="rt-head">
+  <button class="rt-tab active" data-tab="hl">⭐ التظليلات</button>
+  <button class="rt-tab" data-tab="notes">📒 الملاحظات</button>
+  <button class="rt-tab" data-tab="voice">🔊 الصوت</button>
+  <button class="rt-tab" data-tab="search">🔎 البحث</button>
+  <button class="rt-tab" data-tab="translate">🌍 الترجمة</button>
+  <button class="rt-tab" data-tab="define">📘 شرح المصطلحات</button>
+  <button class="rt-tab" data-tab="summary">🧠 التلخيص</button>
+  <button class="rt-tab" data-tab="quiz">🧩 اختبر نفسك</button>
+  <button class="rt-tab" data-tab="ai">🤖 Ask AI</button>
+  <button class="rt-tab" data-tab="notebook">📔 NotebookLM</button>
+</div>
+
 
     <!-- التظليلات -->
     <section class="rt-sec active" id="rt-sec-hl">
@@ -368,6 +370,28 @@ document.head.appendChild(style);
     </div>
   </div>
 </section>
+// 🔹 إضافة تبويب NotebookLM داخل أدوات القارئ
+const nbkTab = document.createElement('button');
+nbkTab.className = 'rt-tab';
+nbkTab.dataset.tab = 'notebook';
+nbkTab.textContent = '🧠 NotebookLM';
+panel.querySelector('.rt-head').appendChild(nbkTab);
+
+const nbkSection = document.createElement('section');
+nbkSection.className = 'rt-sec';
+nbkSection.id = 'rt-sec-notebook';
+nbkSection.innerHTML = `
+  <div class="rt-title">🧠 NotebookLM - الوضع السينمائي</div>
+  <div class="rt-row" style="text-align:center;">
+    <button class="rt-btn gold" id="openNotebookCine">فتح NotebookLM</button>
+  </div>
+  <div style="color:#FFD54A;opacity:.8;font-size:.9rem;margin-top:8px;">
+    ✨ عند الضغط سيتم فتح بوابة NotebookLM السينمائية بنفس التأثير الفخم.
+  </div>
+`;
+panel.appendChild(nbkSection);
+
+document.getElementById('openNotebookCine').onclick = ()=> openNotebookCinematic();
 
 </div> <!-- ✅ هنا يُغلق div الخاصة بكل الأقسام -->
 
