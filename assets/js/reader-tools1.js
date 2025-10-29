@@ -55,11 +55,9 @@
   /* زر عائم */
   .rt-fab{
     position:fixed; bottom:28px; ${document.dir==='ltr'?'left:22px;':'right:22px;'}
-    background:linear-gradient(145deg,rgba(60,60,65,.9),rgba(20,20,25,.95));
-color:#fff;
-border:1px solid rgba(255,255,255,.15);
-box-shadow:0 0 25px rgba(255,255,255,.15), inset 0 0 12px rgba(255,255,255,.08);
-
+    background:linear-gradient(145deg,rgba(10,20,40,.9),rgba(0,0,0,.95));
+    color:#FFD54A; border:1px solid rgba(0,120,255,.45); border-radius:14px;
+    padding:10px 16px; box-shadow:0 0 20px rgba(0,120,255,.3), inset 0 0 10px rgba(0,80,255,.2);
     cursor:pointer; z-index:99991; transition:.3s
   }
   .rt-fab:hover{ transform:translateY(-2px); color:#fff }
@@ -217,11 +215,11 @@ document.head.appendChild(style);
 
 
   /* -------------------- إنشاء عناصر الواجهة -------------------- */
-  const fab = el('button','rt-fab','🧰 أدوات القارئ');
+  const fab = el('button','rt-fab','🎓 أدوات القارئ');
   document.body.appendChild(fab);
 
   const panel = el('div','rt-panel',`
-<div class="rt-head">
+   <div class="rt-head">
   <button class="rt-tab active" data-tab="hl">⭐ التظليلات</button>
   <button class="rt-tab" data-tab="notes">📒 الملاحظات</button>
   <button class="rt-tab" data-tab="voice">🔊 الصوت</button>
@@ -231,6 +229,7 @@ document.head.appendChild(style);
   <button class="rt-tab" data-tab="summary">🧠 التلخيص</button>
   <button class="rt-tab" data-tab="quiz">🧩 اختبر نفسك</button>
   <button class="rt-tab" data-tab="ai">🤖 Ask AI</button>
+  <!-- 🔹 الزر الجديد -->
   <button class="rt-tab" data-tab="notebook">📔 NotebookLM</button>
 </div>
 
@@ -352,6 +351,15 @@ document.head.appendChild(style);
     </div>
   </div>
 </section>
+<section class="rt-sec" id="rt-sec-notebook">
+  <div class="rt-title">📔 NotebookLM</div>
+  <div class="rt-row" style="text-align:center;">
+    <button class="rt-btn gold" id="openNotebookCine">فتح NotebookLM</button>
+  </div>
+  <p style="color:#FFD54A;opacity:.8;font-size:.9rem;margin-top:8px;">
+    ✨ عند الضغط سيتم فتح البوابة السينمائية الخاصة بـ NotebookLM بنفس التأثير الفخم.
+  </p>
+</section>
 
 <!-- ✅ المساعد الذكي (داخل نفس div وليس خارجها) -->
 <section class="rt-sec" id="rt-sec-ai">
@@ -370,28 +378,6 @@ document.head.appendChild(style);
     </div>
   </div>
 </section>
-// 🔹 إضافة تبويب NotebookLM داخل أدوات القارئ
-const nbkTab = document.createElement('button');
-nbkTab.className = 'rt-tab';
-nbkTab.dataset.tab = 'notebook';
-nbkTab.textContent = '🧠 NotebookLM';
-panel.querySelector('.rt-head').appendChild(nbkTab);
-
-const nbkSection = document.createElement('section');
-nbkSection.className = 'rt-sec';
-nbkSection.id = 'rt-sec-notebook';
-nbkSection.innerHTML = `
-  <div class="rt-title">🧠 NotebookLM - الوضع السينمائي</div>
-  <div class="rt-row" style="text-align:center;">
-    <button class="rt-btn gold" id="openNotebookCine">فتح NotebookLM</button>
-  </div>
-  <div style="color:#FFD54A;opacity:.8;font-size:.9rem;margin-top:8px;">
-    ✨ عند الضغط سيتم فتح بوابة NotebookLM السينمائية بنفس التأثير الفخم.
-  </div>
-`;
-panel.appendChild(nbkSection);
-
-document.getElementById('openNotebookCine').onclick = ()=> openNotebookCinematic();
 
 </div> <!-- ✅ هنا يُغلق div الخاصة بكل الأقسام -->
 
@@ -1209,5 +1195,3 @@ document.getElementById('rt-speak').onclick = ()=>{
     setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); },1500);
   }
 })();
-
-
