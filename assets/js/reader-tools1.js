@@ -1214,7 +1214,6 @@ document.getElementById('rt-speak').onclick = ()=>{
 })();
 
 
-})();
 
 
 
