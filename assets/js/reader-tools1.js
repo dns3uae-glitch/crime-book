@@ -251,7 +251,7 @@
       </section>
     </div>
   `;
-  document.body.appendChild(panel);
+(document.getElementById('reader-tools-root') || document.body).appendChild(panel);
 
   // ========= Helpers & Icons =========
   function icon(name) {
@@ -367,3 +367,4 @@
   }
 
 })();
+
