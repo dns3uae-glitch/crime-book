@@ -217,7 +217,7 @@ document.head.appendChild(style);
 
 
   /* -------------------- إنشاء عناصر الواجهة -------------------- */
-  const fab = el('button','rt-fab','🎓 أدوات القارئ');
+  const fab = el('button','rt-fab','🧰 أدوات القارئ');
   document.body.appendChild(fab);
 
   const panel = el('div','rt-panel',`
@@ -1185,3 +1185,4 @@ document.getElementById('rt-speak').onclick = ()=>{
     setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); },1500);
   }
 })();
+
