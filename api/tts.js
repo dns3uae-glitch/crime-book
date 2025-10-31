@@ -1,40 +1,50 @@
-export default async function handler(request) {
-  if (request.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
-  }
+// api/tts.js
 
-  const { text } = await request.json();
-  if (!text) {
-    return new Response(JSON.stringify({ error: "Missing text" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" }
-    });
-  }
+export const config = {
+  runtime: "nodejs18.x", // ✅ نأكد إن Vercel يستخدم Node وليس Edge
+};
 
+export default async function handler(req, res) {
   try {
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed" });
+    }
+
+    // دعم كل الطرق لقراءة النص
+    const body = req.body || {};
+    const text = body.text || (await req.json?.())?.text;
+    if (!text) return res.status(400).json({ error: "Missing text" });
+
+    // استدعاء API الصوت من OpenAI
+    const openaiKey = process.env.OPENAI_API_KEY;
     const response = await fetch("https://api.openai.com/v1/audio/speech", {
       method: "POST",
       headers: {
-        "Authorization": "Bearer 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",
+        Authorization: `Bearer ${openaiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         model: "gpt-4o-mini-tts",
         voice: "alloy",
-        input: text
+        input: text,
       }),
     });
 
-    const buffer = await response.arrayBuffer();
-    return new Response(buffer, {
-      status: 200,
-      headers: { "Content-Type": "audio/mpeg" }
-    });
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("TTS Error:", err);
+      return res.status(500).json({ error: "TTS failed", details: err });
+    }
+
+    // تحويل الصوت إلى ملف MP3
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Length", buffer.length);
+    res.status(200).send(buffer);
   } catch (err) {
-    console.error(err);
-    return new Response(
-      JSON.stringify({ error: "TTS request failed" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    console.error("Server Error:", err);
+    res.status(500).json({ error: "Server error", details: err.message });
   }
 }
