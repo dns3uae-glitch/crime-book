@@ -228,8 +228,8 @@ document.head.appendChild(style);
   <button class="rt-tab" data-tab="define">📘 شرح المصطلحات</button>
   <button class="rt-tab" data-tab="summary">🧠 التلخيص</button>
   <button class="rt-tab" data-tab="quiz">🧩 اختبر نفسك</button>
+   <button class="rt-tab" data-tab="ask">👮‍♂️ اسأل المحاضر</button>
   <button class="rt-tab" data-tab="ai">🤖 Ask AI</button>
-  <!-- 🔹 الزر الجديد -->
   <button class="rt-tab" data-tab="notebook">📔 NotebookLM</button>
 </div>
 
@@ -351,6 +351,24 @@ document.head.appendChild(style);
     </div>
   </div>
 </section>
+<!-- 👮‍♂️ اسأل المحاضر -->
+<section class="rt-sec" id="rt-sec-ask">
+  <div class="rt-title">👮‍♂️ اسأل المحاضر</div>
+  <div class="rt-row">
+    <textarea id="rt-ask-input" class="rt-textarea" placeholder="اكتب سؤالك هنا..."></textarea>
+  </div>
+  <div class="rt-row">
+    <button class="rt-btn" id="rt-ask-btn">إرسال السؤال</button>
+  </div>
+  <div class="rt-row">
+    <div id="rt-ask-output" class="rt-box"
+      style="min-height:60px;background:#1e1e1e;color:#FFD54A;padding:10px;border-radius:8px;">
+      ✨ سيتم عرض الإجابة هنا أو سيجيبك أحمد صوتيًا...
+    </div>
+  </div>
+</section>
+
+
 <section class="rt-sec" id="rt-sec-notebook">
   <div class="rt-title">📔 NotebookLM</div>
   <div class="rt-row" style="text-align:center;">
@@ -970,6 +988,74 @@ ${text}
   }
 };
 
+
+/* ============================================================
+   👮‍♂️ ميزة "اسأل المحاضر"
+   ============================================================ */
+const askInput = document.getElementById('rt-ask-input');
+const askBtn = document.getElementById('rt-ask-btn');
+const askOutput = document.getElementById('rt-ask-output');
+
+// تحميل ملف الدروس JSON مرة واحدة فقط
+let LESSON_DATA = null;
+fetch('https://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json')
+  .then(r => r.json())
+  .then(data => { LESSON_DATA = data; })
+  .catch(err => { console.error('❌ خطأ في تحميل قاعدة البيانات:', err); });
+
+// عند الضغط على زر إرسال
+askBtn.addEventListener('click', async () => {
+  const q = askInput.value.trim();
+  if (!q) {
+    toast('📝 اكتب سؤالك أولاً');
+    return;
+  }
+
+  if (!LESSON_DATA) {
+    askOutput.innerHTML = '⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.';
+    return;
+  }
+
+  const answer = findAnswer(q);
+  askOutput.innerHTML = answer;
+
+  // إرسال السؤال والجواب إلى صفحة الافتار
+  if (window.opener && !window.opener.closed) {
+    window.opener.postMessage({ type: 'ASK_TEACHER', question: q, answer: answer }, '*');
+  } else if (window.parent !== window) {
+    window.parent.postMessage({ type: 'ASK_TEACHER', question: q, answer: answer }, '*');
+  } else {
+    console.warn('⚠️ لم يتم العثور على نافذة الافتار المفتوحة.');
+  }
+});
+
+function normalizeArabic(str) {
+  return str.toLowerCase()
+    .replace(/[ًٌٍَُِّْ]/g, "")
+    .replace(/أ|إ|آ/g, "ا")
+    .replace(/ة/g, "ه")
+    .replace(/ى/g, "ي")
+    .replace(/[^\u0600-\u06FF0-9\s]/g, " ");
+}
+
+function findAnswer(q) {
+  const normQ = normalizeArabic(q);
+  let best = { score: 0, text: LESSON_DATA.fallback || "لم أجد إجابة مناسبة." };
+
+  for (const e of LESSON_DATA.entries) {
+    let score = 0;
+    for (const kw of e.keywords) {
+      const normK = normalizeArabic(kw);
+      if (normQ.includes(normK)) score += 3;
+      else if (normK.includes(normQ)) score += 2;
+    }
+    if (score > best.score) best = { score, text: e.answer };
+  }
+
+  return best.text;
+}
+
+
 /* -------------------- المساعد الذكي (بطاقات سؤال + جواب) -------------------- */
 const aiBtn = document.getElementById('rt-ai-ask');
 const aiInput = document.getElementById('rt-ai-input');
@@ -1198,7 +1284,7 @@ document.getElementById('rt-speak').onclick = ()=>{
   /* ============================================================
      🧠 تفعيل NotebookLM داخل أدوات القارئ
      ============================================================ */
-    document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', () => {
     const openBtn = document.getElementById('openNotebookCine');
     if (openBtn) {
       openBtn.addEventListener('click', () => {
@@ -1214,6 +1300,7 @@ document.getElementById('rt-speak').onclick = ()=>{
 })();
 
 
+})();
 
 
 
