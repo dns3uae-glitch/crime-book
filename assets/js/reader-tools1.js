@@ -1020,14 +1020,19 @@ askBtn.addEventListener('click', async () => {
   askOutput.innerHTML = answer;
 
   // إرسال السؤال والجواب إلى صفحة الافتار
-  if (window.opener && !window.opener.closed) {
-    window.opener.postMessage({ type: 'ASK_TEACHER', question: q, answer: answer }, '*');
-  } else if (window.parent !== window) {
-    window.parent.postMessage({ type: 'ASK_TEACHER', question: q, answer: answer }, '*');
-  } else {
-    console.warn('⚠️ لم يتم العثور على نافذة الافتار المفتوحة.');
-  }
+// 🟡 إرسال الجواب إلى صفحة أحمد ليبدأ الكلام
+try {
+  window.top.postMessage({
+    type: 'ASK_TEACHER',
+    question: q,
+    answer: answer
+  }, '*');
+  console.log('✅ تم إرسال الجواب إلى أحمد:', answer);
+} catch (err) {
+  console.error('⚠️ فشل إرسال الرسالة إلى أحمد:', err);
+}
 });
+
 
 function normalizeArabic(str) {
   return str.toLowerCase()
