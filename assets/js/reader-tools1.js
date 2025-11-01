@@ -1068,48 +1068,47 @@ function normalizeArabic(str) {
 }
 
 // نحسب "درجة" التشابه بين سؤال الطالب وهذا الإدخال
+// 🔹 تحسين الذكاء لاختيار الجواب الأنسب
 function scoreEntry(userQNorm, entry) {
   let score = 0;
 
-  // الكلمات المفتاحية
+  // زيادة الدقة: نحسب كم كلمة مفتاحية تطابقت فعليًا
   for (const kw of entry.keywords) {
     const kwNorm = normalizeArabic(kw);
     if (!kwNorm) continue;
-    if (userQNorm.includes(kwNorm)) score += 5;
+
+    // تطابق كامل
+    if (userQNorm.includes(kwNorm)) score += kwNorm.split(" ").length * 4;
+    // تطابق جزئي
     else if (kwNorm.includes(userQNorm)) score += 2;
   }
 
-  // تعزيز: لو كلمات من الإجابة نفسها ظهرت في السؤال
-  const answerWords = normalizeArabic(entry.answer).split(/\s+/);
-  for (const w of answerWords) {
-    if (w.length > 3 && userQNorm.includes(w)) {
-      score += 1;
-    }
-  }
+  // تعزيز الدرجات إذا السؤال يحتوي أكثر من كلمه مفتاحيه
+  if (score > 6) score += 3;
+  if (score > 10) score += 5;
 
   return score;
 }
 
-// ترجع أفضل إدخال مطابق + fallback لو ما فيه تطابق عالي
 function pickBestMatch(userQuestion, dataArr) {
   const qNorm = normalizeArabic(userQuestion);
   let best = null;
-  let bestScore = -1;
+  let bestScore = 0;
 
   for (const entry of dataArr) {
     const s = scoreEntry(qNorm, entry);
     if (s > bestScore) {
-      bestScore  = s;
-      best       = entry;
+      bestScore = s;
+      best = entry;
     }
   }
 
-  // fallback لو ولا شي كان قوي
-  if (!best && dataArr.length) {
-    const fb = dataArr.find(e => e.id === "fallback");
-    best = fb || dataArr[0];
+  // لو النتيجة ضعيفة، رجع fallback
+  if (!best || bestScore < 3) {
+    best = dataArr.find(e => e.id === "fallback") || dataArr[0];
   }
 
+  console.log(`🧠 أفضل تطابق: ${best.id} (درجة ${bestScore})`);
   return best;
 }
 
