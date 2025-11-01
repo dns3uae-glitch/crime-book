@@ -12,11 +12,13 @@ export default async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: "Missing ELEVEN_API_KEY" });
 
   try {
-    const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/pNInz6obpgDQGcFmaJgB", {
+    // ✅ تحديث الرابط للطراز الجديد من ElevenLabs
+    const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/pNInz6obpgDQGcFmaJgB/stream", {
       method: "POST",
       headers: {
         "xi-api-key": apiKey,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Accept": "audio/mpeg"
       },
       body: JSON.stringify({
         text,
@@ -27,12 +29,15 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const err = await response.text();
+      console.error("❌ ElevenLabs Error:", err);
       return res.status(500).json({ error: "TTS failed", details: err });
     }
 
     const audioBuffer = Buffer.from(await response.arrayBuffer());
     res.setHeader("Content-Type", "audio/mpeg");
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    // 👇 السماح لصفحة GitHub Pages بطلب الصوت
+    res.setHeader("Access-Control-Allow-Origin", "https://dns3uae-glitch.github.io");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.status(200).send(audioBuffer);
 
   } catch (error) {
