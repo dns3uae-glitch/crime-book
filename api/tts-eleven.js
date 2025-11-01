@@ -12,11 +12,11 @@ export default async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: "Missing ELEVEN_API_KEY" });
 
   try {
-    // ✅ تحديث الرابط للطراز الجديد من ElevenLabs
+    // 🔹 هذا هو الرابط الجديد للموديل مع المفاتيح الحديثة (sk_)
     const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/pNInz6obpgDQGcFmaJgB/stream", {
       method: "POST",
       headers: {
-        "xi-api-key": apiKey,
+        "Authorization": `Bearer ${apiKey}`, // ✅ المفاتيح الجديدة تستخدم Authorization
         "Content-Type": "application/json",
         "Accept": "audio/mpeg"
       },
@@ -35,8 +35,7 @@ export default async function handler(req, res) {
 
     const audioBuffer = Buffer.from(await response.arrayBuffer());
     res.setHeader("Content-Type", "audio/mpeg");
-    // 👇 السماح لصفحة GitHub Pages بطلب الصوت
-    res.setHeader("Access-Control-Allow-Origin", "https://dns3uae-glitch.github.io");
+    res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.status(200).send(audioBuffer);
 
