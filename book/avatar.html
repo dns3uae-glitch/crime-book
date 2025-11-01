@@ -528,47 +528,36 @@ document.querySelector('#avatar_ahmed').setAttribute('auto-fix-anim', '');
     }
   });
 
-  // 🎤 النطق بصوت واقعي من ElevenLabs
+  // 🎤 النطق الواقعي من سيرفرك المتصل بـ ElevenLabs
   async function speakAndAnimate(text) {
     const avatar = document.querySelector('#avatar_ahmed');
     if (!avatar) return;
 
-    // 🔑 هنا فقط ضع مفتاحك من موقع ElevenLabs
-    const apiKey = "ضع_مفتاحك_من_ElevenLabs_هنا";
-
     try {
-      console.log("🎧 جاري توليد الصوت من ElevenLabs...");
-
+      console.log("🎧 جاري توليد الصوت من السيرفر...");
       const response = await fetch("https://crime-book.vercel.app/api/tts-eleven", {
-
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "xi-api-key": apiKey
-        },
-        body: JSON.stringify({
-          text,
-          model_id: "eleven_multilingual_v2",
-          voice_settings: { stability: 0.4, similarity_boost: 0.7 }
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
       });
 
       if (!response.ok) {
-        console.error("❌ فشل الاتصال بـ ElevenLabs:", await response.text());
-        alert("⚠️ حدث خطأ أثناء توليد الصوت من ElevenLabs.");
+        console.error("❌ فشل الاتصال بالسيرفر:", await response.text());
+        alert("⚠️ حدث خطأ أثناء توليد الصوت من السيرفر.");
         return;
       }
 
-      const audioBlob = await response.blob();
-      const audioURL = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioURL);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.volume = 1.0;
 
-      // 🗣️ تحريك الفم أثناء النطق
+      // 🗣️ تحريك الفم مع الصوت
       audio.addEventListener("play", () => {
-        window.dispatchEvent(new CustomEvent("avatarSpeak", { detail: { duration: (audio.duration || 3) * 1000 } }));
+        const duration = (audio.duration || 3) * 1000;
+        window.dispatchEvent(new CustomEvent("avatarSpeak", { detail: { duration } }));
       });
 
-      // 🤐 إيقاف التحريك بعد الانتهاء
       audio.addEventListener("ended", () => {
         window.dispatchEvent(new CustomEvent("avatarSpeak", { detail: { duration: 0 } }));
       });
@@ -581,8 +570,14 @@ document.querySelector('#avatar_ahmed').setAttribute('auto-fix-anim', '');
     }
   }
 
-  // نخلي الدالة متاحة يدويًا
+  // نخليها متاحة للاستخدام اليدوي
   window.speakAndAnimate = speakAndAnimate;
+
+  // ✅ نضيف اختبار تلقائي أول ما تفتح الصفحة
+  window.addEventListener("load", () => {
+    speakAndAnimate("السلام عليكم يا زعيم، أحمد يتحدث الآن بصوت واقعي من ElevenLabs.");
+  });
+
 })();
 </script>
 
