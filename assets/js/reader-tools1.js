@@ -998,10 +998,23 @@ const askOutput = document.getElementById('rt-ask-output');
 
 // تحميل ملف الدروس JSON مرة واحدة فقط
 let LESSON_DATA = null;
-fetch('https://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json')
-  .then(r => r.json())
-  .then(data => { LESSON_DATA = data; })
-  .catch(err => { console.error('❌ خطأ في تحميل قاعدة البيانات:', err); });
+
+fetch('http://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json')
+  .then(r => {
+    if (!r.ok) throw new Error('فشل تحميل ملف الدروس: ' + r.status);
+    return r.json();
+  })
+  .then(data => {
+    LESSON_DATA = data;
+    console.log('✅ تم تحميل قاعدة البيانات بنجاح:', LESSON_DATA);
+  })
+  .catch(err => {
+    console.error('❌ خطأ في تحميل قاعدة البيانات:', err);
+    if (typeof askOutput !== 'undefined') {
+      askOutput.innerHTML = '⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.';
+    }
+  });
+
 
 // عند الضغط على زر إرسال
 askBtn.addEventListener('click', async () => {
