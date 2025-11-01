@@ -1069,23 +1069,52 @@ function normalizeArabic(str) {
 
 // نحسب "درجة" التشابه بين سؤال الطالب وهذا الإدخال
 // 🔹 تحسين الذكاء لاختيار الجواب الأنسب
+// 🔹 دالة تحسب تشابه بين كلمتين (نسبة من 0 إلى 1)
+function wordSimilarity(a, b) {
+  a = a.trim();
+  b = b.trim();
+  if (!a || !b) return 0;
+
+  // لو الكلمتين متطابقتين
+  if (a === b) return 1;
+
+  // لو وحدة تحتوي الثانية
+  if (a.includes(b) || b.includes(a)) return 0.8;
+
+  // نحسب الفرق بالحروف
+  const len = Math.max(a.length, b.length);
+  let same = 0;
+  for (let i = 0; i < Math.min(a.length, b.length); i++) {
+    if (a[i] === b[i]) same++;
+  }
+  return same / len;
+}
+
+// 🔸 النسخة الجديدة الذكية من scoreEntry()
 function scoreEntry(userQNorm, entry) {
   let score = 0;
+  const qWords = userQNorm.split(/\s+/).filter(w => w.length > 2);
 
-  // زيادة الدقة: نحسب كم كلمة مفتاحية تطابقت فعليًا
   for (const kw of entry.keywords) {
     const kwNorm = normalizeArabic(kw);
-    if (!kwNorm) continue;
+    const kwWords = kwNorm.split(/\s+/);
 
-    // تطابق كامل
-    if (userQNorm.includes(kwNorm)) score += kwNorm.split(" ").length * 4;
-    // تطابق جزئي
-    else if (kwNorm.includes(userQNorm)) score += 2;
+    // نحسب تشابه كل كلمة مع كل كلمة في السؤال
+    let localScore = 0;
+    for (const qw of qWords) {
+      for (const kwd of kwWords) {
+        const sim = wordSimilarity(qw, kwd);
+        if (sim > 0.6) localScore += sim * 5; // لو تشابه 60% أو أكثر نحسبها
+      }
+    }
+    if (localScore > score) score = localScore;
   }
 
-  // تعزيز الدرجات إذا السؤال يحتوي أكثر من كلمه مفتاحيه
-  if (score > 6) score += 3;
-  if (score > 10) score += 5;
+  // تعزيز لو فيه كلمات سياقية مثل "شنو / يعني / وضح / ما هو"
+  const contextWords = ["شنو", "يعني", "وضح", "ماهو", "ما هو", "اشرح"];
+  for (const c of contextWords) {
+    if (userQNorm.includes(c)) score += 1.5;
+  }
 
   return score;
 }
