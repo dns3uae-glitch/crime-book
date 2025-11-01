@@ -990,16 +990,16 @@ ${text}
 
 
 /* ============================================================
-   👮‍♂️ ميزة "اسأل المحاضر"
+   👮‍♂️ ميزة "اسأل المحاضر" (إصدار ثابت وآمن)
    ============================================================ */
-const askInput = document.getElementById('rt-ask-input');
-const askBtn = document.getElementById('rt-ask-btn');
-const askOutput = document.getElementById('rt-ask-output');
+const askInput = document.getElementById("rt-ask-input");
+const askBtn = document.getElementById("rt-ask-btn");
+const askOutput = document.getElementById("rt-ask-output");
 
 let LESSON_DATA = null;
 
-// ✅ تحميل قاعدة البيانات بعد جاهزية الصفحة
-document.addEventListener("DOMContentLoaded", () => {
+// ✅ تحميل قاعدة البيانات بعد تحميل DOM
+window.addEventListener("DOMContentLoaded", () => {
   console.log("⏳ جاري تحميل قاعدة البيانات...");
   fetch("https://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json", {
     headers: { "Accept": "application/json" },
@@ -1012,6 +1012,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(data => {
       LESSON_DATA = data;
       console.log("✅ تم تحميل قاعدة البيانات بنجاح:", LESSON_DATA);
+      askOutput.textContent = "✨ قاعدة البيانات جاهزة، يمكنك طرح سؤالك الآن.";
     })
     .catch(err => {
       console.error("❌ خطأ في تحميل قاعدة البيانات:", err);
@@ -1019,7 +1020,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// 📩 عند الضغط على زر إرسال
+// 🟡 إرسال السؤال
 askBtn.addEventListener("click", () => {
   const q = askInput.value.trim();
   if (!q) {
@@ -1027,7 +1028,7 @@ askBtn.addEventListener("click", () => {
     return;
   }
 
-  if (!LESSON_DATA || !Array.isArray(LESSON_DATA)) {
+  if (!LESSON_DATA) {
     askOutput.textContent = "⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.";
     return;
   }
@@ -1035,7 +1036,7 @@ askBtn.addEventListener("click", () => {
   const best = findAnswer(q);
   askOutput.innerHTML = best.text;
 
-  // 🟡 إرسال الجواب إلى صفحة أحمد ليبدأ الكلام
+  // 🟡 إرسال الجواب لأحمد
   try {
     window.top.postMessage({
       type: "ASK_TEACHER",
@@ -1043,13 +1044,13 @@ askBtn.addEventListener("click", () => {
       answer: best.text,
       questionId: best.id
     }, "*");
-    console.log("✅ تم إرسال الجواب إلى أحمد:", best.text, "🎯", best.id);
+    console.log("✅ تم إرسال الجواب إلى أحمد:", best.id);
   } catch (err) {
     console.error("⚠️ فشل إرسال الرسالة إلى أحمد:", err);
   }
 });
 
-// 🧠 تبسيط النص العربي للمقارنة
+// ⚙️ تبسيط النص العربي للمقارنة
 function normalizeArabic(str) {
   return str.toLowerCase()
     .replace(/[ًٌٍَُِّْ]/g, "")
@@ -1059,7 +1060,7 @@ function normalizeArabic(str) {
     .replace(/[^\u0600-\u06FF0-9\s]/g, " ");
 }
 
-// 🧩 دالة إيجاد أفضل إجابة
+// 🧠 إيجاد الجواب الأنسب
 function findAnswer(q) {
   const normQ = normalizeArabic(q);
   let best = { id: "fallback", score: 0, text: "لم أجد إجابة مناسبة." };
