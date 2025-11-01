@@ -999,7 +999,7 @@ const askOutput = document.getElementById('rt-ask-output');
 // تحميل ملف الدروس JSON مرة واحدة فقط
 let LESSON_DATA = null;
 
-fetch('http://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json')
+fetch('https://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json')
   .then(r => {
     if (!r.ok) throw new Error('فشل تحميل ملف الدروس: ' + r.status);
     return r.json();
