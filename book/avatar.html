@@ -701,63 +701,75 @@ pages.forEach((page, index) => {
 <script>
 (() => {
 
-  // ✅ استقبال السؤال من أدوات القارئ
-  window.addEventListener("message", (event) => {
+  // 👂 استلام الرسالة من أدوات القارئ
+  window.addEventListener('message', (event) => {
     if (!event.data) return;
-    if (event.data.type === "ASK_TEACHER") {
-      const { answer, questionId } = event.data;
-      console.log("📩 أحمد استقبل الجواب:", answer, "🎵", questionId);
-      speakAndAnimate(questionId || "fallback");
+    if (event.data.type !== 'ASK_TEACHER') return;
+
+    const answerText = event.data.text;   // النص ككلام مكتوب
+    const audioURL   = event.data.audio;  // رابط mp3 الجاهز
+    const qId        = event.data.id;     // مثال: "open_scene"
+
+    console.log("📩 أحمد استقبل سؤال:", qId, answerText);
+    console.log("🔊 بيشغل الصوت من:", audioURL);
+
+    if (audioURL) {
+      playVoiceWithMouth(audioURL);
+    } else {
+      console.warn("⚠️ ما وصل رابط صوت للجواب. ما راح أتكلم.");
     }
   });
 
-  // 🎧 تشغيل ملف MP3 الفعلي وتحليل الموجة لتحريك الفم
-  async function speakAndAnimate(lessonId = "fallback") {
-const audioURL = `https://dns3uae-glitch.github.io/crime-book/assets/audio/${lessonId}.mp3`;
-    const avatar = document.querySelector("#avatar_ahmed");
-
-    // لو في صوت شغال، نوقفه
-    if (window.ahmedAudio) {
-      window.ahmedAudio.pause();
+  // 🎧 يشغل الملف الصوتي ويحرك الفم أثناء التشغيل
+  function playVoiceWithMouth(url) {
+    // لو في صوت قديم شغال نوقفه
+    if (window.__ahmedAudio) {
+      window.__ahmedAudio.pause();
+      window.__ahmedAudio = null;
     }
 
-    const audio = new Audio(audioURL);
-    window.ahmedAudio = audio;
+    const audio = new Audio(url);
+    audio.volume = 1.0;
+    window.__ahmedAudio = audio;
 
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const src = ctx.createMediaElementSource(audio);
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 256;
-    src.connect(analyser);
-    analyser.connect(ctx.destination);
+    // يبدأ حركة الفم أول ما يبدأ الصوت
+    audio.addEventListener('play', () => {
+      startLipMovement();
+    });
 
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    // يوقف حركة الفم بعد ما يخلص الصوت
+    audio.addEventListener('ended', () => {
+      stopLipMovement();
+    });
 
-    let animFrame;
-    function updateMouth() {
-      analyser.getByteFrequencyData(dataArray);
-      const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
-      const level = Math.min(1, avg / 180); // تطبيع مستوى الحركة
-      window.dispatchEvent(new CustomEvent("avatarLipFrame", { detail: { level } }));
-      animFrame = requestAnimationFrame(updateMouth);
-    }
-
-    audio.onplay = () => {
-      console.log("🗣️ أحمد بدأ يتكلم:", lessonId);
-      updateMouth();
-    };
-
-    audio.onended = () => {
-      cancelAnimationFrame(animFrame);
-      window.dispatchEvent(new CustomEvent("avatarLipFrame", { detail: { level: 0 } }));
-      ctx.close();
-      console.log("🤐 انتهى الصوت:", lessonId);
-    };
-
-    await audio.play().catch(e => console.warn("⚠️ خطأ أثناء تشغيل الصوت:", e));
+    audio.play().catch(err => {
+      console.warn("⚠️ ما قدرت أشغل الصوت:", err);
+    });
   }
 
-  // 🎯 مكون تحريك الفم الواقعي
+  // 🟡 تحريك الفم (محاكاة بسيطة لكنها مقبولة بصرياً)
+  let mouthInterval = null;
+
+  function startLipMovement() {
+    clearInterval(mouthInterval);
+    mouthInterval = setInterval(() => {
+      // level بين 0.2 و 0.5 (فتح وإغلاق بسيط للفم)
+      const level = 0.2 + Math.random() * 0.3;
+      window.dispatchEvent(new CustomEvent("avatarLipFrame", {
+        detail: { level }
+      }));
+    }, 120);
+  }
+
+  function stopLipMovement() {
+    clearInterval(mouthInterval);
+    mouthInterval = null;
+    window.dispatchEvent(new CustomEvent("avatarLipFrame", {
+      detail: { level: 0 }
+    }));
+  }
+
+  // 🧠 هذا الجزء يخلي نموذج أحمد فعلاً يحرّك الفم (morph targets)
   AFRAME.registerComponent("avatar-lipsync", {
     init: function () {
       const el = this.el;
@@ -765,8 +777,14 @@ const audioURL = `https://dns3uae-glitch.github.io/crime-book/assets/audio/${les
 
       el.addEventListener("model-loaded", () => {
         el.object3D.traverse((node) => {
-          if (node.isMesh && node.morphTargetDictionary && node.morphTargetInfluences) {
-            const validKeys = /(jaw|mouth|lip|smile|aa|oh|ih|pp|ff|ch|ee)/i;
+          if (
+            node.isMesh &&
+            node.morphTargetDictionary &&
+            node.morphTargetInfluences
+          ) {
+            // نختار فقط مفاتيح الفم / الفك
+            const validKeys = /(jaw|mouth|lip|aa|oh|ih|uh|ee|oo|pp|ff|ch|th|smile)/i;
+
             const indices = Object.entries(node.morphTargetDictionary)
               .filter(([name]) => validKeys.test(name))
               .map(([_, index]) => index);
@@ -776,14 +794,16 @@ const audioURL = `https://dns3uae-glitch.github.io/crime-book/assets/audio/${les
             }
           }
         });
+
         console.log("🎯 تم تحديد مؤثرات الفم:", this.mouthMeshes.length);
       });
 
+      // نستقبل مستوى الفم ونطبقه
       window.addEventListener("avatarLipFrame", (e) => {
-        const level = e.detail.level;
+        const level = e.detail.level; // 0 -> 0.5 تقريبا
         this.mouthMeshes.forEach(({ mesh, indices }) => {
           indices.forEach((i) => {
-            mesh.morphTargetInfluences[i] = Math.min(level * 0.3, 0.3);
+            mesh.morphTargetInfluences[i] = Math.min(level * 0.35, 0.35);
           });
         });
       });
