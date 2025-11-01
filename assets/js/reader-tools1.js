@@ -1019,19 +1019,20 @@ askBtn.addEventListener('click', async () => {
   const answer = findAnswer(q);
   askOutput.innerHTML = answer;
 
-  // إرسال السؤال والجواب إلى صفحة الافتار
 // 🟡 إرسال الجواب إلى صفحة أحمد ليبدأ الكلام
 try {
   window.top.postMessage({
     type: 'ASK_TEACHER',
     question: q,
-    answer: answer
+    answer: answer,
+    questionId: best.id // ✅ نضيف معرف الفقرة علشان يعرف أي ملف MP3 يشغل
   }, '*');
-  console.log('✅ تم إرسال الجواب إلى أحمد:', answer);
+  console.log('✅ تم إرسال الجواب إلى أحمد:', answer, '🎯', best.id);
 } catch (err) {
   console.error('⚠️ فشل إرسال الرسالة إلى أحمد:', err);
 }
 });
+
 
 
 function normalizeArabic(str) {
