@@ -990,54 +990,126 @@ ${text}
 
 
 /* ============================================================
-   👮‍♂️ نظام "اسأل المحاضر" – نسخة نهائية مستقرة
+   👮‍♂️ ميزة "اسأل المحاضر"
    ============================================================ */
-const askInput = document.getElementById("rt-ask-input");
-const askBtn = document.getElementById("rt-ask-btn");
-const askOutput = document.getElementById("rt-ask-output");
 
+const askInput  = document.getElementById('rt-ask-input');
+const askBtn    = document.getElementById('rt-ask-btn');
+const askOutput = document.getElementById('rt-ask-output');
+
+// تحميل قاعدة الدرس مرة واحدة
 let LESSON_DATA = null;
 
-// ✅ تحميل قاعدة البيانات بعد تأكد DOM جاهز
-window.addEventListener("load", async () => {
+fetch('https://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json')
+  .then(r => {
+    if (!r.ok) throw new Error('فشل تحميل ملف الدروس: ' + r.status);
+    return r.json();
+  })
+  .then(data => {
+    LESSON_DATA = data;
+    console.log('✅ LESSON_DATA جاهز:', LESSON_DATA.length, 'فقرة');
+    if (askOutput) {
+      askOutput.innerHTML = '✨ جاهز. اكتب سؤالك واسأل المحاضر.';
+    }
+  })
+  .catch(err => {
+    console.error('❌ خطأ في تحميل قاعدة البيانات:', err);
+    if (askOutput) {
+      askOutput.innerHTML = '⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد قليل.';
+    }
+  });
+
+// عند الضغط على زر إرسال
+askBtn.addEventListener('click', () => {
+  const q = askInput.value.trim();
+  if (!q) {
+    toast('📝 اكتب سؤالك أولاً');
+    return;
+  }
+
+  if (!LESSON_DATA) {
+    askOutput.innerHTML = '⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد قليل.';
+    return;
+  }
+
+  // نختار أفضل مطابقة
+  const best = pickBestMatch(q, LESSON_DATA);
+
+  // نعرض نص الإجابة للطالب
+  askOutput.innerHTML = best.answer;
+
+  // نرسل الجواب + رابط الصوت لأحمد
   try {
-    const res = await fetch("https://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json", {
-      headers: { "Accept": "application/json" },
-      mode: "cors"
-    });
-    if (!res.ok) throw new Error("فشل التحميل: " + res.status);
-    LESSON_DATA = await res.json();
-    console.log("✅ تم تحميل قاعدة البيانات:", LESSON_DATA);
-    askOutput.textContent = "✅ قاعدة البيانات جاهزة، اطرح سؤالك الآن.";
+    window.top.postMessage({
+      type: 'ASK_TEACHER',
+      text:  best.answer,   // <-- النص اللي أحمد يقدر يعرضه لو تبي
+      audio: best.audio,    // <-- رابط mp3 الجاهز
+      id:    best.id        // <-- مثلا: "open_scene"
+    }, '*');
+
+    console.log('📤 أرسلت إلى أحمد:', best.id, best.audio);
   } catch (err) {
-    console.error("❌ خطأ أثناء تحميل قاعدة البيانات:", err);
-    askOutput.textContent = "⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.";
+    console.error('⚠️ فشل إرسال الرسالة إلى أحمد:', err);
   }
 });
 
-// 🔍 البحث عن الجواب المناسب
+/* ------------------------------------------------------------
+   دوال الذكاء البسيطة لاختيار أفضل فقرة قريبة من السؤال
+   ------------------------------------------------------------ */
+
+// تبسيط/توحيد العربية
 function normalizeArabic(str) {
   return str.toLowerCase()
-    .replace(/[ًٌٍَُِّْ]/g, "")
+    .replace(/[ًٌٍَُِّْ]/g, "")     // يشيل الحركات
     .replace(/أ|إ|آ/g, "ا")
     .replace(/ة/g, "ه")
     .replace(/ى/g, "ي")
-    .replace(/[^\u0600-\u06FF0-9\s]/g, " ");
+    .replace(/[^\u0600-\u06FF0-9\s]/g, " "); // يشيل الرموز الغريبة
 }
 
-function findAnswer(q) {
-  const normQ = normalizeArabic(q);
-  let best = { id: "fallback", score: 0, text: "لم أجد إجابة مناسبة." };
+// نحسب "درجة" التشابه بين سؤال الطالب وهذا الإدخال
+function scoreEntry(userQNorm, entry) {
+  let score = 0;
 
-  for (const e of LESSON_DATA) {
-    let score = 0;
-    for (const kw of e.keywords) {
-      const normK = normalizeArabic(kw);
-      if (normQ.includes(normK)) score += 3;
-      else if (normK.includes(normQ)) score += 2;
-    }
-    if (score > best.score) best = { id: e.id, score, text: e.text };
+  // الكلمات المفتاحية
+  for (const kw of entry.keywords) {
+    const kwNorm = normalizeArabic(kw);
+    if (!kwNorm) continue;
+    if (userQNorm.includes(kwNorm)) score += 5;
+    else if (kwNorm.includes(userQNorm)) score += 2;
   }
+
+  // تعزيز: لو كلمات من الإجابة نفسها ظهرت في السؤال
+  const answerWords = normalizeArabic(entry.answer).split(/\s+/);
+  for (const w of answerWords) {
+    if (w.length > 3 && userQNorm.includes(w)) {
+      score += 1;
+    }
+  }
+
+  return score;
+}
+
+// ترجع أفضل إدخال مطابق + fallback لو ما فيه تطابق عالي
+function pickBestMatch(userQuestion, dataArr) {
+  const qNorm = normalizeArabic(userQuestion);
+  let best = null;
+  let bestScore = -1;
+
+  for (const entry of dataArr) {
+    const s = scoreEntry(qNorm, entry);
+    if (s > bestScore) {
+      bestScore  = s;
+      best       = entry;
+    }
+  }
+
+  // fallback لو ولا شي كان قوي
+  if (!best && dataArr.length) {
+    const fb = dataArr.find(e => e.id === "fallback");
+    best = fb || dataArr[0];
+  }
+
   return best;
 }
 
