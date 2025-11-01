@@ -1025,7 +1025,7 @@ try {
     type: 'ASK_TEACHER',
     question: q,
     answer: answer,
-    questionId: best.id // ✅ نضيف معرف الفقرة علشان يعرف أي ملف MP3 يشغل
+    questionId: best.id // ✅ نضيف المعرف هنا
   }, '*');
   console.log('✅ تم إرسال الجواب إلى أحمد:', answer, '🎯', best.id);
 } catch (err) {
