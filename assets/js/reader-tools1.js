@@ -996,58 +996,60 @@ const askInput = document.getElementById('rt-ask-input');
 const askBtn = document.getElementById('rt-ask-btn');
 const askOutput = document.getElementById('rt-ask-output');
 
-// تحميل ملف الدروس JSON مرة واحدة فقط
 let LESSON_DATA = null;
 
-fetch('https://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json')
-  .then(r => {
-    if (!r.ok) throw new Error('فشل تحميل ملف الدروس: ' + r.status);
-    return r.json();
+// ✅ تحميل قاعدة البيانات بعد جاهزية الصفحة
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("⏳ جاري تحميل قاعدة البيانات...");
+  fetch("https://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json", {
+    headers: { "Accept": "application/json" },
+    mode: "cors"
   })
-  .then(data => {
-    LESSON_DATA = data;
-    console.log('✅ تم تحميل قاعدة البيانات بنجاح:', LESSON_DATA);
-  })
-  .catch(err => {
-    console.error('❌ خطأ في تحميل قاعدة البيانات:', err);
-    if (typeof askOutput !== 'undefined') {
-      askOutput.innerHTML = '⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.';
-    }
-  });
-
-
-// عند الضغط على زر إرسال
-askBtn.addEventListener('click', async () => {
-  const q = askInput.value.trim();
-  if (!q) {
-    toast('📝 اكتب سؤالك أولاً');
-    return;
-  }
-
-  if (!LESSON_DATA) {
-    askOutput.innerHTML = '⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.';
-    return;
-  }
-
-  const answer = findAnswer(q);
-  askOutput.innerHTML = answer;
-
-// 🟡 إرسال الجواب إلى صفحة أحمد ليبدأ الكلام
-try {
-  window.top.postMessage({
-    type: 'ASK_TEACHER',
-    question: q,
-    answer: answer,
-    questionId: best.id // ✅ نضيف المعرف هنا
-  }, '*');
-  console.log('✅ تم إرسال الجواب إلى أحمد:', answer, '🎯', best.id);
-} catch (err) {
-  console.error('⚠️ فشل إرسال الرسالة إلى أحمد:', err);
-}
+    .then(res => {
+      if (!res.ok) throw new Error("فشل التحميل: " + res.status);
+      return res.json();
+    })
+    .then(data => {
+      LESSON_DATA = data;
+      console.log("✅ تم تحميل قاعدة البيانات بنجاح:", LESSON_DATA);
+    })
+    .catch(err => {
+      console.error("❌ خطأ في تحميل قاعدة البيانات:", err);
+      askOutput.textContent = "⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.";
+    });
 });
 
+// 📩 عند الضغط على زر إرسال
+askBtn.addEventListener("click", () => {
+  const q = askInput.value.trim();
+  if (!q) {
+    toast("📝 اكتب سؤالك أولاً");
+    return;
+  }
 
+  if (!LESSON_DATA || !Array.isArray(LESSON_DATA)) {
+    askOutput.textContent = "⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.";
+    return;
+  }
 
+  const best = findAnswer(q);
+  askOutput.innerHTML = best.text;
+
+  // 🟡 إرسال الجواب إلى صفحة أحمد ليبدأ الكلام
+  try {
+    window.top.postMessage({
+      type: "ASK_TEACHER",
+      question: q,
+      answer: best.text,
+      questionId: best.id
+    }, "*");
+    console.log("✅ تم إرسال الجواب إلى أحمد:", best.text, "🎯", best.id);
+  } catch (err) {
+    console.error("⚠️ فشل إرسال الرسالة إلى أحمد:", err);
+  }
+});
+
+// 🧠 تبسيط النص العربي للمقارنة
 function normalizeArabic(str) {
   return str.toLowerCase()
     .replace(/[ًٌٍَُِّْ]/g, "")
@@ -1057,21 +1059,22 @@ function normalizeArabic(str) {
     .replace(/[^\u0600-\u06FF0-9\s]/g, " ");
 }
 
+// 🧩 دالة إيجاد أفضل إجابة
 function findAnswer(q) {
   const normQ = normalizeArabic(q);
-  let best = { score: 0, text: LESSON_DATA.fallback || "لم أجد إجابة مناسبة." };
+  let best = { id: "fallback", score: 0, text: "لم أجد إجابة مناسبة." };
 
-  for (const e of LESSON_DATA.entries) {
+  for (const e of LESSON_DATA) {
     let score = 0;
     for (const kw of e.keywords) {
       const normK = normalizeArabic(kw);
       if (normQ.includes(normK)) score += 3;
       else if (normK.includes(normQ)) score += 2;
     }
-    if (score > best.score) best = { score, text: e.answer };
+    if (score > best.score) best = { id: e.id, score, text: e.text };
   }
 
-  return best.text;
+  return best;
 }
 
 
