@@ -990,7 +990,7 @@ ${text}
 
 
 /* ============================================================
-   👮‍♂️ ميزة "اسأل المحاضر" (إصدار ثابت وآمن)
+   👮‍♂️ نظام "اسأل المحاضر" – نسخة نهائية مستقرة
    ============================================================ */
 const askInput = document.getElementById("rt-ask-input");
 const askBtn = document.getElementById("rt-ask-btn");
@@ -998,59 +998,24 @@ const askOutput = document.getElementById("rt-ask-output");
 
 let LESSON_DATA = null;
 
-// ✅ تحميل قاعدة البيانات بعد تحميل DOM
-window.addEventListener("DOMContentLoaded", () => {
-  console.log("⏳ جاري تحميل قاعدة البيانات...");
-  fetch("https://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json", {
-    headers: { "Accept": "application/json" },
-    mode: "cors"
-  })
-    .then(res => {
-      if (!res.ok) throw new Error("فشل التحميل: " + res.status);
-      return res.json();
-    })
-    .then(data => {
-      LESSON_DATA = data;
-      console.log("✅ تم تحميل قاعدة البيانات بنجاح:", LESSON_DATA);
-      askOutput.textContent = "✨ قاعدة البيانات جاهزة، يمكنك طرح سؤالك الآن.";
-    })
-    .catch(err => {
-      console.error("❌ خطأ في تحميل قاعدة البيانات:", err);
-      askOutput.textContent = "⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.";
-    });
-});
-
-// 🟡 إرسال السؤال
-askBtn.addEventListener("click", () => {
-  const q = askInput.value.trim();
-  if (!q) {
-    toast("📝 اكتب سؤالك أولاً");
-    return;
-  }
-
-  if (!LESSON_DATA) {
-    askOutput.textContent = "⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.";
-    return;
-  }
-
-  const best = findAnswer(q);
-  askOutput.innerHTML = best.text;
-
-  // 🟡 إرسال الجواب لأحمد
+// ✅ تحميل قاعدة البيانات بعد تأكد DOM جاهز
+window.addEventListener("load", async () => {
   try {
-    window.top.postMessage({
-      type: "ASK_TEACHER",
-      question: q,
-      answer: best.text,
-      questionId: best.id
-    }, "*");
-    console.log("✅ تم إرسال الجواب إلى أحمد:", best.id);
+    const res = await fetch("https://dns3uae-glitch.github.io/crime-book/assets/js/lesson-data.json", {
+      headers: { "Accept": "application/json" },
+      mode: "cors"
+    });
+    if (!res.ok) throw new Error("فشل التحميل: " + res.status);
+    LESSON_DATA = await res.json();
+    console.log("✅ تم تحميل قاعدة البيانات:", LESSON_DATA);
+    askOutput.textContent = "✅ قاعدة البيانات جاهزة، اطرح سؤالك الآن.";
   } catch (err) {
-    console.error("⚠️ فشل إرسال الرسالة إلى أحمد:", err);
+    console.error("❌ خطأ أثناء تحميل قاعدة البيانات:", err);
+    askOutput.textContent = "⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.";
   }
 });
 
-// ⚙️ تبسيط النص العربي للمقارنة
+// 🔍 البحث عن الجواب المناسب
 function normalizeArabic(str) {
   return str.toLowerCase()
     .replace(/[ًٌٍَُِّْ]/g, "")
@@ -1060,7 +1025,6 @@ function normalizeArabic(str) {
     .replace(/[^\u0600-\u06FF0-9\s]/g, " ");
 }
 
-// 🧠 إيجاد الجواب الأنسب
 function findAnswer(q) {
   const normQ = normalizeArabic(q);
   let best = { id: "fallback", score: 0, text: "لم أجد إجابة مناسبة." };
@@ -1074,9 +1038,37 @@ function findAnswer(q) {
     }
     if (score > best.score) best = { id: e.id, score, text: e.text };
   }
-
   return best;
 }
+
+// 🟡 عند الضغط على زر الإرسال
+askBtn.addEventListener("click", () => {
+  const q = askInput.value.trim();
+  if (!q) return toast("📝 اكتب سؤالك أولاً");
+
+  if (!LESSON_DATA) {
+    askOutput.textContent = "⚠️ لم يتم تحميل قاعدة البيانات بعد، حاول بعد ثوانٍ.";
+    return;
+  }
+
+  const best = findAnswer(q);
+  askOutput.innerHTML = best.text;
+
+  // 🔊 اسم ملف الصوت
+  const audioUrl = `https://dns3uae-glitch.github.io/crime-book/assets/audio/${best.id}.mp3`;
+  console.log("🎧 تشغيل الصوت:", audioUrl);
+
+  // 🟢 إرسال الجواب إلى أحمد
+  window.top.postMessage({
+    type: "ASK_TEACHER",
+    question: q,
+    answer: best.text,
+    questionId: best.id,
+    audio: audioUrl
+  }, "*");
+
+  console.log("✅ تم إرسال الجواب إلى أحمد:", best.id);
+});
 
 
 /* -------------------- المساعد الذكي (بطاقات سؤال + جواب) -------------------- */
