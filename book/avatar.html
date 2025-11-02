@@ -825,9 +825,12 @@ window.addEventListener("DOMContentLoaded", playNextScene);
       const zcr = featureMap.zcr || 0;
       const pitch = featureMap.pitch || 0;
 
-      // 1) jaw / mouth open => يعتمد بشكل رئيسي على RMS (الطاقة)
-      const jawOpen = Math.min(1, rms * 0.4); // تضخيم طفيف
-      this.applyMorph("jawOpen", jawOpen);
+// 🔹 تحسين فتح الفم + حساسية أعلى للأصوات الخفيفة
+const sensitivity = 2.3;    // جرّب بين 2.0 و 2.8 لتعديل استجابة الفم
+const minOpen = 0.05;       // الفم ما يغلق تمامًا إلا بالصمت التام
+const jawOpen = Math.min(1, Math.max(minOpen, rms * sensitivity));
+this.applyMorph("jawOpen", jawOpen);
+
 
       // 2) mouthFunnel / mouthPucker => أصوات مدّية/مقربة (نسبة الطيف)
       // طيف منخفض => more funnel/pucker (مثل أ- oo) -> نستخدم centroid العكس (1-centroid)
@@ -1068,7 +1071,6 @@ window.addEventListener("DOMContentLoaded", playNextScene);
 
 </body>
 </html>
-
 
 
 
