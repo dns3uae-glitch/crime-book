@@ -759,7 +759,7 @@ pages.forEach((page, index) => {
       // clamp
       const v = Math.max(0, Math.min(1, value));
       // smoothing factor (يجرب 0.15 — زيِِّن حسب الحاجة)
-      const sf = 0.80;
+      const sf = 0.2;
       const prev = this.current[name] || 0;
       const next = smooth(v, prev, sf);
       this.current[name] = next;
@@ -1022,6 +1022,7 @@ pages.forEach((page, index) => {
 
 </body>
 </html>
+
 
 
 
