@@ -780,10 +780,7 @@ pages.forEach((page, index) => {
       const pitch = featureMap.pitch || 0;
 
       // 1) jaw / mouth open => يعتمد بشكل رئيسي على RMS (الطاقة)
-      // ✅ حساب متقدّم يفتح الفم بدقّة أكبر حسب الطاقة والتردد
-const dynamic = Math.pow(rms, 0.8) * (1 + centroid * 0.8);
-const jawOpen = Math.min(1, dynamic * 2.5);
- // تضخيم طفيف
+      const jawOpen = Math.min(1, rms * 0.4); // تضخيم طفيف
       this.applyMorph("jawOpen", jawOpen);
 
       // 2) mouthFunnel / mouthPucker => أصوات مدّية/مقربة (نسبة الطيف)
