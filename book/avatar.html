@@ -1143,9 +1143,101 @@ window.addEventListener("DOMContentLoaded", playNextScene);
   idleLoop();
 })();
 </script>
+<script>
+// 🎭 نظام المزاج (Mood System)
+(function() {
+  const avatar = document.querySelector("#avatar_ahmed");
+  if (!avatar) return;
+  const comp = avatar.components["avatar-advanced-lipsync"];
+  if (!comp) return;
+
+  let currentMood = "neutral"; // الحالة الافتراضية
+
+  // ✅ الحالات والتعابير الخاصة بكل Mood
+  const moods = {
+    neutral: {
+      morphs: {
+        eyeBlinkLeft: [0, 1],
+        eyeBlinkRight: [0, 1],
+        browInnerUp: [0.1, 0.3],
+      },
+      interval: [3000, 6000]
+    },
+    thinking: {
+      morphs: {
+        browInnerUp: [0.4, 0.8],
+        browOuterUpLeft: [0.3, 0.6],
+        browOuterUpRight: [0.3, 0.6],
+        eyeLookUpLeft: [0.1, 0.4],
+        eyeLookUpRight: [0.1, 0.4]
+      },
+      interval: [4000, 7000]
+    },
+    happy: {
+      morphs: {
+        mouthSmileLeft: [0.3, 0.7],
+        mouthSmileRight: [0.3, 0.7],
+        cheekSquintLeft: [0.2, 0.5],
+        cheekSquintRight: [0.2, 0.5],
+      },
+      interval: [2500, 4500]
+    },
+    serious: {
+      morphs: {
+        browDownLeft: [0.3, 0.7],
+        browDownRight: [0.3, 0.7],
+        mouthPressLeft: [0.3, 0.6],
+        mouthPressRight: [0.3, 0.6]
+      },
+      interval: [4000, 8000]
+    },
+    surprised: {
+      morphs: {
+        mouthOpen: [0.3, 0.6],
+        eyeWideLeft: [0.4, 0.8],
+        eyeWideRight: [0.4, 0.8]
+      },
+      interval: [3000, 5000]
+    }
+  };
+
+  // 🎬 تطبيق المزاج الحالي
+  function applyMood() {
+    const data = moods[currentMood];
+    if (!data) return;
+
+    for (const [morph, range] of Object.entries(data.morphs)) {
+      const val = range[0] + Math.random() * (range[1] - range[0]);
+      comp.applyMorph(morph, val);
+      setTimeout(() => comp.applyMorph(morph, 0), 1200 + Math.random() * 800);
+    }
+
+    setTimeout(applyMood, random(data.interval[0], data.interval[1]));
+  }
+
+  // 🔁 مولّد أرقام عشوائية
+  function random(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  // 🚀 يبدأ بعد 3 ثوانٍ من تشغيل الصفحة
+  setTimeout(applyMood, 3000);
+
+  // 🎛️ تغيير الحالة يدويًا (للتجربة)
+  window.setMood = (mood) => {
+    if (moods[mood]) {
+      currentMood = mood;
+      console.log(`🎭 تم تغيير المزاج إلى: ${mood}`);
+    } else {
+      console.warn(`⚠️ لا يوجد مزاج بهذا الاسم: ${mood}`);
+    }
+  };
+})();
+</script>
 
 </body>
 </html>
+
 
 
 
