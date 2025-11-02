@@ -696,16 +696,53 @@ pages.forEach((page, index) => {
   animation-mixer="clip: Male_Animation_Idle; loop: repeat; crossFadeDuration: 0.3;"
   avatar-advanced-lipsync>
 </a-entity>
-
 <script>
-  // 🔹 تشغيل حركة الفم المتزامنة مع الصوت
-  window.addEventListener("DOMContentLoaded", () => {
-    playLipsyncWithJSON(
-      "https://dns3uae-glitch.github.io/crime-book/assets/audio/closed_scene.mp3",
-      "https://dns3uae-glitch.github.io/crime-book/assets/audio/closed_scene.json"
-    );
-  });
+// 🎬 ترتيب المقاطع بالترتيب الصحيح:
+const scenes = [
+  "open_scene",
+  "crime_scope",
+  "physical_evidence",
+  "moral_evidence",
+  "preserve_scene",
+  "international_scene",
+  "underwater_scene",
+  "documentation",
+  "types_overview",
+  "moving_scene",
+  "fallback",
+  "closed_scene",
+  "conclusion"
+];
+
+// 🧠 تشغيل المقاطع واحد تلو الآخر
+let currentScene = 0;
+function playNextScene() {
+  const name = scenes[currentScene];
+  const audioPath = `https://dns3uae-glitch.github.io/crime-book/assets/audio/${name}.mp3`;
+  const jsonPath  = `https://dns3uae-glitch.github.io/crime-book/assets/audio/${name}.json`;
+
+  console.log(`🎧 تشغيل المقطع: ${name}`);
+
+  // نستخدم الدالة الأصلية لتشغيل الصوت وحركة الفم
+  playLipsyncWithJSON(audioPath, jsonPath);
+
+  // نحمل الصوت لمعرفة متى ينتهي
+  const audio = new Audio(audioPath);
+  audio.onended = () => {
+    currentScene++;
+    if (currentScene < scenes.length) {
+      setTimeout(playNextScene, 1000); // ⏱️ مهلة ثانية قبل المشهد التالي
+    } else {
+      console.log("✅ انتهت جميع المقاطع!");
+    }
+  };
+  audio.play();
+}
+
+// 🚀 عند تحميل الصفحة يبدأ أول مشهد تلقائيًا
+window.addEventListener("DOMContentLoaded", playNextScene);
 </script>
+
 
 
 </a-scene>
