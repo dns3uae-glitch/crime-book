@@ -301,32 +301,16 @@ setTimeout(typeNext, 500);
 
 /* ===== Intro Voice (MP3 Autoplay on First Interaction - FIXED VERSION) ===== */
 window.addEventListener("load", () => {
+  // إنشاء الصوت وربطه
   const intro = new Audio("https://dns3uae-glitch.github.io/crime-book/assets/audio/uae_google_intro.mp3");
   intro.preload = "auto";
+  // ✅ تفعيل الصوت في Safari/iOS بعد أول لمس
+  document.body.addEventListener("touchend", () => {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume();
+  }, { once: true });
 
-  // ⚡ الحل النهائي لتفعيل الصوت على الجوال (iPhone / Android)
-  const unlockAudio = () => {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      ctx.resume();
-
-      intro.play()
-        .then(() => {
-          notice.style.opacity = "0";
-          setTimeout(() => notice.remove(), 500);
-        })
-        .catch(() => {
-          notice.textContent = "⚠️ اضغط لتشغيل الصوت يدويًا";
-        });
-    } catch (err) {
-      console.warn("⚠️ AudioContext error:", err);
-    }
-
-    document.removeEventListener("click", unlockAudio);
-    document.removeEventListener("touchstart", unlockAudio);
-  };
-
-  // 🔔 لافتة التشغيل
+  // إنشاء لافتة صغيرة تخبر المستخدم أن الصوت جاهز
   const notice = document.createElement("div");
   notice.textContent = "🎧 اضغط لتشغيل التدشين الصوتي";
   Object.assign(notice.style, {
@@ -344,13 +328,6 @@ window.addEventListener("load", () => {
     cursor: "pointer",
     transition: "opacity 0.4s ease",
   });
-  document.body.appendChild(notice);
-
-  // ✅ يعمل في كل الحالات (النقر أو اللمس)
-  document.addEventListener("click", unlockAudio, { once: true });
-  document.addEventListener("touchstart", unlockAudio, { once: true });
-});
-
   document.body.appendChild(notice);
 
   // بمجرد الضغط أو اللمس: تشغيل الصوت وحذف اللافتة
