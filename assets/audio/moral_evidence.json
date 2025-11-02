@@ -1,0 +1,29 @@
+{
+  "metadata": {"soundFile": "moral_evidence.mp3", "duration": 8.2},
+  "mouthCues": [
+    {"start":0.00,"end":0.22,"value":"A"},
+    {"start":0.22,"end":0.45,"value":"O"},
+    {"start":0.45,"end":0.68,"value":"M"},
+    {"start":0.68,"end":0.95,"value":"A"},
+    {"start":0.95,"end":1.25,"value":"rest"},
+    {"start":1.25,"end":1.55,"value":"A"},
+    {"start":1.55,"end":1.82,"value":"O"},
+    {"start":1.82,"end":2.10,"value":"A"},
+    {"start":2.10,"end":2.40,"value":"F"},
+    {"start":2.40,"end":2.70,"value":"M"},
+    {"start":2.70,"end":3.05,"value":"A"},
+    {"start":3.05,"end":3.35,"value":"rest"},
+    {"start":3.35,"end":3.68,"value":"A"},
+    {"start":3.68,"end":4.00,"value":"O"},
+    {"start":4.00,"end":4.32,"value":"M"},
+    {"start":4.32,"end":4.65,"value":"A"},
+    {"start":4.65,"end":5.00,"value":"rest"},
+    {"start":5.00,"end":5.35,"value":"A"},
+    {"start":5.35,"end":5.68,"value":"O"},
+    {"start":5.68,"end":6.00,"value":"A"},
+    {"start":6.00,"end":6.35,"value":"F"},
+    {"start":6.35,"end":6.65,"value":"M"},
+    {"start":6.65,"end":7.00,"value":"A"},
+    {"start":7.00,"end":8.20,"value":"rest"}
+  ]
+}

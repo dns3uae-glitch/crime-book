@@ -1,0 +1,30 @@
+{
+  "metadata": {"soundFile": "underwater_scene.mp3", "duration": 7.8},
+  "mouthCues": [
+    {"start":0.00,"end":0.20,"value":"A"},
+    {"start":0.20,"end":0.45,"value":"O"},
+    {"start":0.45,"end":0.70,"value":"M"},
+    {"start":0.70,"end":0.95,"value":"A"},
+    {"start":0.95,"end":1.25,"value":"rest"},
+    {"start":1.25,"end":1.55,"value":"A"},
+    {"start":1.55,"end":1.85,"value":"O"},
+    {"start":1.85,"end":2.10,"value":"F"},
+    {"start":2.10,"end":2.35,"value":"A"},
+    {"start":2.35,"end":2.65,"value":"M"},
+    {"start":2.65,"end":2.95,"value":"A"},
+    {"start":2.95,"end":3.25,"value":"rest"},
+    {"start":3.25,"end":3.60,"value":"A"},
+    {"start":3.60,"end":3.90,"value":"O"},
+    {"start":3.90,"end":4.25,"value":"A"},
+    {"start":4.25,"end":4.60,"value":"rest"},
+    {"start":4.60,"end":4.95,"value":"A"},
+    {"start":4.95,"end":5.25,"value":"O"},
+    {"start":5.25,"end":5.55,"value":"M"},
+    {"start":5.55,"end":5.85,"value":"A"},
+    {"start":5.85,"end":6.20,"value":"rest"},
+    {"start":6.20,"end":6.50,"value":"A"},
+    {"start":6.50,"end":6.80,"value":"O"},
+    {"start":6.80,"end":7.10,"value":"A"},
+    {"start":7.10,"end":7.80,"value":"rest"}
+  ]
+}

@@ -1,8 +1,5 @@
 {
-  "metadata": {
-    "soundFile": "closed_scene.mp3",
-    "duration": 7.8
-  },
+  "metadata": {"soundFile": "closed_scene.mp3", "duration": 7.8},
   "mouthCues": [
     {"start":0.00,"end":0.12,"value":"rest"},
     {"start":0.12,"end":0.36,"value":"A"},
