@@ -1065,9 +1065,88 @@ window.addEventListener("DOMContentLoaded", playNextScene);
 
 })();
 </script>
+<script>
+(function() {
+  const avatar = document.querySelector("#avatar_ahmed");
+  if (!avatar) return;
+  const comp = avatar.components["avatar-advanced-lipsync"];
+  if (!comp) return;
+
+  let idleTimer = 0;
+  let idleActive = false;
+  const random = (min, max) => Math.random() * (max - min) + min;
+
+  // 🎞️ جدول حركات واقعية متاحة
+  const idleExpressions = [
+    ["eyeBlinkLeft", "eyeBlinkRight"],
+    ["mouthSmileLeft", "mouthSmileRight", "cheekSquintLeft", "cheekSquintRight"],
+    ["browInnerUp"],
+    ["browOuterUpLeft", "browOuterUpRight"],
+    ["browDownLeft", "browDownRight"],
+    ["eyeLookOutLeft", "eyeLookOutRight"],
+    ["mouthDimpleLeft", "mouthDimpleRight"],
+    ["mouthFrownLeft", "mouthFrownRight"],
+    ["noseSneerLeft", "noseSneerRight"]
+  ];
+
+  function idleLoop() {
+    requestAnimationFrame(idleLoop);
+    const jaw = comp.current["jawOpen"] || 0;
+    if (jaw < 0.05) {
+      idleTimer++;
+      if (idleTimer > 180 && !idleActive) { // بعد 3 ثواني صمت
+        idleActive = true;
+        triggerIdleMotion();
+      }
+    } else {
+      idleTimer = 0;
+      idleActive = false;
+    }
+  }
+
+  function triggerIdleMotion() {
+    const group = idleExpressions[Math.floor(Math.random() * idleExpressions.length)];
+    const intensity = random(0.3, 0.8);
+    const duration = random(800, 1600);
+
+    group.forEach(m => smoothMorph(m, intensity, duration));
+
+    // حركة رأس خفيفة
+    if (Math.random() > 0.7) {
+      const x = random(-2, 2);
+      const y = 20 + random(-4, 4);
+      avatar.setAttribute("rotation", { x, y, z: 0 });
+      setTimeout(() => avatar.setAttribute("rotation", { x: 0, y: 20, z: 0 }), duration + 600);
+    }
+
+    // رجوع تدريجي للوضع الطبيعي
+    setTimeout(() => {
+      group.forEach(m => smoothMorph(m, 0, 800));
+      idleActive = false;
+    }, duration + random(400, 800));
+  }
+
+  function smoothMorph(name, target, duration) {
+    const start = performance.now();
+    const startVal = comp.current[name] || 0;
+    const diff = target - startVal;
+
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const val = startVal + diff * t;
+      comp.applyMorph(name, val);
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  idleLoop();
+})();
+</script>
 
 </body>
 </html>
+
 
 
 
