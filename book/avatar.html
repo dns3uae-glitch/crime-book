@@ -2,7 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
 <title>📖 الكتاب الواقعي — بدون خلفية</title>
 
 <!-- مكتبة PageFlip -->
@@ -1256,10 +1258,18 @@ window.addEventListener("DOMContentLoaded", playNextScene);
   };
 })();
 </script>
+<script>
+window.addEventListener('resize', () => {
+  const scene = document.querySelector('a-scene');
+  if (!scene) return;
+  const isMobile = window.innerWidth < 800;
+  scene.style.width = isMobile ? '90vw' : '45vw';
+  scene.style.height = isMobile ? '65vh' : '80vh';
+});
+</script>
 
 </body>
 </html>
-
 
 
 
