@@ -723,8 +723,30 @@ function playNextScene() {
 
   console.log(`🎧 تشغيل المقطع: ${name}`);
 
-  // نستخدم الدالة الأصلية لتشغيل الصوت وحركة الفم
+    // نستخدم الدالة الأصلية لتشغيل الصوت وحركة الفم
   playLipsyncWithJSON(audioPath, jsonPath);
+
+  // 🎭 تحديد المزاج المناسب لكل مشهد تلقائيًا
+  const moodMap = {
+    open_scene: "neutral",
+    crime_scope: "serious",
+    physical_evidence: "thinking",
+    moral_evidence: "serious",
+    preserve_scene: "thinking",
+    international_scene: "neutral",
+    underwater_scene: "serious",
+    documentation: "serious",
+    types_overview: "neutral",
+    moving_scene: "thinking",
+    fallback: "neutral",
+    closed_scene: "serious",
+    conclusion: "happy"
+  };
+
+  const mood = moodMap[name] || "neutral";
+  if (typeof setMood === "function") setMood(mood);
+  console.log(`🎭 الحالة الحالية: ${mood}`);
+
 
   // نحمل الصوت لمعرفة متى ينتهي
   const audio = new Audio(audioPath);
@@ -1237,6 +1259,7 @@ window.addEventListener("DOMContentLoaded", playNextScene);
 
 </body>
 </html>
+
 
 
 
