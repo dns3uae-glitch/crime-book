@@ -694,327 +694,121 @@ pages.forEach((page, index) => {
   rotation="0 20 0"
   scale="3 3 3"
   animation-mixer="clip:*; loop:repeat; crossFadeDuration:0.4;"
-  avatar-advanced-lipsync>
+  avatar-lipsync>
 </a-entity>
-
 
 </a-scene>
 <script>
 (() => {
-  // -------------------------
-  // Utils: smoothing & lerp
-  // -------------------------
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  function smooth(value, prev, smoothFactor) { return lerp(prev, value, 1 - Math.exp(-smoothFactor)); }
 
-  // -------------------------
-  // إعداد متغيرات عامة
-  // -------------------------
-  let audioCtx = null;
-  let analyser = null;
-  let sourceNode = null;
-  let audioElement = null;
-  let dataTime = null;
-  let dataFreq = null;
-  let rafId = null;
+  // 👂 استلام الرسالة من أدوات القارئ
+  window.addEventListener('message', (event) => {
+    if (!event.data) return;
+    if (event.data.type !== 'ASK_TEACHER') return;
 
-  // -------------------------
-  // نبحث ونخزن مراجع المورف-تارجتس عند تحميل الموديل
-  // -------------------------
-  AFRAME.registerComponent("avatar-advanced-lipsync", {
-    init() {
-      const el = this.el;
-      this.targets = {}; // {name: {mesh, index}}
-      this.morphMeshes = []; // قائمة الميزشات التي فيها مورف
+    const answerText = event.data.text;   // النص ككلام مكتوب
+    const audioURL   = event.data.audio;  // رابط mp3 الجاهز
+    const qId        = event.data.id;     // مثال: "open_scene"
 
-      el.addEventListener("model-loaded", () => {
-        el.object3D.traverse(node => {
-          if (node.isMesh && node.morphTargetDictionary && node.morphTargetInfluences) {
-            // نخزن كل اسم-اندكس من dict
-            const dict = node.morphTargetDictionary;
-            for (const name in dict) {
-              // نحوّل الاسم لصيغة موحدة صغيرة
-              const key = name.trim();
-              this.targets[key] = this.targets[key] || [];
-              this.targets[key].push({ mesh: node, index: dict[name] });
-            }
-            this.morphMeshes.push(node);
-          }
-        });
+    console.log("📩 أحمد استقبل سؤال:", qId, answerText);
+    console.log("🔊 بيشغل الصوت من:", audioURL);
 
-        console.log("✅ avatar-advanced-lipsync: found morph targets keys:", Object.keys(this.targets).slice(0,50));
-      });
-
-      // القيم smoothed الحالية لكل تارجت
-      this.current = {};
-      // قيم الهدف لكل frame
-      this.targetValues = {};
-
-      // افتراضي: لو ما في موروف للعين/حركة، ممكن تضيف أنيميشن CSS أو animation-mixer
-    },
-
-    // تطبق قيمة مورف محترفة مع smoothing
-    applyMorph(name, value) {
-      // clamp
-      const v = Math.max(0, Math.min(1, value));
-      // smoothing factor (يجرب 0.15 — زيِِّن حسب الحاجة)
-      const sf = 0.15;
-      const prev = this.current[name] || 0;
-      const next = smooth(v, prev, sf);
-      this.current[name] = next;
-
-      const targets = this.targets[name] || [];
-      for (const t of targets) {
-        t.mesh.morphTargetInfluences[t.index] = next;
-      }
-    },
-
-    // دالة تُستدعى من خارج (Audio processor) لتمرير القيم المستخرجة
-    setFeatureValues(featureMap) {
-      // featureMap مثال: { rms: 0.45, centroid: 0.6, zcr: 0.02, pitch: 220 }
-      // قاعدة تحويل بسيطة => morph targets
-      const rms = featureMap.rms || 0;
-      const centroid = featureMap.centroid || 0;
-      const zcr = featureMap.zcr || 0;
-      const pitch = featureMap.pitch || 0;
-
-      // 1) jaw / mouth open => يعتمد بشكل رئيسي على RMS (الطاقة)
-      const jawOpen = Math.min(1, rms * 1.6); // تضخيم طفيف
-      this.applyMorph("jawOpen", jawOpen);
-
-      // 2) mouthFunnel / mouthPucker => أصوات مدّية/مقربة (نسبة الطيف)
-      // طيف منخفض => more funnel/pucker (مثل أ- oo) -> نستخدم centroid العكس (1-centroid)
-      const pucker = Math.max(0, (1 - centroid)) * 0.9;
-      this.applyMorph("mouthPucker", pucker);
-
-      // 3) mouthSmile left/right correlated to centroid & rms subtle
-      const smile = Math.max(0, centroid - 0.45) * 0.9 * rms;
-      this.applyMorph("mouthSmileLeft", smile * 0.6);
-      this.applyMorph("mouthSmileRight", smile * 0.6);
-
-      // 4) mouthStretch (pull sideways) when centroid high (bright sounds)
-      this.applyMorph("mouthStretchLeft", Math.max(0, centroid - 0.5) * 0.6);
-      this.applyMorph("mouthStretchRight", Math.max(0, centroid - 0.5) * 0.6);
-
-      // 5) mouthClose / mouthPress for plosives: use sudden energy spike (zcr or transient)
-      const press = Math.min(1, zcr * 12); // scale
-      this.applyMorph("mouthPressLeft", press * 0.6);
-      this.applyMorph("mouthPressRight", press * 0.6);
-
-      // 6) jawForward/Left/Right small offsets with pitch movement
-      // normalize pitch (if available)
-      const pNorm = pitch ? Math.min(1, (pitch / 400)) : 0;
-      this.applyMorph("jawForward", pNorm * 0.2);
-
-      // 7) blinks: auto blink when RMS low for a short time OR random timer
-      // handled outside in the audio loop by dispatching eyeBlinkLeft/Right
-
-      // 8) cheek/nostril subtle:
-      this.applyMorph("noseSneerLeft", Math.max(0, (centroid - 0.7)) * 0.25);
-      this.applyMorph("noseSneerRight", Math.max(0, (centroid - 0.7)) * 0.25);
+    if (audioURL) {
+      playVoiceWithMouth(audioURL);
+    } else {
+      console.warn("⚠️ ما وصل رابط صوت للجواب. ما راح أتكلم.");
     }
   });
 
-
-
-  // -------------------------
-  // Audio processing: extract RMS, centroid, ZCR, pitch (simple)
-  // -------------------------
-  async function attachAudioToAvatar(audioEl, avatarEl) {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (sourceNode) {
-      try { sourceNode.disconnect(); } catch (e) {}
+  // 🎧 يشغل الملف الصوتي ويحرك الفم أثناء التشغيل
+  function playVoiceWithMouth(url) {
+    // لو في صوت قديم شغال نوقفه
+    if (window.__ahmedAudio) {
+      window.__ahmedAudio.pause();
+      window.__ahmedAudio = null;
     }
 
-    audioElement = audioEl;
-    sourceNode = audioCtx.createMediaElementSource(audioEl);
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 2048; // دقة جيدة للموجة
-    sourceNode.connect(analyser);
-    analyser.connect(audioCtx.destination);
+    const audio = new Audio(url);
+    audio.volume = 1.0;
+    window.__ahmedAudio = audio;
 
-    dataTime = new Float32Array(analyser.fftSize);
-    dataFreq = new Float32Array(analyser.frequencyBinCount);
-
-    // الوصول للمكوّن اللي رجعناه
-    const comp = avatarEl.components["avatar-advanced-lipsync"];
-    if (!comp) {
-      console.warn("avatar-advanced-lipsync component not found on avatar element.");
-    }
-
-    // blink state & timers
-    let blinkTimer = 0;
-    let lastRms = 0;
-    let lastSpike = 0;
-
-    function audioLoop() {
-      analyser.getFloatTimeDomainData(dataTime);
-
-      // RMS = sqrt(mean(x^2))
-      let sum = 0;
-      for (let i = 0; i < dataTime.length; i++) {
-        sum += dataTime[i] * dataTime[i];
-      }
-      const rms = Math.sqrt(sum / dataTime.length); // 0.. ~0.5
-
-      // Frequency spectrum for centroid
-      analyser.getFloatFrequencyData(dataFreq); // in dB (negative)
-      // convert to linear
-      let specSum = 0;
-      let specWeighted = 0;
-      for (let i = 0; i < dataFreq.length; i++) {
-        const linear = Math.pow(10, dataFreq[i] / 20); // dB -> amplitude
-        specSum += linear;
-        specWeighted += linear * i;
-      }
-      const centroid = specSum ? (specWeighted / specSum) / dataFreq.length : 0; // 0..1 approx
-
-      // Zero-crossing rate (ZCR) — proxy for plosives & consonants
-      let zc = 0;
-      for (let i = 1; i < dataTime.length; i++) {
-        if ((dataTime[i - 1] >= 0 && dataTime[i] < 0) || (dataTime[i - 1] < 0 && dataTime[i] >= 0)) zc++;
-      }
-      const zcr = zc / dataTime.length;
-
-      // Simple pitch estimate via autocorrelation (lightweight)
-      function autoCorrelate(buf, sampleRate) {
-        // crude but ok for voiced detection
-        const SIZE = buf.length;
-        let rmsv = 0;
-        for (let i = 0; i < SIZE; i++) rmsv += buf[i] * buf[i];
-        rmsv = Math.sqrt(rmsv / SIZE);
-        if (rmsv < 0.01) return 0;
-        let r1 = 0, r2 = SIZE - 1;
-        for (let i = 0; i < SIZE / 2; i++) {
-          if (Math.abs(buf[i]) < 0.0001) { r1 = i; break; }
-        }
-        for (let i = 1; i < SIZE / 2; i++) {
-          if (Math.abs(buf[SIZE - i]) < 0.0001) { r2 = SIZE - i; break; }
-        }
-        buf = buf.slice(r1, r2);
-        const newSize = buf.length;
-        const c = new Array(newSize).fill(0);
-        for (let i = 0; i < newSize; i++) {
-          for (let j = 0; j < newSize - i; j++) c[i] = c[i] + buf[j] * buf[j + i];
-        }
-        let d = 0;
-        while (c[d] > c[d + 1]) d++;
-        let maxPos = -1, maxVal = -1;
-        for (let i = d; i < newSize; i++) {
-          if (c[i] > maxVal) {
-            maxVal = c[i];
-            maxPos = i;
-          }
-        }
-        let T0 = maxPos;
-        if (!T0) return 0;
-        return sampleRate / T0;
-      }
-      const pitch = autoCorrelate(dataTime, audioCtx.sampleRate) || 0;
-
-      // smoothing of metrics
-      const smoothRms = lerp(lastRms || 0, rms, 0.35);
-      lastRms = smoothRms;
-
-      // construct feature map normalized to 0..1
-      const featureMap = {
-        rms: Math.min(1, smoothRms * 6),                 // scale RMS to ~0..1
-        centroid: Math.min(1, centroid * 1.2),           // freq centroid 0..1
-        zcr: Math.min(1, zcr * 50),                      // scale zcr
-        pitch: Math.min(1000, pitch)                     // raw pitch (Hz) if needed
-      };
-
-      // deliver to component
-      if (comp) comp.setFeatureValues(featureMap);
-
-      // blinking logic: blink when low energy + random timer
-      if (featureMap.rms < 0.02) blinkTimer += 1;
-      else blinkTimer = Math.max(0, blinkTimer - 2);
-
-      if (Math.random() < 0.008 + (featureMap.rms * 0.02)) {
-        // random micro-blink during speech
-        dispatchBlinkOnce();
-      } else if (blinkTimer > 60) {
-        // forced blink when idle
-        dispatchBlinkOnce();
-        blinkTimer = 0;
-      }
-
-      rafId = requestAnimationFrame(audioLoop);
-    }
-
-    function dispatchBlinkOnce() {
-      // قصيرة جداً blink
-      if (comp) {
-        // عينين مع اختلاف بسيط
-        comp.applyMorph && comp.applyMorph("eyeBlinkLeft", 1);
-        comp.applyMorph && comp.applyMorph("eyeBlinkRight", 1);
-        setTimeout(() => {
-          comp.applyMorph && comp.applyMorph("eyeBlinkLeft", 0);
-          comp.applyMorph && comp.applyMorph("eyeBlinkRight", 0);
-        }, 120);
-      }
-    }
-
-    // start loop when audio plays
-    audioEl.addEventListener("play", () => {
-      // resume audio context if suspended
-      if (audioCtx.state === "suspended") audioCtx.resume();
-      if (!rafId) rafId = requestAnimationFrame(audioLoop);
+    // يبدأ حركة الفم أول ما يبدأ الصوت
+    audio.addEventListener('play', () => {
+      startLipMovement();
     });
 
-    audioEl.addEventListener("ended", () => {
-      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-      // reset some morphs gently
-      if (comp) {
-        comp.applyMorph && comp.applyMorph("jawOpen", 0);
-        comp.applyMorph && comp.applyMorph("mouthPucker", 0);
-      }
+    // يوقف حركة الفم بعد ما يخلص الصوت
+    audio.addEventListener('ended', () => {
+      stopLipMovement();
+    });
+
+    audio.play().catch(err => {
+      console.warn("⚠️ ما قدرت أشغل الصوت:", err);
     });
   }
 
-  // -------------------------
-  // Public helper: use when message arrives
-  // -------------------------
-  window.playAvatarAudioWithAdvancedLipsync = async function(audioUrl) {
-    // find avatar element (تأكد تغيير الـ selector لو عندك غير)
-    const avatar = document.querySelector("#avatar_ahmed");
-    if (!avatar) {
-      console.warn("Avatar element not found (#avatar_ahmed).");
-      // حاول إنشاء صوت عادي
-      const fallbackAudio = new Audio(audioUrl);
-      fallbackAudio.play().catch(()=>{ /* ignore */ });
-      return;
-    }
+  // 🟡 تحريك الفم (محاكاة بسيطة لكنها مقبولة بصرياً)
+  let mouthInterval = null;
 
-    // if there's a currently playing audio, pause it
-    if (window.__ahmedAudioPlaying) {
-      try { window.__ahmedAudioPlaying.pause(); } catch(e){}
-      window.__ahmedAudioPlaying = null;
-    }
+  function startLipMovement() {
+    clearInterval(mouthInterval);
+    mouthInterval = setInterval(() => {
+      // level بين 0.2 و 0.5 (فتح وإغلاق بسيط للفم)
+      const level = 0.2 + Math.random() * 0.3;
+      window.dispatchEvent(new CustomEvent("avatarLipFrame", {
+        detail: { level }
+      }));
+    }, 120);
+  }
 
-    const a = new Audio(audioUrl);
-    window.__ahmedAudioPlaying = a;
-    // attach advanced processor
-    await attachAudioToAvatar(a, avatar);
-    // play
-    a.play().catch(err => console.warn("Can't play avatar audio:", err));
-  };
+  function stopLipMovement() {
+    clearInterval(mouthInterval);
+    mouthInterval = null;
+    window.dispatchEvent(new CustomEvent("avatarLipFrame", {
+      detail: { level: 0 }
+    }));
+  }
 
-  // -------------------------
-  // Hook message listener to use new helper
-  // -------------------------
-  window.addEventListener("message", (ev) => {
-    if (!ev.data || ev.data.type !== "ASK_TEACHER") return;
-    const audio = ev.data.audio;
-    if (audio) {
-      // to bypass autoplay restriction, you still need a user gesture once on page.
-      // If audio won't play due to autoplay policy, fall back to showing a press-to-play UI elsewhere.
-      window.playAvatarAudioWithAdvancedLipsync(audio);
+  // 🧠 هذا الجزء يخلي نموذج أحمد فعلاً يحرّك الفم (morph targets)
+  AFRAME.registerComponent("avatar-lipsync", {
+    init: function () {
+      const el = this.el;
+      this.mouthMeshes = [];
+
+      el.addEventListener("model-loaded", () => {
+        el.object3D.traverse((node) => {
+          if (
+            node.isMesh &&
+            node.morphTargetDictionary &&
+            node.morphTargetInfluences
+          ) {
+            // نختار فقط مفاتيح الفم / الفك
+            const validKeys = /(jaw|mouth|lip|aa|oh|ih|uh|ee|oo|pp|ff|ch|th|smile)/i;
+
+            const indices = Object.entries(node.morphTargetDictionary)
+              .filter(([name]) => validKeys.test(name))
+              .map(([_, index]) => index);
+
+            if (indices.length > 0) {
+              this.mouthMeshes.push({ mesh: node, indices });
+            }
+          }
+        });
+
+        console.log("🎯 تم تحديد مؤثرات الفم:", this.mouthMeshes.length);
+      });
+
+      // نستقبل مستوى الفم ونطبقه
+      window.addEventListener("avatarLipFrame", (e) => {
+        const level = e.detail.level; // 0 -> 0.5 تقريبا
+        this.mouthMeshes.forEach(({ mesh, indices }) => {
+          indices.forEach((i) => {
+            mesh.morphTargetInfluences[i] = Math.min(level * 0.35, 0.35);
+          });
+        });
+      });
     }
-  }, false);
+  });
 
 })();
 </script>
