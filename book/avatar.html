@@ -697,6 +697,15 @@ pages.forEach((page, index) => {
   avatar-advanced-lipsync>
 </a-entity>
 
+<script>
+  // 🔹 تشغيل حركة الفم المتزامنة مع الصوت
+  window.addEventListener("DOMContentLoaded", () => {
+    playLipsyncWithJSON(
+      "https://dns3uae-glitch.github.io/crime-book/assets/audio/closed_scene.mp3",
+      "https://dns3uae-glitch.github.io/crime-book/assets/audio/closed_scene.json"
+    );
+  });
+</script>
 
 
 </a-scene>
