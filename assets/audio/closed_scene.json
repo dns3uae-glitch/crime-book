@@ -1,0 +1,35 @@
+{
+  "metadata": {
+    "soundFile": "closed_scene.mp3",
+    "duration": 7.8
+  },
+  "mouthCues": [
+    {"start":0.00,"end":0.12,"value":"rest"},
+    {"start":0.12,"end":0.36,"value":"A"},
+    {"start":0.36,"end":0.55,"value":"O"},
+    {"start":0.55,"end":0.68,"value":"A"},
+    {"start":0.68,"end":0.84,"value":"rest"},
+    {"start":0.84,"end":1.10,"value":"A"},
+    {"start":1.10,"end":1.34,"value":"O"},
+    {"start":1.34,"end":1.60,"value":"A"},
+    {"start":1.60,"end":1.88,"value":"rest"},
+    {"start":1.88,"end":2.10,"value":"F"},
+    {"start":2.10,"end":2.38,"value":"A"},
+    {"start":2.38,"end":2.60,"value":"M"},
+    {"start":2.60,"end":2.88,"value":"A"},
+    {"start":2.88,"end":3.20,"value":"rest"},
+    {"start":3.20,"end":3.55,"value":"A"},
+    {"start":3.55,"end":3.88,"value":"O"},
+    {"start":3.88,"end":4.15,"value":"rest"},
+    {"start":4.15,"end":4.45,"value":"A"},
+    {"start":4.45,"end":4.78,"value":"M"},
+    {"start":4.78,"end":5.15,"value":"O"},
+    {"start":5.15,"end":5.40,"value":"A"},
+    {"start":5.40,"end":6.10,"value":"rest"},
+    {"start":6.10,"end":6.35,"value":"F"},
+    {"start":6.35,"end":6.70,"value":"A"},
+    {"start":6.70,"end":7.00,"value":"O"},
+    {"start":7.00,"end":7.35,"value":"A"},
+    {"start":7.35,"end":7.80,"value":"rest"}
+  ]
+}
