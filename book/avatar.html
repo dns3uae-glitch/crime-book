@@ -772,39 +772,48 @@ pages.forEach((page, index) => {
 
     // دالة تُستدعى من خارج (Audio processor) لتمرير القيم المستخرجة
     setFeatureValues(featureMap) {
-  const rms = featureMap.rms || 0;
-  const centroid = featureMap.centroid || 0;
-  const zcr = featureMap.zcr || 0;
-  const pitch = featureMap.pitch || 0;
+      // featureMap مثال: { rms: 0.45, centroid: 0.6, zcr: 0.02, pitch: 220 }
+      // قاعدة تحويل بسيطة => morph targets
+      const rms = featureMap.rms || 0;
+      const centroid = featureMap.centroid || 0;
+      const zcr = featureMap.zcr || 0;
+      const pitch = featureMap.pitch || 0;
 
-  // 🔹 الفتح والإغلاق (الأساسي)
-  const jawOpen = Math.min(1, rms * 2.0);
-  this.applyMorph("jawOpen", jawOpen);
-  this.applyMorph("mouthClose", 1 - jawOpen * 0.6);
+      // 1) jaw / mouth open => يعتمد بشكل رئيسي على RMS (الطاقة)
+      const jawOpen = Math.min(1, rms * 1.6); // تضخيم طفيف
+      this.applyMorph("jawOpen", jawOpen);
 
-  // 🔹 شكل الفم للأصوات الطويلة (مدّ)
-  const pucker = Math.max(0, (1 - centroid)) * 0.8;
-  this.applyMorph("mouthPucker", pucker);
-  this.applyMorph("mouthFunnel", pucker * 0.6);
+      // 2) mouthFunnel / mouthPucker => أصوات مدّية/مقربة (نسبة الطيف)
+      // طيف منخفض => more funnel/pucker (مثل أ- oo) -> نستخدم centroid العكس (1-centroid)
+      const pucker = Math.max(0, (1 - centroid)) * 0.9;
+      this.applyMorph("mouthPucker", pucker);
 
-  // 🔹 ابتسامة خفيفة أثناء الكلام
-  const smile = Math.max(0, centroid - 0.4) * rms;
-  this.applyMorph("mouthSmileLeft", smile);
-  this.applyMorph("mouthSmileRight", smile);
+      // 3) mouthSmile left/right correlated to centroid & rms subtle
+      const smile = Math.max(0, centroid - 0.45) * 0.9 * rms;
+      this.applyMorph("mouthSmileLeft", smile * 0.6);
+      this.applyMorph("mouthSmileRight", smile * 0.6);
 
-  // 🔹 تحريك جانبي للفك (إضافة واقعية)
-  const jawLeft = Math.sin(performance.now() / 350) * 0.05 * rms;
-  const jawRight = Math.sin(performance.now() / 380) * 0.05 * rms;
-  this.applyMorph("jawLeft", Math.max(0, jawLeft));
-  this.applyMorph("jawRight", Math.max(0, jawRight));
+      // 4) mouthStretch (pull sideways) when centroid high (bright sounds)
+      this.applyMorph("mouthStretchLeft", Math.max(0, centroid - 0.5) * 0.6);
+      this.applyMorph("mouthStretchRight", Math.max(0, centroid - 0.5) * 0.6);
 
-  // 🔹 لمسات في الخدود والأنف
-  this.applyMorph("noseSneerLeft", Math.max(0, centroid - 0.7) * 0.3);
-  this.applyMorph("noseSneerRight", Math.max(0, centroid - 0.7) * 0.3);
-  this.applyMorph("cheekSquintLeft", rms * 0.4);
-  this.applyMorph("cheekSquintRight", rms * 0.4);
-}
+      // 5) mouthClose / mouthPress for plosives: use sudden energy spike (zcr or transient)
+      const press = Math.min(1, zcr * 12); // scale
+      this.applyMorph("mouthPressLeft", press * 0.6);
+      this.applyMorph("mouthPressRight", press * 0.6);
 
+      // 6) jawForward/Left/Right small offsets with pitch movement
+      // normalize pitch (if available)
+      const pNorm = pitch ? Math.min(1, (pitch / 400)) : 0;
+      this.applyMorph("jawForward", pNorm * 0.2);
+
+      // 7) blinks: auto blink when RMS low for a short time OR random timer
+      // handled outside in the audio loop by dispatching eyeBlinkLeft/Right
+
+      // 8) cheek/nostril subtle:
+      this.applyMorph("noseSneerLeft", Math.max(0, (centroid - 0.7)) * 0.25);
+      this.applyMorph("noseSneerRight", Math.max(0, (centroid - 0.7)) * 0.25);
+    }
   });
 
 
