@@ -207,18 +207,23 @@ let W,H,stars=[], warp=0;
 function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
 addEventListener('resize', resize); resize();
 
-function spawnStars(n=900){
-  stars.length=0;
-  for(let i=0;i<n;i++){
+function spawnStars(n) {
+  // ✅ تحديد عدد النجوم تلقائيًا حسب نوع الجهاز
+  const count = n || (innerWidth < 800 ? 400 : 900);
+  stars.length = 0;
+  for (let i = 0; i < count; i++) {
     stars.push({
-      x:(Math.random()-0.5)*2, // -1..1
-      y:(Math.random()-0.5)*2,
-      z:Math.random()*1,       // 0..1 (قريب..بعيد)
-      spd: 0.0007 + Math.random()*0.0015,
-      hue: Math.random()<0.2 ? 50+Math.random()*10 : 195+Math.random()*20 // ذهبي/سماوي
+      x: (Math.random() - 0.5) * 2,
+      y: (Math.random() - 0.5) * 2,
+      z: Math.random() * 1,
+      spd: 0.0007 + Math.random() * 0.0015,
+      hue: Math.random() < 0.2
+        ? 50 + Math.random() * 10
+        : 195 + Math.random() * 20
     });
   }
 }
+
 spawnStars();
 
 function starLoop(t){
@@ -299,6 +304,11 @@ window.addEventListener("load", () => {
   // إنشاء الصوت وربطه
   const intro = new Audio("https://dns3uae-glitch.github.io/crime-book/assets/audio/uae_google_intro.mp3");
   intro.preload = "auto";
+  // ✅ تفعيل الصوت في Safari/iOS بعد أول لمس
+  document.body.addEventListener("touchend", () => {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    ctx.resume();
+  }, { once: true });
 
   // إنشاء لافتة صغيرة تخبر المستخدم أن الصوت جاهز
   const notice = document.createElement("div");
@@ -407,3 +417,4 @@ addEventListener('keydown', (e)=>{ if(e.key==='Enter') startSequence(); });
 
 </body>
 </html>
+
