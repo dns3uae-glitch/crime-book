@@ -721,59 +721,101 @@ pages.forEach((page, index) => {
   // -------------------------
   // نبحث ونخزن مراجع المورف-تارجتس عند تحميل الموديل
   // -------------------------
- AFRAME.registerComponent("avatar-advanced-lipsync", {
-  init: function () {
-    const el = this.el;
-    this.targets = {};
+  AFRAME.registerComponent("avatar-advanced-lipsync", {
+    init() {
+      const el = this.el;
+      this.targets = {}; // {name: {mesh, index}}
+      this.morphMeshes = []; // قائمة الميزشات التي فيها مورف
 
-    el.addEventListener("model-loaded", () => {
-      el.object3D.traverse((node) => {
-        if (node.isMesh && node.morphTargetDictionary && node.morphTargetInfluences) {
-          for (const [name, index] of Object.entries(node.morphTargetDictionary)) {
-            this.targets[name] = { mesh: node, index };
+      el.addEventListener("model-loaded", () => {
+        el.object3D.traverse(node => {
+          if (node.isMesh && node.morphTargetDictionary && node.morphTargetInfluences) {
+            // نخزن كل اسم-اندكس من dict
+            const dict = node.morphTargetDictionary;
+            for (const name in dict) {
+              // نحوّل الاسم لصيغة موحدة صغيرة
+              const key = name.trim();
+              this.targets[key] = this.targets[key] || [];
+              this.targets[key].push({ mesh: node, index: dict[name] });
+            }
+            this.morphMeshes.push(node);
           }
-        }
+        });
+
+        console.log("✅ avatar-advanced-lipsync: found morph targets keys:", Object.keys(this.targets).slice(0,50));
       });
-      console.log("✅ تم ربط حركات الفم الواقعية:", Object.keys(this.targets));
-    });
 
-    window.addEventListener("avatarLipFrame", (e) => {
-      const level = e.detail.level || 0;
+      // القيم smoothed الحالية لكل تارجت
+      this.current = {};
+      // قيم الهدف لكل frame
+      this.targetValues = {};
 
-      // تنظيف القيم تدريجياً لتنعيم الحركة
-      for (const t of Object.values(this.targets)) {
-        t.mesh.morphTargetInfluences[t.index] *= 0.8;
+      // افتراضي: لو ما في موروف للعين/حركة، ممكن تضيف أنيميشن CSS أو animation-mixer
+    },
+
+    // تطبق قيمة مورف محترفة مع smoothing
+    applyMorph(name, value) {
+      // clamp
+      const v = Math.max(0, Math.min(1, value));
+      // smoothing factor (يجرب 0.15 — زيِِّن حسب الحاجة)
+      const sf = 0.15;
+      const prev = this.current[name] || 0;
+      const next = smooth(v, prev, sf);
+      this.current[name] = next;
+
+      const targets = this.targets[name] || [];
+      for (const t of targets) {
+        t.mesh.morphTargetInfluences[t.index] = next;
       }
+    },
 
-      // فتح الفم حسب شدة الصوت
-      this.setMorph("jawOpen", level * 1.2);
-      this.setMorph("mouthClose", 1 - level);
-      this.setMorph("aa", level);
-      this.setMorph("oh", level * 0.6);
-      this.setMorph("mouthPucker", level * 0.4);
-      this.setMorph("mouthFunnel", level * 0.3);
-      this.setMorph("mouthSmileLeft", level * 0.15);
-      this.setMorph("mouthSmileRight", level * 0.15);
+    // دالة تُستدعى من خارج (Audio processor) لتمرير القيم المستخرجة
+    setFeatureValues(featureMap) {
+      // featureMap مثال: { rms: 0.45, centroid: 0.6, zcr: 0.02, pitch: 220 }
+      // قاعدة تحويل بسيطة => morph targets
+      const rms = featureMap.rms || 0;
+      const centroid = featureMap.centroid || 0;
+      const zcr = featureMap.zcr || 0;
+      const pitch = featureMap.pitch || 0;
 
-      // رمش عشوائي طبيعي
-      if (Math.random() < 0.005) {
-        this.setMorph("eyeBlinkLeft", 1);
-        this.setMorph("eyeBlinkRight", 1);
-        setTimeout(() => {
-          this.setMorph("eyeBlinkLeft", 0);
-          this.setMorph("eyeBlinkRight", 0);
-        }, 200);
-      }
-    });
-  },
+      // 1) jaw / mouth open => يعتمد بشكل رئيسي على RMS (الطاقة)
+      const jawOpen = Math.min(1, rms * 1.6); // تضخيم طفيف
+      this.applyMorph("jawOpen", jawOpen);
 
-  setMorph(name, value) {
-    if (this.targets[name]) {
-      this.targets[name].mesh.morphTargetInfluences[this.targets[name].index] =
-        Math.min(Math.max(value, 0), 1);
+      // 2) mouthFunnel / mouthPucker => أصوات مدّية/مقربة (نسبة الطيف)
+      // طيف منخفض => more funnel/pucker (مثل أ- oo) -> نستخدم centroid العكس (1-centroid)
+      const pucker = Math.max(0, (1 - centroid)) * 0.9;
+      this.applyMorph("mouthPucker", pucker);
+
+      // 3) mouthSmile left/right correlated to centroid & rms subtle
+      const smile = Math.max(0, centroid - 0.45) * 0.9 * rms;
+      this.applyMorph("mouthSmileLeft", smile * 0.6);
+      this.applyMorph("mouthSmileRight", smile * 0.6);
+
+      // 4) mouthStretch (pull sideways) when centroid high (bright sounds)
+      this.applyMorph("mouthStretchLeft", Math.max(0, centroid - 0.5) * 0.6);
+      this.applyMorph("mouthStretchRight", Math.max(0, centroid - 0.5) * 0.6);
+
+      // 5) mouthClose / mouthPress for plosives: use sudden energy spike (zcr or transient)
+      const press = Math.min(1, zcr * 12); // scale
+      this.applyMorph("mouthPressLeft", press * 0.6);
+      this.applyMorph("mouthPressRight", press * 0.6);
+
+      // 6) jawForward/Left/Right small offsets with pitch movement
+      // normalize pitch (if available)
+      const pNorm = pitch ? Math.min(1, (pitch / 400)) : 0;
+      this.applyMorph("jawForward", pNorm * 0.2);
+
+      // 7) blinks: auto blink when RMS low for a short time OR random timer
+      // handled outside in the audio loop by dispatching eyeBlinkLeft/Right
+
+      // 8) cheek/nostril subtle:
+      this.applyMorph("noseSneerLeft", Math.max(0, (centroid - 0.7)) * 0.25);
+      this.applyMorph("noseSneerRight", Math.max(0, (centroid - 0.7)) * 0.25);
     }
-  },
-});
+  });
+
+
 
   // -------------------------
   // Audio processing: extract RMS, centroid, ZCR, pitch (simple)
