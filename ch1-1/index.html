@@ -347,7 +347,103 @@ function go(target, dir){
 document.getElementById('prevPage').addEventListener('click', ()=> go('https://dns3uae-glitch.github.io/crime-book/chapter1/','prev'));
 document.getElementById('nextPage').addEventListener('click', ()=> go('https://dns3uae-glitch.github.io/crime-book/chapter2/','next'));
 </script>
-<script src="../assets/js/reader-tools.js"></script>
+<script src="https://dns3uae-glitch.github.io/crime-book/assets/js/reader-tools.js"></script>
+<!-- 🔹 زر عائم لفتح الكتاب -->
+<!-- 🔹 زر عائم فخم لفتح الكتاب -->
+<button id="openBook" class="floating-btn" title="فتح الكتاب الكامل">📖</button>
+
+<!-- 🔹 نافذة عرض الكتاب -->
+<div id="bookOverlay">
+  <iframe id="bookFrame" src="" frameborder="0"></iframe>
+  <button id="closeBook">✖</button>
+</div>
+
+<style>
+/* 👑 زر عائم ذهبي */
+.floating-btn {
+  position: fixed;
+  bottom: 30px;           /* 👇 ثابت فوق الفوتر */
+  left: 30px;             /* 👈 في الجهة اليسار */
+  z-index: 999999;        /* 🧱 فوق كل العناصر بما فيها reader-tools */
+  background: radial-gradient(circle at 40% 40%, #ffd700, #b38b2d);
+  color: #000;
+  border: none;
+  border-radius: 50%;
+  width: 65px;
+  height: 65px;
+  font-size: 28px;
+  box-shadow: 0 0 25px rgba(255,215,0,0.4);
+  cursor: pointer;
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.floating-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 35px rgba(255,215,0,0.6);
+}
+
+/* ✅ الإطار يغطي كامل الصفحة */
+#bookOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999998;
+  transition: opacity .6s ease;
+  opacity: 0;
+}
+
+#bookOverlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+#bookFrame {
+  width: 92%;
+  height: 92%;
+  border-radius: 16px;
+  box-shadow: 0 0 40px rgba(255,215,0,0.3);
+  background: #000;
+}
+
+#closeBook {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  background: rgba(255,215,0,0.15);
+  border: 1px solid rgba(255,215,0,0.6);
+  color: #ffd700;
+  font-size: 22px;
+  font-weight: bold;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .3s ease;
+}
+#closeBook:hover { background: rgba(255,215,0,0.3); }
+</style>
+
+
+
+<script>
+const openBtn = document.getElementById('openBook');
+const overlay = document.getElementById('bookOverlay');
+const frame = document.getElementById('bookFrame');
+const closeBtn = document.getElementById('closeBook');
+
+openBtn.addEventListener('click', ()=>{
+  frame.src = 'book.html';
+  overlay.classList.add('active');
+  document.body.classList.add('modal-open'); // ✅ يمنع التمرير في الخلفية
+});
+
+closeBtn.addEventListener('click', ()=>{
+  overlay.classList.remove('active');
+  document.body.classList.remove('modal-open'); // ✅ يرجع التمرير طبيعي
+  setTimeout(()=>{ frame.src = ''; }, 400);
+});
+</script>
 
 </body>
 </html>
