@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<title>AI Crime Scene – Elite Investigator Edition (v9-fixed+smooth)</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<style>
+
+:root{--gold:#d4af37;--dark:#0a0c0f;--glass:#0f1317cc}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--dark);font-family:"Tajawal",system-ui,Arial;color:#fff}
+a-scene{width:100%;height:100vh;z-index:1}
+
+/* شاشة البداية */
+#overlayStart{
+  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(700px 420px at 50% 40%, rgba(212,175,55,.15), rgba(0,0,0,.8));
+  z-index:12000;text-align:center;color:var(--gold);font-size:22px
+}
+#overlayStart, #overlayStart *{ pointer-events:auto !important; }
+#overlayStart button{
+  margin-top:20px;padding:10px 24px;border:none;border-radius:12px;cursor:pointer;
+  background:linear-gradient(90deg,var(--gold),#b78f2a);color:#000;font-weight:800;font-size:18px;
+  box-shadow:0 0 14px rgba(212,175,55,.5); transition:transform .18s ease, box-shadow .18s ease, filter .2s ease
+}
+#overlayStart button:hover{ box-shadow:0 0 26px rgba(212,175,55,.85); filter:brightness(1.05) }
+#overlayStart button:active{ transform:scale(.96) }
+
+/* HUD */
+#hud{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px 12px;font-weight:800;z-index:11000;display:flex;gap:10px;align-items:center}
+#time{color:#d4af37}
+#status{color:#cfe1ff}
+#score{color:#39d98a}
+/* صندوق الأدلة المركزي */
+#evidenceBox{
+  position:fixed;
+  top:80px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:12001;
+  min-width:320px;
+  max-width:720px;
+  background:linear-gradient(180deg, rgba(10,12,15,0.85), rgba(8,10,12,0.7));
+  border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  padding:12px 14px;
+  border-radius:12px;
+  text-align:center;
+  pointer-events:none; /* يجعل المشهد للتفاعل بينما يُعرض الصندوق */
+  color:#eaf0ff;
+  font-weight:800;
+}
+#evidenceTimer{ font-size:20px; color:#ffd96a; margin-bottom:8px; letter-spacing:1px;}
+#evidenceList{ font-size:15px; color:#d6e6ff; opacity:0.95;}
+
+/* طبقة الواجهة */
+#uiLayer{position:fixed;inset:0;z-index:10000;pointer-events:none}
+#btnOpen{position:absolute;top:20px;right:20px;pointer-events:auto;width:56px;height:56px;border:none;border-radius:50%;cursor:pointer;background:radial-gradient(circle at 35% 30%, var(--gold), #b78f2a);color:#000;font-weight:900;font-size:22px;box-shadow:0 0 12px rgba(212,175,55,.6)}
+
+/* القائمة */
+#sidebar{position:absolute;top:0;right:0;width:400px;height:100%;background:var(--glass);backdrop-filter:blur(14px);border-left:1px solid rgba(255,255,255,.12);padding:14px;overflow:auto;transition:right .45s ease;pointer-events:auto;z-index:10001}
+#sidebar.hidden{right:-420px}
+#sidebarHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+#btnClose{pointer-events:auto;border:none;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+h2{color:var(--gold);margin:12px 0 8px}
+.btn{background:linear-gradient(90deg,var(--gold),#b78f2a);color:#000;font-weight:800;border:none;border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:0 0 12px rgba(212,175,55,.4)}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.2);color:#d6dbe3;border-radius:10px;padding:7px 10px;cursor:pointer}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:#0c1014;color:#fff}
+.library{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.card{background:rgba(255,255,255,.05);border-radius:12px;padding:10px;text-align:center;box-shadow:inset 0 0 14px rgba(212,175,55,.12);transition:.25s;cursor:pointer}
+.card:hover{box-shadow:0 0 20px rgba(212,175,55,.28)}
+.card .btn{width:100%;margin-top:6px}
+
+/* أزرار التحكم العامة */
+.dynamic-controls, .camera-controls {
+  position: fixed;
+  bottom: 20px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  gap: 6px;
+  z-index: 10002;
+}
+
+/* أدوات العناصر تبقى يسار الشاشة */
+.dynamic-controls { left: 20px; flex-direction: column; }
+
+/* أدوات الكاميرا في المنتصف أسفل */
+.camera-controls { left: 50%; transform: translateX(-50%); flex-direction: row; justify-content: center; }
+
+.dynamic-controls .row, .camera-controls .row { display: flex; gap: 6px; justify-content: center; }
+
+.ctrl-btn, .cam-btn {
+  background: var(--gold); border: none; border-radius: 8px; font-size: 18px; font-weight: bold; color: #000;
+  width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 6px rgba(212,175,55,.4); cursor: pointer; transition: transform 0.2s ease;
+}
+.ctrl-btn:hover, .cam-btn:hover { transform: scale(1.1); }
+
+/* نافذة إدخال الملاحظة */
+#noteModal { position: fixed; inset: 0; display: none; place-items: center; z-index: 12001; background: radial-gradient(600px 320px at 50% 40%, rgba(212,175,55,.12), rgba(0,0,0,.65)); }
+.noteCard { width: min(92vw,520px); background: #0b0f13f2; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 14px; box-shadow: 0 0 22px rgba(212,175,55,.35); }
+.noteCard .row { justify-content: flex-end; }
+
+/* Toast */
+.toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.75); padding: 10px 14px; border-radius: 10px; display: none; z-index: 11000; }
+
+/* ميديا واستايلات أخرى محذوفة للاختصار — (هي نفسها من ملفك) */
+@media (max-width: 768px) {
+  .dynamic-controls, .camera-controls { position: fixed; left: 50%; transform: translateX(-50%); background: rgba(10, 12, 15, 0.85); padding: 8px 10px; border-radius: 14px; box-shadow: 0 0 10px rgba(212,175,55,0.25); }
+  .dynamic-controls { bottom: 110px; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 8px; width: 92vw; }
+  .camera-controls { bottom: 20px; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 8px; width: 92vw; }
+  .ctrl-btn, .cam-btn { width: 38px; height: 38px; font-size: 16px; }
+}
+@media (min-width: 769px) and (max-width: 1200px) { .dynamic-controls, .camera-controls { transform: none; left: auto; right: 20px; background: rgba(10,12,15,0.65); } }
+@media (orientation: portrait) {
+  .dynamic-controls { bottom: 110px; left: 50%; transform: translateX(-50%); flex-direction: row; flex-wrap: wrap; justify-content: center; width: 92vw; }
+  .camera-controls { bottom: 20px; left: 50%; transform: translateX(-50%); flex-direction: row; flex-wrap: wrap; justify-content: center; width: 92vw; }
+  #sidebar { width: 100%; height: 50%; bottom: 0; right: 0; border-left: none; border-top: 1px solid rgba(255,255,255,.12); border-radius: 12px 12px 0 0; }
+}
+@media (orientation: landscape) {
+  .dynamic-controls { bottom: 20px; left: 20px; flex-direction: column; gap: 6px; transform: none; }
+  .camera-controls { right: 20px; left: auto; bottom: 20px; transform: none; flex-direction: column; gap: 6px; }
+  #sidebar { width: 380px; height: 100%; top: 0; right: 0; border-left: 1px solid rgba(255,255,255,.12); border-top: none; border-radius: 0; }
+}
+@media (max-width: 600px) { .ctrl-btn, .cam-btn { width: 34px; height: 34px; font-size: 15px; } }
+@media (orientation: landscape) and (max-height: 500px) {
+  .dynamic-controls, .camera-controls { background: rgba(10,10,10,0.45); padding: 6px; border-radius: 10px; flex-direction: row; flex-wrap: nowrap; justify-content: center; gap: 4px; width: 96vw; left: 50%; transform: translateX(-50%); }
+  .dynamic-controls { bottom: 60px; }
+  .camera-controls { bottom: 10px; }
+  .ctrl-btn, .cam-btn { width: 32px; height: 32px; font-size: 14px; opacity: 0.85; }
+  #sidebar { width: 320px; background: rgba(15,15,15,0.9); }
+}
+@media (max-width: 900px) and (orientation: landscape) {
+  .camera-controls, .dynamic-controls { position: fixed; left: 50%; transform: translateX(-50%); width: auto; max-width: 90vw; flex-wrap: wrap; justify-content: center; }
+  .dynamic-controls { bottom: 100px; }
+  .camera-controls { bottom: 20px; }
+  .ctrl-btn, .cam-btn { width: 36px; height: 36px; font-size: 15px; }
+}
+/* ✨ الباب والانفجار */
+#doorOverlay { position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;z-index:20000;overflow:hidden; }
+#leftDoor, #rightDoor { position: absolute; top: 0; width: 50%; height: 100%;
+  background: linear-gradient(135deg, #b8b8b8 0%, #c7a06a 35%, #5f5f5f 100%); background-blend-mode: overlay;
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 6px),
+    linear-gradient(160deg, #d0b07833 0%, #333 100%);
+  border: 1px solid rgba(200,160,90,0.35); border-left: none; border-right: none;
+  box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.1), inset 0 0 25px rgba(0,0,0,0.6), 0 0 50px rgba(0,0,0,0.8);
+  filter: brightness(0.95) contrast(1.1); transition: transform 2.8s ease-in-out, filter 0.3s ease;
+}
+#leftDoor:hover, #rightDoor:hover { filter: brightness(1.15) saturate(1.2); box-shadow: inset 0 0 80px rgba(255,220,150,0.25), 0 0 40px rgba(198,169,116,0.4); }
+#leftDoor::after, #rightDoor::after { content: ""; position: absolute; top: 50%; width: 18px; height: 80px; border-radius: 6px;
+  background: linear-gradient(180deg, #c6a974 0%, #7b5f2a 100%); box-shadow: inset 0 0 6px rgba(255,255,255,0.4), 0 0 10px rgba(0,0,0,0.6); }
+#leftDoor::after { right: 25px; transform: translateY(-50%); }
+#rightDoor::after { left: 25px; transform: translateY(-50%); }
+#leftDoor{left:0;transform-origin:left center;} #rightDoor{right:0;transform-origin:right center;}
+#fxSmoke,#fxParticles{position:absolute;inset:0;pointer-events:none;}
+.smoke{ position:absolute;width:240px;height:240px;border-radius:50%; background:radial-gradient(circle,rgba(80,160,255,.6),rgba(20,50,100,.2),transparent); opacity:0;mix-blend-mode:screen;filter:blur(5px) }
+.particle{ position:absolute;width:6px;height:6px;border-radius:50%; background:radial-gradient(circle,rgba(180,240,255,.9),rgba(0,100,200,.3),transparent); opacity:0; }
+@keyframes shake{0%,100%{transform:translate(0,0);}20%{transform:translate(-6px,-4px);}40%{transform:translate(6px,8px);}60%{transform:translate(-5px,4px);}80%{transform:translate(8px,-6px);}}
+.shake {animation:shake 0.4s ease-in-out 4;}
+#btnDoorStart{ position: absolute; bottom: 140px; left: 50%; transform: translateX(-50%); z-index: 100; padding: 16px 46px;
+  border: 2px solid rgba(212,175,55,0.25); border-radius: 14px; cursor: pointer; font-size: 22px; font-weight: 800; color: #d4af37;
+  background: linear-gradient(180deg, #0a0c0f 0%, #162233 100%); box-shadow: inset 0 0 18px rgba(255,255,255,0.05), 0 0 22px rgba(13,27,42,0.6);
+  transition: transform 0.2s ease, box-shadow 0.3s ease, filter 0.3s ease; animation: deepGlow 2s infinite ease-in-out; }
+#btnDoorStart:hover{ transform: translateX(-50%) scale(1.08); box-shadow: inset 0 0 25px rgba(212,175,55,0.25), 0 0 30px rgba(212,175,55,0.3); filter: brightness(1.15); }
+@keyframes deepGlow{0%,100%{ box-shadow: 0 0 18px rgba(212,175,55,0.18);}50%{ box-shadow: 0 0 28px rgba(212,175,55,0.38);} }
+</style>
+</head>
+<body>
+<!-- إعدادات تفاعل الأبواب -->
+<style>
+#doorOverlay * { pointer-events: auto; }
+#leftDoor, #rightDoor, #fxSmoke, #fxParticles { pointer-events: none; }
+</style>
+<div id="doorOverlay">
+<div id="leftDoor"></div>
+<div id="rightDoor"></div>
+<div id="fxSmoke"></div>
+<div id="fxParticles"></div>
+<button id="btnDoorStart" onclick="startTimer()">ابدأ</button>
+<audio id="doorSfx" preload="auto">
+<source src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_81c287eb63.mp3?filename=gate-heavy-openclose-wav-103288.mp3" type="audio/mpeg"/>
+</audio>
+</div>
+<!-- بلاغ غرفة العمليات -->
+<div id="reportOverlay" style="display:none;position:fixed;inset:0;z-index:26000;align-items:center;justify-content:center;">
+<div style="
+    position:absolute;inset:0;
+    background:
+      radial-gradient(circle at 60% 30%, rgba(40,50,70,.25) 0%, rgba(10,10,20,.9) 80%),
+      linear-gradient(to bottom, rgba(0,0,0,.65), rgba(0,0,0,.85)),
+      url('http://dns3uae-glitch.github.io/crime-book/assets/A_digital_photograph_captures_a_nighttime_cityscap.png') center/cover no-repeat;
+    filter: blur(1.8px) brightness(.45) saturate(1.2);
+    opacity:.98;">
+</div>
+<div id="reportCard" style="
+    position:relative;width:min(92vw,780px);
+    background:linear-gradient(180deg,#071017,#0b1116);
+    border:1px solid rgba(212,175,55,.14);
+    border-radius:14px;padding:18px 18px 14px;
+    box-shadow:0 10px 40px rgba(0,0,0,.7); color:#e9edf5; direction:rtl; text-align:right;">
+<div style="color:#d4af37;font-weight:900;font-size:20px;margin-bottom:8px">بلاغ عاجل — غرفة عمليات شرطة الشارقة</div>
+<div id="reportText" style="line-height:1.9;font-size:17px;max-height:260px;overflow:auto;margin-bottom:12px">
+      التاريخ: الأحد، الساعة 21:35 مساءً — الموقع: منطقة المجاز 3، برج الأفق — الطابق 12، الشقة 1205.<br/>
+      وردت مكالمة من حارس المبنى عن سماع أصوات شجار تلتها صرخة ودوي سقوط جسم ثقيل. منذ 10 دقائق انقطعت الأصوات ولا يوجد رد عند طرق الباب. لوحظت بقع داكنة قرب العتبة مع آثار سحب نحو الداخل. يُطلب الانتقال فورًا، تأمين المدخل، وتقييم الوضع الأوّلي.
+    </div>
+<div style="display:flex;gap:8px;justify-content:flex-end">
+<button id="reportStartMission" style="background:transparent;border:1px solid rgba(255,255,255,.22);color:#d6dbe3;border-radius:10px;padding:10px 14px;cursor:pointer">ابدأ المهمة</button>
+</div>
+<audio id="reportAudio" preload="auto">
+<source src="http://dns3uae-glitch.github.io/crime-book/assets/audio/CrimeScene_Closed_Majaz_Report.mp3" type="audio/mpeg"/>
+</audio>
+</div>
+</div>
+<!-- مشهد الغوص داخل المدينة -->
+<div id="cityDive" style="display:none;position:fixed;inset:0;z-index:25000;overflow:hidden;">
+<img id="cityImg" src="http://dns3uae-glitch.github.io/crime-book/assets/A_digital_photograph_captures_a_nighttime_cityscap.png" style="width:100%;height:100%;object-fit:cover;transform-origin:center;transition:transform 5s ease-in-out;filter:brightness(0.9);"/>
+</div>
+<!-- HUD -->
+<!-- ===== واجهة جمع الأدلة المركزية (موجودة فوق، في منتصف الشاشة) ===== -->
+<div id="evidenceCenter" style="position:fixed;left:50%;top:10%;transform:translateX(-50%);z-index:12000;pointer-events:auto;display:flex;justify-content:center;align-items:center;">
+<div id="evidenceCenterBox" style="backdrop-filter: blur(6px); background: linear-gradient(180deg, rgba(10,10,10,0.6), rgba(8,8,10,0.4)); border:1px solid rgba(255,255,255,0.06); padding:12px 18px; border-radius:12px; min-width:360px; text-align:center;">
+<div style="display:flex;align-items:center;justify-content:center;gap:12px">
+<div style="font-weight:900;color:var(--gold);font-size:18px">⏳ العد التنازلي</div>
+<div id="evidenceCenterTime" style="font-weight:900;font-size:18px;color:#fff">03:00</div>
+</div>
+<div id="evidenceCenterList" style="margin-top:9px; max-height:120px; overflow:auto; text-align:right; direction:rtl;"></div>
+</div>
+</div>
+<!-- المودال الزجاجي النهائي عند انتهاء الوقت -->
+<div id="finalGlassModal" style="display:none; position:fixed; inset:0; z-index:26000; align-items:center; justify-content:center; pointer-events:auto;">
+<div style="position:absolute; inset:0; background: rgba(7,9,12,0.7); backdrop-filter: blur(6px);"></div>
+<div id="finalGlassCard" style="position:relative; width:min(92vw,760px); background: linear-gradient(180deg, rgba(10,10,12,0.92), rgba(6,6,8,0.95)); border-radius:14px; padding:20px; color:#e9edf5; border:1px solid rgba(212,175,55,0.08); box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+<div style="font-size:20px;color:var(--gold);font-weight:900">تقرير الأدلة — المهمة انتهت</div>
+<button id="finalCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,0.12);padding:6px 10px;border-radius:8px;cursor:pointer;color:#fff">اغلاق</button>
+</div>
+<div id="finalReportDetails" style="line-height:1.8; font-size:16px; max-height:360px; overflow:auto;"></div>
+</div>
+</div>
+<!-- المشهد -->
+<a-scene embedded="" renderer="antialias:true; colorManagement:true" touch-action="pan-y">
+<a-entity id="rig" movement-controls="fly:false; speed:0.2" position="0 0.7 5.5" rotation="0 0 0" smooth-collision="room:#room;
+    marginFront:0.55; marginBack:0.45;
+    marginLeft:0.5; marginRight:0.5;
+    minY:0.6; maxY:2.8">
+<a-entity camera="" id="cam" look-controls="" wasd-controls="acceleration:30"></a-entity>
+</a-entity>
+<a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/room66.glb)" id="room" position="0 0 0" shadow="receive:true" visible="false"></a-entity>
+<a-entity class="clickable" gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/blood.glb)" id="ev_4_blood" position="2.7 -0.03 -3.1" rotation="0 90 0" scale="0.10254404522189213 0.10254404522189213 0.10254404522189213" shadow="receive:true; cast:true"></a-entity>
+<a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/broken_chair.glb)" id="custom_2_broken_chair" position="5.0 0 -2.65" rotation="0 -105 0" scale="1.113960206249105 1.113960206249105 1.113960206249105" shadow="receive:true; cast:true"></a-entity>
+<a-entity class="clickable" gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/broken_glass_cups.glb)" id="custom_3_broken_cup" position="4.45 0 -2.7" rotation="0 0 0" scale="1.569226594089098 1.569226594089098 1.569226594089098" shadow="receive:true; cast:true"></a-entity>
+<a-entity class="clickable" gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/mobile_phone.glb)" id="custom_4_mobile" position="0.65 0 -2.8" rotation="-90 6 -6" scale="2.2353661105660914 2.2353661105660914 2.2353661105660914" shadow="receive:true; cast:true"></a-entity>
+<a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/small_table.glb)" id="custom_5_small_table" position="4.7 0 -3.4" rotation="0 0 0" scale="0.0016665891364265834 0.0016665891364265834 0.0016665891364265834" shadow="receive:true; cast:true"></a-entity>
+<a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/lamp_27.glb)" id="custom_7_lamp" position="-0.55 4.2 0.95" rotation="0 0 0" scale="1.209230746879588 1.209230746879588 1.209230746879588" shadow="receive:true; cast:true"></a-entity>
+<a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/old_cabinet.glb)" id="custom_8_old_cabinet" position="-4.3 0.6 -4.45" rotation="0 12 0" scale="1.0928584753134105 1.0928584753134105 1.0928584753134105" shadow="receive:true; cast:true"></a-entity>
+<a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/old_double_bed.glb)" id="custom_9_old_bed" position="0.05 0 -5.0" rotation="0 0 0" scale="0.010165990208361732 0.010165990208361732 0.010165990208361732" shadow="receive:true; cast:true"></a-entity>
+<a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/plant_pot.glb)" id="custom_10_vase" position="-4.75 0 -3.25" rotation="0 0 0" scale="1.7136295377455988 1.7136295377455988 1.7136295377455988" shadow="receive:true; cast:true"></a-entity>
+<a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/window__wodden_4_mb.glb)" id="custom_11_window" position="5.75 -0.1 0.05" rotation="0 -90 0" scale="2.715339009539666 2.715339009539666 2.715339009539666" shadow="receive:true; cast:true"></a-entity>
+<a-entity class="clickable" gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/cadaver.glb)" id="custom_12_corpse" position="2.8 0.15 -2.55" rotation="0 0 0" scale="0.7300307961477923 0.7300307961477923 0.7300307961477923" shadow="receive:true; cast:true"></a-entity>
+<a-entity class="clickable" gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/gun1.glb)" id="custom_13_gun" position="-7.6 0 4.75" rotation="-82.5 -1.5 0" scale="0.2472377118304502 0.2472377118304502 0.2472377118304502" shadow="receive:true; cast:true"></a-entity>
+<a-entity light="type:ambient; intensity:0.55"></a-entity>
+<a-entity cursor="rayOrigin:mouse" id="ray" raycaster="objects:.clickable,.placed,.noteMarker"></a-entity>
+</a-scene>
+<!-- واجهة -->
+<div id="uiLayer">
+<button id="btnOpen">≡</button>
+<aside class="hidden" id="sidebar">
+<div id="sidebarHead">
+<div style="color:#d4af37;font-weight:800">لوحة التحكم</div>
+<button id="btnClose" title="إغلاق">✕</button>
+</div>
+<h2>📦 مكتبة الأدلة</h2>
+<div class="library" id="library"></div>
+<h2>➕ إضافة عنصر خارجي</h2>
+<div class="row">
+<input id="customName" placeholder="اسم العنصر" type="text"/>
+<input id="customURL" placeholder="رابط النموذج (.glb)" type="text"/>
+<button class="btn" id="btnAddCustom">إضافة</button>
+</div>
+<h2>🧩 العناصر الموضوعة</h2>
+<select id="placedList" size="6" style="width:100%"></select>
+<div class="row">
+<button class="btn-ghost" id="btnDelete">🗑 حذف العنصر</button>
+<button class="btn-ghost" id="btnReset">🔄 إعادة ضبط المشهد</button>
+</div>
+<h2>✅❌ تقييم الأدلة</h2>
+<div class="row">
+<select id="evidenceSel">
+<option selected="" value="none">— بدون تقييم —</option>
+<option value="true">✔️ دليل صحيح</option>
+<option value="false">❌ دليل خاطئ</option>
+</select>
+<button class="btn" id="btnApplyEvidence">تطبيق</button>
+</div>
+<h2>🧪 الاختبار</h2>
+<div class="row">
+<input id="duration" title="المدة بالثواني" type="number" value="120"/>
+<button class="btn" id="btnGameStart">بدء</button>
+<button class="btn-ghost" id="btnGameStop">إيقاف</button>
+<button class="btn-ghost" id="btnGameFinalize">اعتماد</button>
+</div>
+<h2>🗒️ الملاحظات</h2>
+<div class="row">
+<button class="btn" id="btnNoteMode">➕ إضافة ملاحظة</button>
+<button class="btn-ghost" onclick="deleteNotes()">🗑️ حذف الملاحظات</button>
+</div>
+<h2>⚙️ إعدادات التحريك</h2>
+<div class="row">
+<label style="font-size:12px;color:#cdd6e1">سرعة الحركة:</label>
+<select id="stepSel">
+<option value="0.05">بطيئة (0.05)</option>
+<option selected="" value="0.1">متوسطة (0.1)</option>
+<option value="0.25">سريعة (0.25)</option>
+<option value="0.5">عالية (0.5)</option>
+</select>
+</div>
+</aside>
+</div>
+<!-- تحكم بالعنصر -->
+<div class="dynamic-controls" id="controls">
+<div class="row">
+<button class="ctrl-btn" data-act="up">⬆️</button>
+<button class="ctrl-btn" data-act="down">⬇️</button>
+</div>
+<div class="row">
+<button class="ctrl-btn" data-act="right">➡️</button>
+<button class="ctrl-btn" data-act="left">⬅️</button>
+</div>
+<div class="row">
+<button class="ctrl-btn" data-act="zoomIn">🔼</button>
+<button class="ctrl-btn" data-act="zoomOut">🔽</button>
+</div>
+<div class="row">
+<button class="ctrl-btn" data-act="rotL">⟲</button>
+<button class="ctrl-btn" data-act="rotR">⟳</button>
+</div>
+<div class="row">
+<button class="ctrl-btn" data-act="tilt">📐</button>
+<button class="ctrl-btn" data-act="shrink">🔹</button>
+</div>
+<div class="row">
+<button class="ctrl-btn" data-act="grow">➕</button>
+</div>
+</div>
+<!-- تحكم بالكاميرا -->
+<div class="camera-controls" id="cameraPanel">
+<button class="cam-btn" data-cam="up">⬆️</button>
+<button class="cam-btn" data-cam="down">⬇️</button>
+<button class="cam-btn" data-cam="right">➡️</button>
+<button class="cam-btn" data-cam="left">⬅️</button>
+<button class="cam-btn" data-cam="back">🔼</button>
+<button class="cam-btn" data-cam="fwd">🔽</button>
+<button class="cam-btn" data-cam="yawL">⟲</button>
+<button class="cam-btn" data-cam="yawR">⟳</button>
+</div>
+<div id="noteModal">
+<div class="noteCard">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+<strong style="color:#d4af37">إضافة ملاحظة باللغة الانجليزية</strong>
+<button class="btn-ghost" id="noteCancel">إلغاء</button>
+</div>
+<label>النص:</label>
+<textarea id="noteText" placeholder="اكتب الملاحظة باللغة الانجليزية فقط..." rows="5"></textarea>
+<div class="row" style="margin-top:10px">
+<button class="btn" id="noteSave">حفظ</button>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+/* ===== بدء التطبيق ===== */
+window.missionStarted = false;
+
+// إزالة شاشة بداية قديمة إن وجدت
+window.startApp = function(){
+  const ov = document.getElementById('overlayStart');
+  if(ov){ ov.style.transition='opacity .6s ease'; ov.style.opacity='0'; setTimeout(()=> ov.remove(),650); }
+};
+
+const sidebar = document.getElementById('sidebar');
+document.getElementById('btnOpen').onclick  = ()=> sidebar.classList.remove('hidden');
+document.getElementById('btnClose').onclick = ()=> sidebar.classList.add('hidden');
+
+const toast = document.getElementById('toast');
+function msg(t){ toast.textContent=t; toast.style.display='block'; setTimeout(()=>toast.style.display='none',1100); }
+const timeEl = document.getElementById('time');
+const statusEl = document.getElementById('status');
+const scoreEl = document.getElementById('score');
+
+const scene = document.querySelector('a-scene');
+const ray   = document.getElementById('ray');
+document.getElementById('room').setAttribute('visible','false');
+
+// إخفاء المشهد والواجهة في البداية
+window.addEventListener('load', ()=>{
+  document.querySelector('a-scene').style.display = 'none';
+  const ui = document.querySelectorAll('#hud, #controls, #cameraPanel, #uiLayer');
+  ui.forEach(el => el.style.display = 'none');
+});
+
+/* أدوات مساعدة للحركة */
+function lerp(a,b,t){ return a + (b-a)*t; }
+function animate(duration, step, done){
+  const start = performance.now();
+  function frame(now){
+    const p = Math.min(1, (now - start) / duration);
+    step(p);
+    if(p < 1) requestAnimationFrame(frame); else if(done) done();
+  }
+  requestAnimationFrame(frame);
+}
+function getVec3(attr){ return {x:attr.x||0,y:attr.y||0,z:attr.z||0}; }
+function tweenPosition(ent, to, duration=200){
+  const from = getVec3(ent.getAttribute('position')||{x:0,y:0,z:0});
+  animate(duration, p=>{ ent.setAttribute('position', {x:lerp(from.x,to.x,p), y:lerp(from.y,to.y,p), z:lerp(from.z,to.z,p)}); });
+}
+function tweenDeltaPosition(ent, dx,dy,dz, duration=200){
+  const from = getVec3(ent.getAttribute('position')||{x:0,y:0,z:0});
+  tweenPosition(ent, {x:from.x+dx,y:from.y+dy,z:from.z+dz}, duration);
+}
+function tweenRotationY(ent, deltaDeg, duration=200){
+  const from = ent.getAttribute('rotation') || {x:0,y:0,z:0};
+  const toY = from.y + deltaDeg;
+  animate(duration, p=>{ ent.setAttribute('rotation', {x:from.x,y:lerp(from.y,toY,p),z:from.z}); });
+}
+function tweenScaleFactor(ent, factor, duration=200){
+  const s = ent.getAttribute('scale') || {x:1,y:1,z:1};
+  const to = {x:s.x*factor, y:s.y*factor, z:s.z*factor};
+  animate(duration, p=>{ ent.setAttribute('scale',{x:lerp(s.x,to.x,p), y:lerp(s.y,to.y,p), z:lerp(s.z,to.z,p)}); });
+}
+
+/* مكتبة الأدلة */
+const library = [
+  {name:'سلاح كلاشنكوف', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/gun.glb'},
+  {name:'سلاح', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/gun1.glb'},
+  {name:'غرفة', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/room.glb'},
+  {name:'منزل', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/home.glb'},
+  {name:'منزل1', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/home1.glb'},
+  {name:'داخل قطار', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/qtar.glb'},
+  {name:'سرير', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/bed.glb'},
+  {name:'جثة', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/corpse.glb'},
+  {name:'يد مقطوعة', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/hand_sculpt.glb'},
+  {name:'بقعة دم', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/blood.glb'},
+  {name:'قبضة حديد', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/scene_compressed.glb'},
+  {name:'شارع', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/stret.glb'},
+  {name:'سيف', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/siaf.glb'}
+];
+function renderLibrary(){
+  const lib = document.getElementById('library'); lib.innerHTML = '';
+  library.forEach((m,i)=>{
+    const card=document.createElement('div'); card.className='card';
+    card.innerHTML = `<div style="font-weight:800">${m.name}</div><button class="btn">وضع</button>`;
+    card.querySelector('button').onclick = ()=> placeModel(i);
+    lib.appendChild(card);
+  });
+}
+renderLibrary();
+document.getElementById('btnAddCustom').onclick = ()=>{
+  const name = document.getElementById('customName').value.trim();
+  const url  = document.getElementById('customURL').value.trim();
+  if(!name || !url){ msg('يرجى إدخال الاسم والرابط'); return; }
+  library.push({name, url}); renderLibrary(); msg('✅ تم إضافة العنصر إلى المكتبة');
+};
+
+let placed = []; // {id,name,el,scored:false}
+let selected = null;
+const placedList = document.getElementById('placedList');
+const evidenceSel = document.getElementById('evidenceSel');
+
+document.getElementById('btnApplyEvidence').onclick = ()=>{
+  if(!selected){ msg('اختر عنصرًا أولًا'); return; }
+  const val = evidenceSel.value;
+  selected.setAttribute('data-valid', val);
+  [...selected.children].filter(c=> c.classList && c.classList.contains('evidenceHalo')).forEach(h=>selected.removeChild(h));
+  if(val==='true' || val==='false'){
+    const halo = document.createElement('a-torus');
+    halo.classList.add('evidenceHalo');
+    halo.setAttribute('radius','0.6'); halo.setAttribute('radius-tubular','0.02');
+    halo.setAttribute('rotation','90 0 0'); halo.setAttribute('position','0 0.05 0');
+    const col = (val==='true') ? '#39d98a' : '#ff5c5c';
+    halo.setAttribute('material',`color:${col}; emissive:${col}; emissiveIntensity:0.5; opacity:0.85; transparent:true`);
+    selected.appendChild(halo);
+  }
+  msg('✅ تم تقييم العنصر'); saveScene();
+};
+
+/* وضع عنصر */
+function placeModel(i){
+  const m = library[i]; if(!m) return;
+  const id = 'ent-' + Date.now();
+  const ent = document.createElement('a-entity');
+  ent.setAttribute('id', id);
+  ent.setAttribute('gltf-model', m.url);
+  ent.classList.add('placed', 'clickable');
+  ent.setAttribute('data-valid', 'none');
+  ent.setAttribute('data-scored', 'no');
+  ent.setAttribute('position', '0 0 -2.8');
+  ent.setAttribute('rotation', '0 180 0');
+
+  ent.addEventListener('model-loaded', (e)=>{
+    const THREE = (window.AFRAME && AFRAME.THREE) ? AFRAME.THREE : window.THREE;
+    if(!THREE) { console.warn('THREE غير متاح'); return; }
+    const root = e.detail.model || ent.getObject3D('mesh'); if(!root){ console.warn('لم يتم العثور على جذر النموذج'); return; }
+    const bbox = new THREE.Box3().setFromObject(root);
+    const size = bbox.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    let s = Math.min(0.35, 1.0 / (maxDim || 1)); if(!isFinite(s) || s <= 0) s = 0.2;
+    ent.setAttribute('scale', `${s} ${s} ${s}`);
+    const minY = bbox.min.y; const groundY = 0.02;
+    const pos = ent.getAttribute('position'); pos.x=0; pos.z=-2.8; pos.y = groundY - (s * minY);
+    ent.setAttribute('position', pos);
+  });
+
+  const col = document.createElement('a-box');
+  col.setAttribute('width','1.2'); col.setAttribute('height','1.8'); col.setAttribute('depth','1.2'); col.setAttribute('opacity','0'); col.setAttribute('position','0 0.9 0');
+  col.classList.add('clickable'); ent.appendChild(col);
+
+  scene.appendChild(ent);
+  placed.push({ id, name: m.name, el: ent, scored: false });
+  const opt = document.createElement('option'); opt.value = id; opt.textContent = m.name; placedList.appendChild(opt);
+  selectById(id); msg('تم وضع ' + m.name + ' داخل الغرفة'); saveScene();
+}
+
+function selectById(id){
+  const rec = placed.find(p=>p.id===id); if(!rec) return;
+  selected = rec.el; placedList.value = id;
+  evidenceSel.value = selected.getAttribute('data-valid') || 'none';
+}
+placedList.onchange = e => selectById(e.target.value);
+
+function findAncestor(el, pred){
+  let cur = el;
+  while(cur && cur !== scene){ if(pred(cur)) return cur; cur = cur.parentEl; }
+  return null;
+}
+
+/* تحريك عنصر */
+function stepVal(){ return parseFloat(document.getElementById('stepSel').value)||0.1; }
+function zoomSelected(deltaZ){ if(!selected){ msg('اختر عنصرًا أولًا'); return; } tweenDeltaPosition(selected, 0, 0, deltaZ, 220); }
+function rotateSelected(deltaY){ if(!selected){ msg('اختر عنصرًا أولًا'); return; } tweenRotationY(selected, deltaY, 220); }
+function tiltSelected(){
+  if(!selected){ msg('اختر عنصرًا أولًا'); return; }
+  const r = selected.getAttribute('rotation') || {x:0,y:0,z:0};
+  const toX = r.x + 90; const from = r.x;
+  animate(220, p=>{ selected.setAttribute('rotation', {x:lerp(from,toX,p), y:r.y, z:r.z}); });
+}
+
+let moveObjInterval;
+document.querySelectorAll('#controls .ctrl-btn').forEach(btn=>{
+  const act = btn.dataset.act;
+  const start = ()=> {
+    const step = stepVal();
+    if(['up','down','left','right','zoomIn','zoomOut','rotL','rotR','tilt','grow','shrink'].includes(act) && !selected){ msg('اختر عنصرًا أولًا'); return; }
+    moveObjInterval = setInterval(()=>{
+      if(act==='up')   tweenDeltaPosition(selected, 0, +step, 0, 100);
+      if(act==='down') tweenDeltaPosition(selected, 0, -step, 0, 100);
+      if(act==='left') tweenDeltaPosition(selected, -step, 0, 0, 100);
+      if(act==='right')tweenDeltaPosition(selected, +step, 0, 0, 100);
+      if(act==='zoomIn')  zoomSelected(-step);
+      if(act==='zoomOut') zoomSelected(+step);
+      if(act==='rotL') rotateSelected(-10);
+      if(act==='rotR') rotateSelected(+10);
+      if(act==='tilt') tiltSelected();
+      if(act==='grow') tweenScaleFactor(selected, 1.02, 100);
+      if(act==='shrink') tweenScaleFactor(selected, 0.98, 100);
+    }, 60);
+  };
+  const stop = ()=> clearInterval(moveObjInterval);
+  btn.addEventListener('mousedown', start);
+  btn.addEventListener('mouseup', stop);
+  btn.addEventListener('mouseleave', stop);
+  btn.addEventListener('touchstart', e=>{ e.preventDefault(); start(); });
+  btn.addEventListener('touchend', stop);
+});
+
+/* كاميرا */
+function moveCam(dx, dy, dz){
+  const rig = document.getElementById('rig');
+  const cam = rig.querySelector('[camera]');
+  const rot = cam.getAttribute('rotation') || {y:0};
+  const yaw = (rot.y || 0) * Math.PI / 180;
+  const pos = rig.getAttribute('position') || {x:0, y:1.6, z:0};
+  const forward = { x: -Math.sin(yaw), z: -Math.cos(yaw) };
+  const right   = { x:  Math.cos(yaw), z: -Math.sin(yaw) };
+  const newPos = { x: pos.x + forward.x * dz + right.x * dx, y: pos.y + dy, z: pos.z + forward.z * dz + right.z * dx };
+  tweenPosition(rig, newPos, 220);
+}
+function yawCam(delta) {
+  const rig = document.getElementById('rig');
+  const cam = rig.querySelector('[camera]');
+  const rot = cam.getAttribute('rotation') || {x: 0, y: 0, z: 0};
+  const targetY = rot.y + delta;
+  const THREE = AFRAME.THREE;
+  const startY = rot.y;
+  const duration = 500;
+  const startTime = performance.now();
+  function animateTurn(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const newY = startY + (targetY - startY) * eased;
+    cam.setAttribute('rotation', {x: rot.x, y: newY, z: rot.z});
+    if (cam.components['look-controls']) {
+      cam.object3D.rotation.set(THREE.MathUtils.degToRad(rot.x), THREE.MathUtils.degToRad(newY), THREE.MathUtils.degToRad(rot.z));
+      cam.components['look-controls'].pitchObject.rotation.x = THREE.MathUtils.degToRad(rot.x);
+      cam.components['look-controls'].yawObject.rotation.y = THREE.MathUtils.degToRad(newY);
+    }
+    if (progress < 1) requestAnimationFrame(animateTurn);
+  }
+  requestAnimationFrame(animateTurn);
+}
+let moveInterval;
+document.querySelectorAll('#cameraPanel .cam-btn').forEach(btn=>{
+  const act = btn.dataset.cam;
+  const start = ()=>{
+    const step = stepVal();
+    moveInterval = setInterval(()=>{
+      if(act==='up')   moveCam(0, +step*6, 0);
+      if(act==='down') moveCam(0, -step*6, 0);
+      if(act==='left') moveCam(-step*6, 0, 0);
+      if(act==='right')moveCam(+step*6, 0, 0);
+      if(act==='fwd')  moveCam(0, 0, -step*6);
+      if(act==='back') moveCam(0, 0, +step*6);
+      if(act==='yawL') yawCam(-12);
+      if(act==='yawR') yawCam(+12);
+    }, 50);
+  };
+  const stop = ()=> clearInterval(moveInterval);
+  btn.addEventListener('mousedown', start);
+  btn.addEventListener('mouseup', stop);
+  btn.addEventListener('mouseleave', stop);
+  btn.addEventListener('touchstart', e=>{ e.preventDefault(); start(); });
+  btn.addEventListener('touchend', stop);
+});
+
+/* الملاحظات */
+let noteModeActive = false;
+let pendingPoint = null;
+const noteModal = document.getElementById('noteModal');
+const noteText = document.getElementById('noteText');
+
+document.getElementById('btnNoteMode').onclick = ()=>{
+  noteModeActive=true; statusEl.textContent='وضع الملاحظات مفعل'; msg('اضغط في المشهد لتحديد مكان الملاحظة');
+};
+
+function createNoteAt(point, text) {
+  const marker = document.createElement('a-entity');
+  marker.classList.add('noteMarker','clickable');
+  marker.setAttribute('position', `${point.x} ${Math.max(0.05,point.y)} ${point.z}`);
+  marker.setAttribute('data-note', text || '');
+
+  const dot = document.createElement('a-sphere');
+  dot.setAttribute('radius','0.09');
+  dot.setAttribute('material','color:#d4af37; emissive:#b78f2a; emissiveIntensity:0.5; metalness:0.4; roughness:0.3');
+  dot.classList.add('clickable'); marker.appendChild(dot);
+
+  const noteBox = document.createElement('a-entity'); noteBox.setAttribute('visible','false'); noteBox.setAttribute('position','0 1.0 0');
+  const bg = document.createElement('a-plane'); bg.setAttribute('width','3.2'); bg.setAttribute('height','1.6'); bg.setAttribute('material','color:#0a0c0f; opacity:0.88; side:double; metalness:0.2; roughness:0.4; emissive:#d4af37; emissiveIntensity:0.15'); noteBox.appendChild(bg);
+  const txt = document.createElement('a-entity'); txt.setAttribute('text', `value:${text}; color:#fff; align:center; wrapCount:40; width:3;`); txt.setAttribute('position','0 0 0.02'); noteBox.appendChild(txt);
+
+  const btnEdit = document.createElement('a-entity'); btnEdit.setAttribute('text','value:✏️; color:#d4af37; align:left; width:1;'); btnEdit.setAttribute('position','-1.3 0.6 0.02'); btnEdit.classList.add('clickable'); noteBox.appendChild(btnEdit);
+  const btnDelete = document.createElement('a-entity'); btnDelete.setAttribute('text','value:🗑️; color:#d4af37; align:center; width:1;'); btnDelete.setAttribute('position','0 0.6 0.02'); btnDelete.classList.add('clickable'); noteBox.appendChild(btnDelete);
+  const btnClose = document.createElement('a-entity'); btnClose.setAttribute('text','value:✖️; color:#d4af37; align:right; width:1;'); btnClose.setAttribute('position','1.3 0.6 0.02'); btnClose.classList.add('clickable'); noteBox.appendChild(btnClose);
+
+  marker.appendChild(noteBox);
+  marker._label = noteBox;
+  marker._text = txt;
+
+  function toggleNote(){ const vis = noteBox.getAttribute('visible'); noteBox.setAttribute('visible', !vis); }
+  dot.addEventListener('click', e => { e.stopPropagation(); toggleNote(); });
+  btnClose.addEventListener('click', e => { e.stopPropagation(); noteBox.setAttribute('visible','false'); });
+  btnDelete.addEventListener('click', e => { e.stopPropagation(); marker.remove(); saveNotes(); });
+  btnEdit.addEventListener('click', e => {
+    e.stopPropagation();
+    const newText = prompt('📝 عدّل الملاحظة:', marker.getAttribute('data-note') || '');
+    if(newText !== null){ marker.setAttribute('data-note', newText); txt.setAttribute('text', `value:${newText}; color:#fff; align:center; wrapCount:40; width:3;`); saveNotes(); }
+  });
+
+  scene.appendChild(marker);
+  return marker;
+}
+
+/* no-op لتفادي أخطاء مرجعية إن استُخدمت */
+function handleNoteClick(){ /* intentionally empty */ }
+
+function saveNotes(){
+  const notes = [];
+  document.querySelectorAll('.noteMarker').forEach(p=>{
+    notes.push({ position: p.getAttribute('position'), text: p.getAttribute('data-note') || '' });
+  });
+  localStorage.setItem('crimeNotes', JSON.stringify(notes));
+}
+window.addEventListener('load', ()=>{
+  const savedNotes = localStorage.getItem('crimeNotes');
+  if(savedNotes){ JSON.parse(savedNotes).forEach(n=>{ createNoteAt(n.position, n.text); }); }
+});
+function deleteNotes(){ document.querySelectorAll('.noteMarker').forEach(n=>n.remove()); localStorage.removeItem('crimeNotes'); msg('🗑️ تم حذف جميع الملاحظات'); }
+document.getElementById('noteSave').onclick = ()=>{
+  const t = noteText.value.trim();
+  if(!pendingPoint){ noteModal.style.display='none'; return; }
+  const marker = createNoteAt(pendingPoint, t);
+  marker._label.setAttribute('visible','true');
+  pendingPoint=null; noteModal.style.display='none'; noteModeActive=false; statusEl.textContent='جاهز'; saveNotes();
+};
+document.getElementById('noteCancel').onclick = ()=>{ pendingPoint=null; noteModal.style.display='none'; statusEl.textContent='جاهز'; noteModeActive=false; };
+ray.addEventListener('click', ev => {
+  if (!noteModeActive) return;
+  const point = ev.detail?.intersection?.point; if (!point) return;
+  pendingPoint = point; noteModal.style.display='grid'; noteText.value = ''; noteText.focus();
+});
+/* ===== نظام جمع الأدلة والعداد المركزي (3 دقائق عند دخول الغرفة) ===== */
+let evidenceCollected = [];           // أسماء الأدلة التي تم جمعها
+let evidenceCountdown = null;         // interval id
+let evidenceTimeLeft = 180;           // 180 ثانية = 3 دقائق
+let evidenceCountdownStarted = false; // لمنع التشغيل المتكرر
+
+// دوال مساعدة
+function fmtSec(t){
+  const m = String(Math.floor(Math.max(0,t)/60)).padStart(2,'0');
+  const s = String(Math.max(0,t)%60).padStart(2,'0');
+  return `${m}:${s}`;
+}
+function updateCentralUI(){
+  const elTime = document.getElementById('evidenceCenterTime');
+  const list = document.getElementById('evidenceCenterList');
+  if(elTime) elTime.textContent = fmtSec(evidenceTimeLeft);
+  if(list){
+    list.innerHTML = '';
+    evidenceCollected.forEach(name=>{
+      const it = document.createElement('div');
+      it.className = 'evidence-center-item';
+      it.textContent = name;
+      list.appendChild(it);
+    });
+  }
+}
+
+// بدء العد عند الدخول للغرفة (يُستدعى عند إنشاء الغرفة/عند missionStarted أو عند إظهار room)
+function startEvidenceCountdownIfNeeded(){
+  if(evidenceCountdownStarted) return;
+  const room = document.getElementById('room');
+  const report = document.getElementById('reportOverlay');
+  if(!room || room.getAttribute('visible') !== 'true') return;
+  // لا نبدأ العد بينما البلاغ معروض
+  if(report && report.style.display !== 'none') return;
+
+  evidenceCountdownStarted = true;
+  evidenceTimeLeft = 180; // 3 دقائق
+  updateCentralUI();
+  // إظهار واجهة العد
+  const evidenceUI = document.getElementById('evidenceCenter');
+  if(evidenceUI) evidenceUI.style.display = 'flex';
+  statusEl.textContent = 'التحقيق قيد التنفيذ';
+
+  // 👇 نبدأ العد فعليًا
+  evidenceCountdown = setInterval(()=>{
+    evidenceTimeLeft--;
+
+    // تحديث العنصر مباشرة كل ثانية
+    const timerEl = document.getElementById('evidenceCenterTime');
+    if(timerEl) timerEl.textContent = fmtSec(evidenceTimeLeft);
+
+    updateCentralUI(); // يحدّث القائمة أيضًا
+
+    // عند انتهاء الوقت
+    if(evidenceTimeLeft <= 0){
+      clearInterval(evidenceCountdown);
+      evidenceCountdown = null;
+      // إخفاء واجهة العد قبل التقرير
+      const evidenceUI2 = document.getElementById('evidenceCenter');
+      if(evidenceUI2) evidenceUI2.style.display = 'none';
+      finalizeEvidenceReport();
+    }
+  }, 1000);
+}
+
+
+
+// دالة لإضافة دليل (تتفادى التكرار)
+function collectEvidence(name){
+  if(!name) return;
+  if(evidenceCollected.includes(name)) return; // لا تكرر
+  evidenceCollected.push(name);
+  updateCentralUI();
+  msg('تم جمع الدليل: ' + name);
+
+  const pulse = document.getElementById('evidenceCenter');
+  if(pulse) { pulse.classList.add('pulse'); setTimeout(()=>pulse.classList.remove('pulse'), 500); }
+
+  // ✅ إبقاء العداد ظاهر بعد الجمع
+  const box = document.getElementById('evidenceCenter');
+  if(box) box.style.display = 'block';
+
+  // ✅ لو تم جمع جميع الأدلة قبل انتهاء الوقت، أوقف العد وأظهر التقرير فوراً
+  const allEvidence = ['custom_13_gun','custom_12_corpse','custom_4_mobile','custom_3_broken_cup','ev_4_blood'];
+  if (allEvidence.every(id => evidenceCollected.includes(id))) {
+    clearInterval(evidenceCountdown);
+    evidenceCountdown = null;
+    finalizeEvidenceReport();
+  }
+}
+
+
+
+// دالة تلخيص/اعلان النتائج عند انتهاء الوقت
+function finalizeEvidenceReport(){
+  // بناء نص التقرير
+const allEvidence = ['custom_13_gun','custom_12_corpse','custom_4_mobile','custom_3_broken_cup','ev_4_blood'];
+const missing = allEvidence.filter(id => !evidenceCollected.includes(id));
+let details = '';
+if(evidenceCollected.length) {
+  details += '<strong>الأدلة التي تم العثور عليها:</strong><br>' + evidenceCollected.join('<br>');
+}
+if(missing.length) {
+  details += '<br><br><strong style="color:#ff5c5c">الأدلة التي لم يتم العثور عليها:</strong><br>' + missing.join('<br>');
+}
+if(!details) details = 'لم يتم العثور على أي دليل.';
+showFinalGlassReport(details);
+
+  // تعطيل التفاعل في المشهد (بسيط)
+  document.querySelectorAll('.clickable').forEach(el=> el.classList.add('disabled-click'));
+  // وضع حالة أنه انتهى
+  statusEl.textContent = 'انتهى الزمن — التقرير';
+
+  // إظهار المودال النهائي (تمت بالأساس في showFinalGlassReport)
+  // إذا أردنا إعادة الضبط لاحقًا يمكن استدعاء resetEvidenceCountdown()
+}
+
+// إذا أردت إعادة ضبط النظام (مثلاً زر إعادة الضبط أو بداية مهمة جديدة)
+function resetEvidenceCountdown(){
+  if(evidenceCountdown) { clearInterval(evidenceCountdown); evidenceCountdown = null; }
+  evidenceCollected = []; evidenceCountdownStarted = false; evidenceTimeLeft = 180;
+  updateCentralUI();
+  const evidenceUI = document.getElementById('evidenceCenter');
+  if(evidenceUI) evidenceUI.style.display = 'none';
+  timeEl.textContent = '--:--';
+  statusEl.textContent = 'جاهز';
+  document.querySelectorAll('.clickable').forEach(el=> el.classList.remove('disabled-click'));
+}
+
+/* ربط بدء العداد تلقائياً بعد الدخول للغرفة
+   في مشروعك، بعد انتهاء الـ cityDive دالة startCityDiveThenEnterRoom() تقوم بإظهار الغرفة
+   لذلك نراقب خاصية room.visible أو window.missionStarted */
+// ✅ مراقبة فتح الغرفة + التحكم في ظهور العداد الزمني (مباشرة)
+(function watchRoomVisibility(){
+  const room = document.getElementById('room');
+  if(!room) return;
+
+  const obs = new MutationObserver(()=>{
+    const report = document.getElementById('reportOverlay');
+    const evidenceUI = document.getElementById('evidenceCenter');
+
+    // ✅ عند ظهور الغرفة لأول مرة فقط نبدأ العدّ مباشرة
+    if(room.getAttribute('visible') === 'true' && !evidenceCountdownStarted){
+      // تأكد أن البلاغ أغلق أولاً
+      if(report && report.style.display !== 'none'){
+        const repObs = new MutationObserver(()=>{
+          if(report.style.display === 'none'){
+            repObs.disconnect();
+            if(evidenceUI) evidenceUI.style.display = 'flex';
+            startEvidenceCountdownIfNeeded();
+          }
+        });
+        repObs.observe(report, { attributes:true, attributeFilter:['style'] });
+      } else {
+        if(evidenceUI) evidenceUI.style.display = 'flex';
+        startEvidenceCountdownIfNeeded();
+      }
+    }
+  });
+
+  obs.observe(room, { attributes:true, attributeFilter:['visible'] });
+})();
+
+
+
+
+// احتفظنا بزر إعادة الضبط القديم بصيغة resetEvidenceCountdown() — إن أردت ربطه بزر في الـ sidebar افعل ذلك.
+
+function flashHalo(ent, color){
+  const halo = document.createElement('a-ring');
+  halo.setAttribute('radius-inner','0.5'); halo.setAttribute('radius-outer','0.6'); halo.setAttribute('rotation','-90 0 0');
+  halo.setAttribute('material',`color:${color}; opacity:0.9; transparent:true`);
+  ent.appendChild(halo);
+  setTimeout(()=>{ try{ ent.removeChild(halo);}catch(e){} }, 350);
+}
+
+/* تفاعل بالنقر المعدّل — يدعم: اختيار العناصر placed, وضع الملاحظات، وجمع الأدلة القابلة للنقر */
+ray.addEventListener('click',(ev)=>{
+  const el = ev.detail?.intersectedEl; if(!el) return;
+
+  // 1) إن كان النقر على عنصر 'placed' ضعف الاختيار كما قبل
+  const entPlaced = findAncestor(el, e => e.classList && e.classList.contains('placed'));
+  if(entPlaced){
+    const rec = placed.find(p => p.el === entPlaced || p.id === entPlaced.id);
+    if(rec) {
+      selectById(rec.id);
+      // لا نوقف هنا، لأن العنصر يمكن أن يكون دليلًا أيضاً (placed + clickable)
+    }
+  }
+
+  // 2) دعم وضع الملاحظات (كما سابقاً)
+  handleNoteClick(ev);
+
+  // 3) جمع الأدلة: ندعم عناصر لها id من قائمة الأدلة أو أي عنصر يحمل class 'clickable'
+  // قائمة الأدلة الأساسية (التي طلبتها) — اكتب أسماء الـ id كما في المشهد
+  const evidenceIds = ['custom_13_gun','custom_12_corpse','custom_4_mobile','custom_3_broken_cup','ev_4_blood'];
+
+  // العثور على أي عنصر يمكن أن يمثل دليلاً (ابحث للأعلى في الشجرة)
+  const targetEvidence = findAncestor(el, e => {
+    if(!e) return false;
+    if(e.id && evidenceIds.includes(e.id)) return true;
+    if(e.classList && e.classList.contains('clickable')) return true;
+    return false;
+  });
+
+  if(targetEvidence){
+    // عطل التفاعل إن كانت العنصر مُعَلّم بتعطيل النقر
+    if(targetEvidence.classList && targetEvidence.classList.contains('disabled-click')) return;
+
+    // حدد اسمًا لعرضه — استخدم data-name لو متوفر، وإلا id
+    const evName = targetEvidence.getAttribute('data-name') || targetEvidence.id || 'دليل مجهول';
+    collectEvidence(evName);
+
+    // ضع تأثير بصري خفيف: وميض/حلقة
+    try{
+      const halo = document.createElement('a-ring');
+      halo.setAttribute('radius-inner','0.45'); halo.setAttribute('radius-outer','0.55'); halo.setAttribute('rotation','-90 0 0');
+      halo.setAttribute('material',`color:#ffd56b; opacity:0.9; transparent:true`);
+      targetEvidence.appendChild(halo);
+      setTimeout(()=>{ try{ targetEvidence.removeChild(halo);}catch(e){} }, 600);
+    }catch(e){}
+  }
+});
+
+
+/* حذف/إعادة ضبط */
+document.getElementById('btnDelete').onclick = ()=>{
+  if(!selected){ msg('اختر عنصرًا أولًا'); return; }
+  const id = placedList.value;
+  try{ selected.parentNode && selected.parentNode.removeChild(selected); }catch(e){}
+  placed = placed.filter(p=>p.id!==id);
+  [...placedList.options].forEach(o=>{ if(o.value===id) o.remove(); });
+  selected=null; evidenceSel.value='none'; msg('🗑 تم حذف العنصر'); saveScene();
+};
+document.getElementById('btnReset').onclick = ()=>{
+  if(!confirm('هل أنت متأكد من حذف جميع العناصر والملاحظات؟')) return;
+  document.querySelectorAll('.placed').forEach(el=>el.remove());
+  placed = []; placedList.innerHTML='';
+  localStorage.removeItem('crimeSceneData'); localStorage.removeItem('crimeNotes');
+  msg('🧹 تم إعادة تعيين المشهد بالكامل'); saveScene();
+};
+document.addEventListener('mouseup', ()=>{ if(selected) saveScene(); });
+document.addEventListener('touchend', ()=>{ if(selected) saveScene(); });
+
+/* مراقبة انتقال الكاميرا عند فتح القائمة */
+document.addEventListener('DOMContentLoaded', function() {
+  const sidebar = document.getElementById('sidebar');
+  const cameraControls = document.querySelector('.camera-controls');
+  if (!sidebar || !cameraControls) return;
+  const observer = new MutationObserver(() => {
+    const isSidebarVisible = !sidebar.classList.contains('hidden');
+    const isMobile = window.innerWidth <= 900;
+    cameraControls.style.transition = 'transform 0.4s ease';
+    if (isSidebarVisible) cameraControls.style.transform = isMobile ? 'translateX(-80px)' : 'translateX(-290px)';
+    else cameraControls.style.transform = isMobile ? 'translateX(-50%)' : 'translateX(0)';
+  });
+  observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+});
+
+/* مؤثرات الباب */
+function spawnSmoke(){
+  const root=document.getElementById('fxSmoke'); const W=innerWidth,H=innerHeight;
+  for(let i=0;i<110;i++){
+    const s=document.createElement('div'); s.className='smoke';
+    s.style.left=(W/2-120)+'px'; s.style.top=(H/2-120)+'px'; root.appendChild(s);
+    const ang=Math.random()*Math.PI*2,dist=300+Math.random()*H*.7; const tx=Math.cos(ang)*dist,ty=Math.sin(ang)*dist;
+    const dur=3200+Math.random()*1200,dl=Math.random()*150;
+    s.animate([{transform:'translate(0,0) scale(.5)',opacity:0},{transform:`translate(${tx*.4}px,${ty*.4}px) scale(1.1)`,opacity:.9,offset:.3},{transform:`translate(${tx}px,${ty}px) scale(1.5)`,opacity:0}],{duration:dur,delay:dl,easing:'cubic-bezier(.2,.9,.1,1)',fill:'forwards'});
+    setTimeout(()=>s.remove(),dur+dl+200);
+  }
+}
+function spawnParticles(){
+  const root=document.getElementById('fxParticles'); const W=innerWidth,H=innerHeight;
+  for(let i=0;i<140;i++){
+    const p=document.createElement('div');p.className='particle';
+    p.style.left=W/2+'px';p.style.top=H/2+'px'; root.appendChild(p);
+    const ang=Math.random()*Math.PI*2,dist=200+Math.random()*H*.8; const tx=Math.cos(ang)*dist,ty=Math.sin(ang)*dist;
+    const dur=1600+Math.random()*900,dl=Math.random()*100;
+    p.animate([{transform:'translate(0,0) scale(.6)',opacity:0},{transform:`translate(${tx*.6}px,${ty*.6}px) scale(1)`,opacity:1,offset:.3},{transform:`translate(${tx}px,${ty}px) scale(.8)`,opacity:0}],{duration:dur,delay:dl,easing:'cubic-bezier(.2,.9,.1,1)',fill:'forwards'});
+    setTimeout(()=>p.remove(),dur+dl+100);
+  }
+}
+function cameraShake(){ const cam=document.getElementById('rig'); cam.classList.add('shake'); setTimeout(()=>cam.classList.remove('shake'),1600); }
+function flashBlast(){
+  const ov = document.getElementById('doorOverlay');
+  setTimeout(()=>{
+    const gold = document.createElement('div');
+    gold.style.position='absolute'; gold.style.inset='0';
+    gold.style.background='radial-gradient(circle at center, rgba(255,220,150,0.95) 0%, rgba(212,175,55,0.6) 35%, transparent 80%)';
+    gold.style.zIndex='25000'; gold.style.opacity='0'; gold.style.pointerEvents='none'; ov.appendChild(gold);
+    gold.animate([{opacity:0},{opacity:1, offset:.15},{opacity:.8, offset:.3},{opacity:.3, offset:.55},{opacity:0}],{duration:1200,easing:'ease-out'});
+    setTimeout(()=>gold.remove(),1300);
+  }, 2500);
+  setTimeout(()=>{
+    for(let i=0;i<6;i++){
+      setTimeout(()=>{
+        const blue=document.createElement('div');
+        blue.style.position='absolute'; blue.style.inset='0';
+        blue.style.background='radial-gradient(circle at center, rgba(100,180,255,1) 0%, rgba(50,100,200,0.6) 25%, rgba(0,0,0,0.9) 80%)';
+        blue.style.zIndex='25000'; blue.style.opacity='0'; blue.style.pointerEvents='none'; ov.appendChild(blue);
+        blue.animate([{transform:'scale(0.8)',opacity:0},{transform:'scale(1.1)',opacity:1,offset:.15},{transform:'scale(1.3)',opacity:.8,offset:.3},{transform:'scale(1.5)',opacity:0}],{duration:350,easing:'ease-in-out'});
+        setTimeout(()=>blue.remove(),380);
+      }, i*380);
+    }
+  }, 4000);
+}
+
+/* الغوص داخل المدينة ثم دخول الغرفة */
+function startCityDiveThenEnterRoom(){
+  // إخفاء المشهد والـUI أثناء الغوص
+  document.querySelector('a-scene').style.display = 'none';
+  const uiEls = document.querySelectorAll('#hud, #controls, #cameraPanel, #uiLayer');
+  uiEls.forEach(el => el.style.display = 'none');
+
+  const stage = document.getElementById('cityDive');
+  const img = document.getElementById('cityImg');
+  stage.style.display='block';
+  stage.style.opacity='1';
+  img.style.transformOrigin='center';
+
+  // 🎧 تشغيل صوت الهواء أثناء الغوص
+  let windAudio = document.getElementById('windAudio');
+  if(!windAudio){
+    windAudio = document.createElement('audio');
+    windAudio.id = 'windAudio';
+    windAudio.src = 'https://cdn.pixabay.com/download/audio/2025/03/31/audio_3a8f31919f.mp3';
+    windAudio.loop = true;
+    windAudio.volume = 0.45;
+    document.body.appendChild(windAudio);
+  }
+  windAudio.currentTime = 0;
+  windAudio.play().catch(()=>{});
+
+// ✨ حركة الغوص السينمائية الهادئة بزوم تدريجي
+img.animate([
+  { transform: 'scale(1) translateY(0%)', filter: 'brightness(0.9) blur(0px)' },
+  { transform: 'scale(1.2) translateY(-1%)', filter: 'brightness(1.0) blur(0.5px)' },
+  { transform: 'scale(1.5) translateY(-5%)', filter: 'brightness(1.05) blur(1px)' },
+  { transform: 'scale(1.8) translateY(-10%)', filter: 'brightness(1.1) blur(1.5px)' },
+  { transform: 'scale(3.5) translateY(-20%)', filter: 'brightness(1.15) blur(2px)' }
+], { 
+  duration: 8000, 
+  easing: 'ease-in-out', 
+  fill: 'forwards' 
+});
+
+
+  // نهاية الغوص → إظهار الغرفة
+  setTimeout(()=>{
+    stage.animate([{opacity:1},{opacity:0}],{duration:900,fill:'forwards'}).onfinish=()=>{
+      stage.style.display='none';
+
+      // 👇 إظهار المشهد والواجهة
+      const sceneEl = document.querySelector('a-scene');
+      sceneEl.style.display = 'block';
+      document.getElementById('room').setAttribute('visible','true');
+      uiEls.forEach(el => el.style.display = '');
+      // لا نستدعي startEvidenceCountdownIfNeeded() هنا مباشرة لأن المراقب سيتولى التشغيل
+      // وكذلك نتحقق من تقرير البلاغ (إذا كان مغلقاً سيبدأ العداد عبر المراقب)
+      if (sceneEl.resize) sceneEl.resize();
+      window.dispatchEvent(new Event('resize'));
+
+      window.missionStarted = true;
+
+      // 🌀 بعد الدخول نوقف صوت الهواء
+      if(windAudio){
+        setTimeout(()=>{
+          windAudio.pause();
+          windAudio.currentTime = 0;
+        }, 300); // بعد لحظة قصيرة من الدخول
+      }
+    };
+  }, 5000);
+}
+
+
+
+/* إغلاق البلاغ والبدء بالغوص */
+document.addEventListener('click', (e)=>{
+  if(e.target && e.target.id === 'reportStartMission'){
+    const ov = document.getElementById('reportOverlay');
+    const audio = document.getElementById('reportAudio');
+    if (audio && !audio.paused) { audio.pause(); audio.currentTime = 0; }
+    ov.animate([{opacity:1},{opacity:0}],{duration:600,fill:'forwards'}).onfinish = ()=>{
+      ov.style.display='none';
+      startCityDiveThenEnterRoom();
+    };
+  }
+});
+
+/* إظهار وإخفاء البلاغ */
+function showReportOverlay(){
+  const ov = document.getElementById('reportOverlay');
+  const audio = document.getElementById('reportAudio');
+  ov.style.display = 'flex';
+  ov.style.opacity = 0;
+  ov.animate([{opacity:0},{opacity:1}],{duration:250,fill:'forwards'});
+  if (audio){ try{ audio.currentTime = 0; audio.play(); }catch(e){} }
+
+  // 🎞️ حركة ظهور صندوق البلاغ + الوميض
+const box = document.querySelector('#reportCard');
+  if(box){
+    box.animate([
+      {transform:'scale(0.8)', opacity:0},
+      {transform:'scale(1.05)', opacity:1, offset:0.6},
+      {transform:'scale(1)', opacity:1}
+    ], {duration:800, easing:'ease-out', fill:'forwards'});
+  }
+
+function flashBox(){
+  if(!box) return;
+  const colors = ['#FFD700', '#FF3B3B', '#3B6EFF']; // ذهبي - أحمر - أزرق
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  box.animate([
+    {boxShadow:`0 0 0px ${color}`},
+    {boxShadow:`0 0 40px ${color}`},
+    {boxShadow:`0 0 0px ${color}`}
+  ], {duration:800, easing:'ease-in-out'});
+}
+
+
+let flashCount = 0;
+const flashInterval = setInterval(() => {
+  flashBox();
+  flashCount++;
+  if (flashCount >= 10) clearInterval(flashInterval); // عدد الومضات = 10
+}, 3000); // كل 3 ثواني
+
+
+}
+
+function hideReportOverlay(){
+  const ov = document.getElementById('reportOverlay');
+  ov.animate([{opacity:1},{opacity:0}],{duration:220,fill:'forwards'}).onfinish = ()=>{ ov.style.display='none'; };
+}
+document.addEventListener('click', (e)=>{ if(e.target && e.target.id === 'reportClose'){ hideReportOverlay(); } });
+
+/* تسلسل فتح الباب */
+function startDoorSequence(){
+  const l=document.getElementById('leftDoor'),
+        r=document.getElementById('rightDoor'),
+        sfx=document.getElementById('doorSfx'),
+        ov=document.getElementById('doorOverlay'),
+        btn=document.getElementById('btnDoorStart');
+
+  btn.style.transition='opacity .4s ease'; btn.style.opacity='0'; setTimeout(()=>btn.style.display='none',400);
+
+  sfx.currentTime=0; sfx.play();
+
+  l.style.transition='transform 3s ease-in-out';
+  r.style.transition='transform 3s ease-in-out';
+  l.style.transform='rotateY(-100deg)';
+  r.style.transform='rotateY(100deg)';
+
+  setTimeout(()=>{ spawnSmoke(); spawnParticles(); flashBlast(); cameraShake(); },3000);
+
+  setTimeout(()=>{ if (!window.missionStarted) showReportOverlay(); }, 8000);
+
+  const checkInterval=setInterval(()=>{
+    if(sfx.duration && sfx.currentTime >= sfx.duration - 0.2){
+      clearInterval(checkInterval);
+      ov.style.transition='opacity 1.6s ease'; ov.style.opacity='0';
+      setTimeout(()=>{ ov.style.display='none'; ov.style.zIndex='-1'; },1600);
+    }
+  },100);
+}
+document.getElementById('btnDoorStart').addEventListener('click',startDoorSequence);
+
+// 🧱 نظام تصادم ناعم يمنع الاختراق في كل الاتجاهات (كيبورد + أزرار)
+// 🧱 تصادم احترافي يغطي الكيبورد + الأزرار
+AFRAME.registerComponent('smooth-collision', {
+  schema: {
+    room: { type: 'selector' },
+    marginFront: { type: 'number', default: 0.4 },
+    marginBack:  { type: 'number', default: 0.4 },
+    marginLeft:  { type: 'number', default: 0.4 },
+    marginRight: { type: 'number', default: 0.4 },
+    minY: { type: 'number', default: 0.6 },
+    maxY: { type: 'number', default: 3 }
+  },
+  init() {
+    this.lastPos = this.el.object3D.position.clone();
+    this.box = null;
+    this.frame = 0;
+  },
+  tick() {
+    const el = this.el;
+    const data = this.data;
+    const room = data.room;
+    if (!room || !room.object3D) return;
+
+    // نحسب الـ Box كل 10 إطارات فقط لتقليل الحمل
+    if (this.frame++ % 10 === 0) {
+      const mesh = room.getObject3D('mesh');
+      if (mesh) this.box = new THREE.Box3().setFromObject(mesh);
+    }
+
+    if (!this.box) return;
+    const pos = el.object3D.position;
+    const min = this.box.min.clone();
+    const max = this.box.max.clone();
+
+    // نحسب المسافات المسموح بها حسب الجدران الأربعة
+    const leftLimit   = min.x + data.marginLeft;
+    const rightLimit  = max.x - data.marginRight;
+    const frontLimit  = max.z - data.marginFront;
+    const backLimit   = min.z + data.marginBack;
+
+    // قيود المحاور
+    pos.x = THREE.MathUtils.clamp(pos.x, leftLimit, rightLimit);
+    pos.z = THREE.MathUtils.clamp(pos.z, backLimit, frontLimit);
+    pos.y = THREE.MathUtils.clamp(pos.y, data.minY, data.maxY);
+
+    // تنعيم الحركة (يقلل الاهتزاز)
+    this.lastPos.lerp(pos, 0.25);
+    el.object3D.position.copy(this.lastPos);
+  }
+});
+function showFinalGlassReport(details){
+  const modal = document.getElementById('finalGlassModal');
+  const body = document.getElementById('finalReportDetails');
+  if(!modal || !body) return;
+  body.innerHTML = details + '<br><br><em>المهمة انتهت. اضغط إغلاق للعودة.</em>';
+  modal.style.display = 'flex';
+  // عند ظهور التقرير نُخفي واجهة العد (إن كانت ظاهرة)
+  const evidenceUI = document.getElementById('evidenceCenter');
+  if(evidenceUI) evidenceUI.style.display = 'none';
+}
+document.getElementById('finalCloseBtn').onclick = ()=>{
+  // عند الإغلاق نعيد التوجيه للرابط المطلوب (مبدئياً google.com)
+  try{
+    window.location.href = 'https://www.google.com';
+  }catch(e){
+    // إذا لم يُسمح بالتوجيه داخل بيئة ما، نغلق النافذة
+    try{ window.close(); }catch(_){}
+  }
+};
+
+// حفظ/تحميل المشهد (بسيط)
+function saveScene(){
+  try{
+    const data = placed.map(p=>({
+      id:p.id, name:p.name, position: p.el.getAttribute('position'), rotation: p.el.getAttribute('rotation'), scale: p.el.getAttribute('scale')
+    }));
+    localStorage.setItem('crimeSceneData', JSON.stringify(data));
+  }catch(e){}
+}
+window.addEventListener('load', ()=>{
+  const saved = localStorage.getItem('crimeSceneData');
+  if(saved){
+    try{
+      const arr = JSON.parse(saved);
+      arr.forEach(a=>{
+        // لا نعيد تحميل النماذج تلقائياً لتجنب تعقيد، لكن نحتفظ بالبيانات إن أردت لاحقاً
+      });
+    }catch(e){}
+  }
+});
+
+</script>
+<script>
+  window.missionStarted = false;
+  let evidenceCountdown = null;
+  let evidenceTimeLeft = 180; // 3 minutes
+  let evidenceCountdownStarted = false;
+
+  function fmtSec(t){
+    const m = String(Math.floor(Math.max(0,t)/60)).padStart(2,'0');
+    const s = String(Math.max(0,t)%60).padStart(2,'0');
+    return `${m}:${s}`;
+  }
+
+  function startEvidenceCountdownIfNeeded(){
+    if(evidenceCountdownStarted) return;
+    const room = document.getElementById('room');
+    if (!room || !room.getAttribute('visible')) return;  // Ensure the room is visible
+
+    evidenceCountdownStarted = true;
+    evidenceTimeLeft = 180; // 3 minutes
+    const evidenceUI = document.getElementById('evidenceCenter');
+    if (evidenceUI) evidenceUI.style.display = 'flex';
+
+    evidenceCountdown = setInterval(() =&gt; {
+      evidenceTimeLeft--;
+      document.getElementById('evidenceCenterTime').textContent = fmtSec(evidenceTimeLeft);
+
+      if (evidenceTimeLeft &lt;= 0) {
+        clearInterval(evidenceCountdown);
+        evidenceCountdown = null;
+        finalizeEvidenceReport();
+      }
+    }, 1000);
+  }
+
+  function finalizeEvidenceReport(){
+    // Construct the report details for the timer
+    const reportDetails = '&lt;strong&gt;الوقت انتهى!&lt;/strong&gt;&lt;br&gt;تم الانتهاء من المهمة.';
+    document.getElementById('finalReportDetails').innerHTML = reportDetails;
+    document.getElementById('finalGlassModal').style.display = 'flex';
+  }
+
+  // Start the countdown when the room becomes visible
+  const observer = new MutationObserver(() =&gt; {
+    const visible = document.getElementById('room').getAttribute('visible');
+    if (visible &amp;&amp; !evidenceCountdownStarted) {
+      startEvidenceCountdownIfNeeded();
+    }
+  });
+
+  observer.observe(document.getElementById('room'), { attributes: true, attributeFilter: ['visible'] });
+</script>
+<script>
+    let timerStarted = false;
+    let timerInterval;
+    let timeLeft = 180; // 3 minutes
+
+    function startTimer() {
+        if (timerStarted) return; // Prevent multiple starts
+        timerStarted = true;
+        timerInterval = setInterval(function() {
+            timeLeft--;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('evidenceCenterTime').textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert('الوقت انتهى!');
+            }
+        }, 1000);
+    }
+</script>
+</body>
+</html>
