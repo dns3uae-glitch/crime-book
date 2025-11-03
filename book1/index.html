@@ -1276,16 +1276,19 @@ window.addEventListener('message', (event) => {
 </script>
 <script>
 window.addEventListener('message', (event)=>{
-  if(event.data?.type === 'PLAY_SOUND_MANUAL'){
-    const sounds = document.querySelectorAll('audio');
-    sounds.forEach(a=>{
+  if(event.data?.type === 'PLAY_AUDIO_FROM_PARENT'){
+    const audios = document.querySelectorAll('audio');
+    audios.forEach(a=>{
       a.muted = false;
       a.currentTime = 0;
-      a.play().catch(err=>console.warn('🎧 الصوت مرفوض إلا بعد تفاعل المستخدم:', err));
+      a.play().catch(err=>{
+        console.warn('🎧 لم يتم التشغيل إلا بعد تفاعل داخل الإطار:', err);
+      });
     });
   }
 });
 </script>
+
 
 </body>
 </html>
