@@ -358,17 +358,10 @@ function pickVoices(){
 speechSynthesis.onvoiceschanged = pickVoices;
 pickVoices();
 
-function speak(text, {rate=1, pitch=1, volume=1}={}){
-  return new Promise(res=>{
-    const clean = (text||'').replace(/[_]{2,}/g,' ').replace(/_/g,' ');
-    const u = new SpeechSynthesisUtterance(clean);
-    u.lang = 'ar-AE';
-    u.rate = rate; u.pitch = pitch; u.volume = volume;
-    if(voiceNormal) u.voice = voiceNormal;
-    u.onend = ()=>res();
-    try{ speechSynthesis.speak(u); }catch(e){ res(); }
-  });
+function speak(text, opts={}) {
+  return Promise.resolve(); // بدون أي صوت
 }
+
 function stopSpeak(){ try{ speechSynthesis.cancel(); }catch(e){} }
 
 let fadeTimer=null;
@@ -441,7 +434,7 @@ function goPrev(){
 function nextScene(){
   stopSpeak();
   clearInterval(timerId);
-  timeLeft = 60;
+  timeLeft = 90;
   btnNextTop.disabled = false;
   currentScene++;
   scnIndexEl.textContent = (currentScene+1);
