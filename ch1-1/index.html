@@ -353,10 +353,14 @@ document.getElementById('nextPage').addEventListener('click', ()=> go('https://d
 <button id="openBook" class="floating-btn" title="فتح الكتاب الكامل">📖</button>
 
 <!-- 🔹 نافذة عرض الكتاب -->
-<div id="bookOverlay">
-  <iframe id="bookFrame" src="" frameborder="0"></iframe>
-  <button id="closeBook">✖</button>
-</div>
+<iframe 
+  id="bookFrame" 
+  src="" 
+  frameborder="0"
+  allow="autoplay; fullscreen"
+  allowtransparency="true">
+</iframe>
+
 
 <style>
 /* 👑 زر عائم ذهبي */
@@ -433,33 +437,22 @@ const frame = document.getElementById('bookFrame');
 const closeBtn = document.getElementById('closeBook');
 
 openBtn.addEventListener('click', ()=>{
-  frame.src = 'https://dns3uae-glitch.github.io/crime-book/book1/';
   overlay.classList.add('active');
-  document.body.classList.add('modal-open'); // ✅ يمنع التمرير في الخلفية
+  document.body.classList.add('modal-open');
+  frame.src = 'https://dns3uae-glitch.github.io/crime-book/book1/index.html';
+
+  // 🟡 بعد تحميل الكتاب نرسل له أمر تشغيل الصوت
+  frame.addEventListener('load', () => {
+    setTimeout(()=>{
+      frame.contentWindow?.postMessage({ type: 'PLAY_SOUND_MANUAL' }, '*');
+    }, 1000);
+  }, { once: true });
 });
 
 closeBtn.addEventListener('click', ()=>{
   overlay.classList.remove('active');
-  document.body.classList.remove('modal-open'); // ✅ يرجع التمرير طبيعي
-  setTimeout(()=>{ frame.src = ''; }, 400);
-});
-</script>
-<script>
-document.addEventListener('click', () => {
-  // السماح بتشغيل الأصوات داخل الإطار بعد أول نقرة
-  const iframe = document.getElementById('bookFrame');
-  if (iframe && iframe.contentWindow) {
-    iframe.contentWindow.postMessage({ type: 'ALLOW_SOUND' }, '*');
-  }
-}, { once: true });
-
-// استقبال الرسالة داخل الصفحة الداخلية للكتاب
-window.addEventListener('message', (event) => {
-  if (event.data?.type === 'ALLOW_SOUND') {
-    document.querySelectorAll('audio').forEach(a => {
-      a.muted = false;
-    });
-  }
+  document.body.classList.remove('modal-open');
+  setTimeout(()=>{ frame.src=''; }, 400);
 });
 </script>
 
