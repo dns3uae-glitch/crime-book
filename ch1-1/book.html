@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+<title>📖 الكتاب الواقعي — بدون خلفية</title>
+
+<!-- مكتبة PageFlip -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/page-flip/dist/css/page-flip.css" />
+<script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
+
+<style>
+
+:root { --W:1000px; --H:600px; }
+
+body {
+  margin:0;
+  font-family:"Tajawal",system-ui,Arial;
+  background: transparent; /* ✅ لا خلفية إطلاقًا */
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* نحذف الصندوق الخارجي تمامًا */
+.stage {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  border: none;
+  width:auto;
+  height:auto;
+}
+
+.flip-book {
+  width:var(--W);
+  height:var(--H);
+}
+
+/* شكل الصفحات فقط */
+.page {
+  width: 500px;
+  height: 600px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      #ffffff 0px,
+      #ffffff 27px,
+      rgba(0, 0, 0, 0.09) 28px
+    ); /* 💡 خطوط أفقية خفيفة جداً */
+  border: 1px solid #e3e3e3;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  border-radius: 2px;
+}
+
+
+.page .content {
+  padding:36px;
+  box-sizing:border-box;
+  flex:1;
+  overflow:auto;
+  color:#333;
+  font-size:18px;
+  line-height:1.8;
+}
+
+.page h2 {
+  margin:0 0 12px;
+  font-size:24px;
+  color:#111;
+  border-bottom:1px solid #eee;
+  padding-bottom:8px;
+}
+
+.controls {
+  position:fixed;
+  bottom:22px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:14px;
+  z-index:99;
+}
+
+button {
+  padding:10px 18px;
+  border-radius:10px;
+  border:1px solid #cfcfcf;
+  background:linear-gradient(#fff,#eee);
+  cursor:pointer;
+  font-size:15px;
+}
+button:active { transform:translateY(1px); }
+
+.hint {
+  position:fixed;
+  top:14px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#555;
+  font-size:13px;
+}
+/* يعطي شعور السمك والانحناء */
+.flip-book::before,
+.flip-book::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 40px;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* ظل يسار الكتاب */
+.flip-book::before {
+  left: -5px;
+  background: linear-gradient(to right, rgba(0,0,0,0.25), rgba(0,0,0,0));
+  filter: blur(1px);
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+/* ظل يمين الكتاب */
+.flip-book::after {
+  right: -5px;
+  background: linear-gradient(to left, rgba(0,0,0,0.25), rgba(0,0,0,0));
+  filter: blur(1px);
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* تأثير بسيط على الحواف الداخلية للصفحات */
+.page {
+  box-shadow:
+    inset 10px 0 10px rgba(0,0,0,0.04),
+    inset -10px 0 10px rgba(0,0,0,0.04),
+    0 2px 5px rgba(0,0,0,0.1);
+  border-radius: 3px;
+  transform: perspective(800px) rotateY(0deg);
+}
+/* يجعل النص مندمج في الورقة وليس عائم */
+.page p, .page h1, .page h2, .page h3 {
+  color: #2a2418;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.6),
+               0 0 2px rgba(0,0,0,0.05);
+  mix-blend-mode: multiply;
+}
+/* رقم الصفحة */
+.page::after {
+  content: attr(data-page);
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "Tajawal", system-ui;
+  font-size: 14px;
+  color: #7a6531;
+  opacity: 0.9;
+  font-weight: bold;
+}
+
+</style>
+</head>
+<body>
+
+
+<!-- أصوات -->
+<audio id="flipS" preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_62c8f9853d.mp3"></audio>
+<audio id="wooshS" preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/02/audio_35f03c2e7b.mp3"></audio>
+
+<!-- فقط الكتاب -->
+<div class="flip-book" id="book">
+
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">الخاتمة:</h3>
+    <p>يُظهر ما تقدم أن مسرح الجريمة يُعد المنطلق الأول لتحقيق العدالة وكشف الحقيقة، إذ يمثل المصدر الأساسي للأدلة التي يعتمد عليها القضاء في إصدار الأحكام.</p>
+    <p>ولذلك فإن حسن التعامل مع المسرح منذ لحظة الوصول وحتى انتهاء المعاينة يُعد من أهم مراحل العمل الشرطي التي تتطلب دقة وخبرة وانضباطًا عاليًا.</p>
+    <p>كما أن التعاون بين الجهات الأمنية والفنية والقضائية يسهم في بناء منظومة متكاملة تُعزز كفاءة التحقيقات وترسخ الثقة في العدالة.</p>
+    <p>ويجب أن يُنظر إلى مسرح الجريمة على أنه كيان علمي تطبيقي يتطور مع تطور التقنيات، مما يتطلب تدريبًا مستمرًا وتجهيزات حديثة لمواكبة التحديات الجديدة.</p>
+    <p>وبذلك يتحقق الهدف الأسمى وهو كشف الحقيقة وصون الحقوق، تحقيقًا للعدالة وسيادة القانون في المجتمع.</p>
+  </div>
+</div>
+
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">الأدلة المعنوية ودورها:</h3>
+    <p>إلى جانب الأدلة المادية، تحتل الأدلة المعنوية مكانة مهمة في التحقيق الجنائي، إذ تعتمد على أقوال الأشخاص وتصرفاتهم وسلوكياتهم التي يمكن أن تكشف عن نواياهم أو تورطهم في الجريمة.</p>
+    <p>وتشمل الأدلة المعنوية شهادة الشهود، وأقوال المجني عليهم، واعترافات المتهمين، وما يتم استخلاصه من التحريات والمراقبة الميدانية.</p>
+    <p>وتُعد هذه الأدلة مكملة للأدلة المادية، إذ تساعد على بناء تسلسل منطقي للأحداث وربط النتائج بالأسباب في ضوء المعطيات الميدانية.</p>
+    <p>ويُشترط لقبول الأدلة المعنوية أن تكون خالية من الإكراه أو التأثير، وأن تُدعم بعناصر واقعية تعزز مصداقيتها أمام القضاء.</p>
+    <p>ويؤدي التوازن بين الأدلة المادية والمعنوية إلى تحقيق العدالة والوصول إلى الحقيقة دون لبس أو تحيز.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">الأدلة المادية في مسرح الجريمة:</h3>
+    <p>تُعد الأدلة المادية حجر الأساس في التحقيقات الجنائية، إذ تمثل الشاهد الصامت الذي لا يمكن إنكار وجوده. وتشمل هذه الأدلة كل ما يُعثر عليه في مسرح الجريمة من أدوات أو آثار يمكن أن تربط بين الجاني والواقعة.</p>
+    <p>وتتضمن الأدلة المادية أمثلة متنوعة مثل بصمات الأصابع، وبقع الدم، وألياف الملابس، وآثار الأقدام، وأدوات الجريمة كالسكاكين أو الأسلحة النارية.</p>
+    <p>ويتم جمع هذه الأدلة بعناية شديدة بواسطة مختصين في الأدلة الجنائية باستخدام أدوات معقمة ووسائل نقل آمنة لضمان عدم تلوثها.</p>
+    <p>كما تُخزن كل عينة في عبوة منفصلة تحمل بطاقة تعريفية تتضمن رقم القضية وتاريخ الجمع واسم القائم بالإجراء، حفاظًا على التسلسل القانوني لسلسلة الأدلة.</p>
+    <p>ويُعتبر حسن التعامل مع الأدلة المادية من أبرز العوامل التي تساهم في كشف الحقيقة وتحديد هوية الجناة بدقة عالية.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">التوثيق الزمني والإجراءات الختامية:</h3>
+    <p>يُعد تسجيل الأوقات بدقة من العناصر الأساسية في المحافظة على مسرح الجريمة، إذ يتم تدوين وقت الإبلاغ، ووقت الانتقال، ووقت الوصول إلى الموقع، لما لذلك من دور في تحديد الفترة التي ظل فيها المسرح دون حماية.</p>
+    <p>كما يُسهم هذا التوثيق في تقييم قيمة الأدلة المادية ومدى مصداقية أقوال الشهود والمجني عليهم، خاصة في الحالات التي يكون فيها فارق زمني كبير بين وقوع الجريمة واكتشافها.</p>
+    <p>بعد الانتهاء من المعاينة ورفع الأدلة، يُعد تقرير تفصيلي يتضمن وصف المكان والآثار التي وُجدت فيه، مدعومًا بالصور والمخططات التوضيحية.</p>
+    <p>ويُرفق هذا التقرير بمحاضر الضبط والبيانات الفنية الصادرة عن الخبراء لتقديمها لاحقًا إلى النيابة العامة لاستكمال إجراءات التحقيق.</p>
+    <p>وبذلك يُختتم العمل الميداني في مسرح الجريمة بعد التأكد من جمع كل ما يمكن أن يسهم في كشف الحقيقة وتقديم الجناة إلى العدالة.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">المحافظة على المسارح تحت الماء:</h3>
+    <p>عند وقوع الجريمة في بيئة مائية، فإن الحفاظ على المسرح يتطلب إجراءات دقيقة تضمن عدم تحريك الأدلة أو إتلافها. لذلك يُمنع الاقتراب من موقع الجريمة في الماء حتى وصول فريق الغطس المتخصص.</p>
+    <p>ويتم تحديد محيط الموقع باستخدام عوامات أو حبال عائمة لتثبيت الحدود التي يجب أن يلتزم بها الغواصون أثناء العمل.</p>
+    <p>كما تُراعى الظروف البيئية مثل التيارات المائية والرياح والعمق، ويتم تصوير المكان تحت الماء قبل تحريك أي شيء لضمان التوثيق الدقيق.</p>
+    <p>ويُرفع كل دليل من الماء بطريقة تحفظ حالته الأصلية قدر الإمكان، ثم يُحفظ داخل أوعية مائية خاصة لتجنب جفافه قبل الفحص الجنائي.</p>
+    <p>ويجب أن يتم ذلك تحت إشراف مباشر من المحقق المختص وخبراء الأدلة المائية، لضمان سلامة سلسلة الأدلة والمحافظة على مصداقيتها.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">المحافظة على المسارح المفتوحة:</h3>
+    <p>تُعتبر المسارح المفتوحة من أكثر المواقع عرضة للعبث بسبب اتساعها وسهولة الوصول إليها من قبل العامة، لذا يجب تطويقها من الخارج بالحبال أو الشرائط البلاستيكية فورًا عند الوصول.</p>
+    <p>كما تُغلق جميع المنافذ المؤدية إلى المكان، ويُمنع دخول أي شخص غير مخوّل، بما في ذلك الصحفيون أو شهود العيان، حفاظًا على الأدلة من التلف أو التلوث.</p>
+    <p>ويُفضّل وضع حراسة دائمة على محيط المسرح إلى حين انتهاء أعمال التحقيق ورفع جميع الآثار المادية الموجودة في الموقع.</p>
+    <p>ويجب أن تشمل الحماية كامل المنطقة التي يُحتمل أن يكون الجناة قد دخلوا منها أو هربوا عبرها، مثل الطرق الجانبية أو الأراضي الزراعية القريبة.</p>
+    <p>وتُعد سرعة الاستجابة في تأمين المسرح المفتوح من العوامل الحاسمة في الحفاظ على الأدلة قبل أن تتأثر بعوامل الطقس أو التدخل البشري.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">المحافظة على المسارح المغلقة:</h3>
+    <p>تُعد المسارح المغلقة من أسهل أنواع المسارح في السيطرة عليها مقارنة بالمفتوحة، إذ يمكن إغلاقها بإحكام لمنع دخول أو خروج أي شخص غير مختص. ويبدأ ذلك بإبعاد جميع الفضوليين والموجودين في المكان فورًا بعد وصول الجهات الأمنية.</p>
+    <p>ثم يُصار إلى تأمين المداخل والمنافذ عبر الحواجز أو الأشرطة التحذيرية، مع وضع أفراد من الشرطة لحراسة الأبواب والنوافذ والدرج المؤدي للموقع.</p>
+    <p>ويجب أن يشمل نطاق الحماية كل المناطق المرتبطة بمسرح الجريمة، مثل الملحقات والممرات والمصاعد والمخازن القريبة، لأنها قد تحتوي على آثار مادية مرتبطة بالجريمة.</p>
+    <p>ويتم بعد ذلك توثيق حالة الأبواب والنوافذ كما وُجدت أول مرة، من حيث كونها مفتوحة أو مغلقة أو مكسورة، لما لذلك من أهمية في تحديد طريقة دخول الجاني وخروجه.</p>
+    <p>كما يُراعى الحفاظ على كل الأدلة الدقيقة، مثل آثار الأقدام أو بصمات الأصابع أو بقع الدم، إلى أن يتم رفعها وتحريزها من قبل المختصين في الأدلة الجنائية.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">إجراءات المحافظة على مسرح الجريمة والعمل بداخله:</h3>
+    <p>تهدف إجراءات المحافظة على مسرح الجريمة إلى إبقاء المكان كما هو لحظة وقوع الجريمة دون أي تغيير أو عبث. فالتغيير أو سوء التعامل مع المسرح يؤدي إلى تلف الأدلة المادية، وهو ما يصعب معه تحديد الجناة أو إثبات الواقعة بدقة أمام الجهات القضائية.</p>
+    <p>ويبدأ الحفاظ على المسرح من لحظة وصول رجال الشرطة الأوائل إلى الموقع، حيث تتم عملية تأمين المكان وإبعاد الفضوليين ووضع حواجز أو شرائط بلاستيكية تحدد نطاق المسرح.</p>
+    <p>كما يتم تسجيل وقت الإبلاغ ووقت الانتقال والوصول للموقع بدقة، لأن هذه الأوقات تساعد في تقييم قيمة الأدلة ومصداقية أقوال الشهود والمجني عليهم.</p>
+    <p>ويتطلب العمل داخل المسرح التنسيق بين مأمور الضبط القضائي والخبراء الفنيين، بحيث يتولى كلٌّ منهم مهامه في المعاينة والفحص ورفع الأدلة دون تداخل أو تضارب.</p>
+    <p>ويُعد التدريب على إجراءات الدخول والخروج من المسرح وضبط الأدلة المادية أحد أهم عناصر نجاح التحقيق الميداني، لضمان سلامة مسرح الجريمة إلى حين استكمال جمع كافة الآثار المرتبطة بها.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <p>من الأمثلة العملية على امتداد مسرح الجريمة، أن يقوم شخص في دولة ما بإرسال تعليمات إلكترونية إلى شريك له في دولة أخرى لتنفيذ عملية احتيال أو تحويل أموال غير مشروعة. في هذه الحالة، يُعتبر كل من مكان إرسال التعليمات ومكان تنفيذها جزءًا من المسرح الواحد.</p>
+    <p>كما يمكن أن تمتد الجريمة إلى دولة ثالثة إذا نُقلت فيها الأموال أو ظهرت فيها نتائج الفعل الإجرامي، مما يجعل من الضروري تنسيق الجهود بين أكثر من جهة تحقيق.</p>
+    <p>ولأن هذه القضايا تتطلب تبادلًا سريعًا للمعلومات، تُعتبر اتفاقيات التعاون الأمني مثل الإنتربول واليوروبول من الأدوات الأساسية التي تُسهم في ربط جهود الدول معًا.</p>
+    <p>ويُعد توحيد أساليب جمع الأدلة وحفظها وتوثيقها أمرًا ضروريًا لضمان قبولها أمام المحاكم في مختلف الدول المتعاونة، إذ قد يؤدي أي اختلاف في الإجراءات إلى رفض الدليل.</p>
+    <p>ويُظهر هذا الجانب أهمية التدريب المستمر لرجال الأمن على التعامل مع الجرائم الدولية لضمان فعالية التحقيقات وتكاملها عبر الحدود.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">امتداد مسرح الجريمة إلى أكثر من دولة:</h3>
+    <p>قد يمتد مسرح الجريمة ليشمل أكثر من دولة، وذلك في الحالات التي تكون فيها مكونات النشاط الإجرامي والنتيجة موزعة عبر حدود مختلفة. فقد يبدأ التنفيذ الفعلي في دولة معينة، ثم تكتمل أركان الجريمة في دولة أخرى، مما يجعل كلا الموقعين جزءًا من مسرح الجريمة ذاته.</p>
+    <p>وتبرز أهمية هذا المفهوم في الجرائم الإلكترونية وغسيل الأموال والاتجار بالبشر، حيث تتداخل الأدوار والأماكن بين عدة دول. ويستلزم هذا النوع من القضايا تنسيقًا عالي المستوى بين أجهزة الشرطة الدولية لضمان تتبع الأدلة والفاعلين.</p>
+    <p>ويُعتبر مسرح الجريمة في هذه الحالة شاملاً لكل مكان حدث فيه أي نشاط إجرامي له علاقة مباشرة بالفعل الأصلي أو نتائجه، سواء كان هذا النشاط ماديًا أو إلكترونيًا.</p>
+    <p>ويتم تحديد نطاق المسؤولية القانونية وفق مبدأ "الرابطة السببية" بين النشاط الإجرامي والنتيجة، بحيث تتحمل كل دولة جزءًا من المسؤولية عن الجزء الذي تم على أراضيها.</p>
+    <p>وتسهم هذه الرؤية في تعزيز التعاون الدولي وتسهيل تبادل المعلومات والأدلة ضمن اتفاقيات مشتركة تهدف إلى مكافحة الجرائم العابرة للحدود.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">نطاق مسرح الجريمة:</h3>
+    <p>يتجه الفقه الجنائي إلى اعتبار أن مسرح الجريمة لا يقتصر على المكان الذي تم فيه تنفيذ الجريمة فقط، بل يشمل كل موقع ساهم في ارتكابها. فقد يكون من يقف في نهاية الطريق الزراعي لمراقبة الهدف جزءًا من مسرح الجريمة نفسه، لأنه يؤدي دورًا تنفيذياً ضمن الخطة الموضوعة للجناة. ومن ثم يمتد نطاق المسرح ليشمل كل مكان تم فيه نشاط إجرامي أو جزء منه.</p>
+    <p>وقد يمتد المسرح إلى أماكن أخرى تتعلق بالتخطيط أو المساعدة في ارتكاب الفعل، مثل المواقع التي أُعدت فيها أدوات الجريمة أو تم فيها نقل الأدلة. وهذا الاتساع في المفهوم يهدف إلى ضمان عدم إغفال أي أثر مادي أو معنوي يمكن أن يساعد في كشف الحقيقة.</p>
+    <p>وبهذا، فإن تحديد نطاق المسرح بدقة يسهم في اختيار الخبراء المناسبين لفحص الأدلة وفق طبيعة كل موقع من المواقع المرتبطة بالجريمة.</p>
+    <p>كما أن تحديد هذا النطاق بدقة يُعد عاملاً جوهريًا في توجيه التحقيق نحو الجناة الحقيقيين، وتجنب ضياع الجهد في مواقع لا علاقة لها بالواقعة.</p>
+    <p>ويُسهم كذلك في تعزيز كفاءة التحقيقات وتوثيق الأدلة بما يضمن عدالتها ومصداقيتها أمام الجهات القضائية.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">[د] مسرح الجريمة المتحرك:</h3>
+    <p>تتنوع مسارح الجريمة كذلك حسب طبيعة المكان الذي ارتكبت فيه، فقد تكون ثابتة كالعقارات، أو متحركة كالجرائم التي تقع في السفن والطائرات أو المركبات. ويُعد هذا النوع من المسارح من أكثر الأنواع صعوبة في التوثيق، نظرًا لاحتمال تحركه من مكان إلى آخر، مما يتطلب جهداً مضاعفاً في تحديد مكان وقوع الفعل الإجرامي بدقة.</p>
+    <p>في هذه الحالات، تُستخدم وسائل تقنية متقدمة لتثبيت موقع الجريمة، مثل أجهزة تحديد المواقع GPS وكاميرات المراقبة، من أجل إثبات الزمن والمكان الذي حدثت فيه الجريمة.</p>
+    <p>وقد يشمل مسرح الجريمة المتحرك أكثر من موقع واحد، كأن يبدأ الحدث داخل السيارة ثم يمتد إلى موقع آخر، الأمر الذي يتطلب من فريق التحقيق تتبع جميع النقاط المحتملة التي شهدت النشاط الإجرامي.</p>
+    <p>ومن المهم أن يتعامل فريق الأدلة الجنائية مع المركبة أو الموقع المتحرك باعتباره وحدة متكاملة، بحيث يتم فحص كل جزء فيها بحثًا عن أدلة يمكن أن تقود إلى معرفة الفاعل أو طريقة التنفيذ.</p>
+    <p>ويجب كذلك توثيق كل عملية نقل أو تحريك للموقع أو المركبة لمنع الطعن في سلامة الأدلة أمام القضاء.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <p>وللمحافظة على مسرح الجريمة تحت الماء، يجب اتباع ترتيبات خاصة تشمل حساب سرعة التيارات المائية واتجاهها وكثافة الشيء المطلوب البحث عنه، إضافة إلى تقدير المسافة التي قد يتحرك فيها الأثر المادي نتيجة حركة الماء. إن هذه العوامل مجتمعة تسهم في تحديد موقع الأدلة بدقة قبل أن تتلف بفعل البيئة المائية.</p>
+    <p>كما ينبغي تصوير المشهد المائي باستخدام كاميرات مخصصة لتوثيق حالة الأدلة قبل رفعها من الماء، وذلك للحفاظ على تسلسل الأدلة وتسليمها للمعمل الجنائي لفحصها وفق الأصول العلمية.</p>
+    <p>وعادة ما يتم التعامل مع هذا النوع من الأدلة بحذر شديد لأن الماء قد يؤدي إلى تشويه البصمات أو إذابة بعض المواد الكيميائية، مما يجعل سرعة العمل ودقته أمرًا حاسمًا.</p>
+    <p>وتُعد مسارح الجرائم المائية من أصعب المسارح في إجراءات التحقيق الميداني، نظرًا لتأثير الطبيعة والوقت والموقع على الأدلة التي تُكتشف.</p>
+    <p>لذلك، فإن التدريب المستمر لفرق الغوص الجنائي يُعد عنصرًا أساسيًا لرفع الكفاءة وضمان نتائج دقيقة تسهم في كشف الحقيقة.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">[جـ] مسرح الجريمة تحت الماء:</h3>
+    <p>قد يرتكب المجرمون جرائمهم تحت الماء، أو يرتكبونها في اليابسة ثم يلقون بالأداة المستخدمة أو الجثة في الماء لإخفاء معالم الجريمة. فعلى سبيل المثال، قد يتم إلقاء جثة المجني عليه بعد قتله في المياه، فتطفو بعد فترة نتيجة التحلل والتيبس الرمي، أو قد لا تطفو في حال تم ربطها بجسم ثقيل كالحجارة أو الحديد، مما يجعلها مغمورة في العمق ويستلزم إنزال الغواصين للبحث عنها.</p>
+    <p>يُعد التعامل مع مسرح الجريمة تحت الماء من أكثر أنواع المسارح صعوبة، نظرًا للعوامل البيئية المؤثرة كحركة التيارات المائية ودرجة الحرارة وكثافة المياه، والتي يمكن أن تغير مواقع الأدلة بشكل كبير.</p>
+    <p>في هذه الحالات، يعتمد فريق التحقيق على تحديد موقع الجريمة بدقة عبر خرائط دقيقة وأجهزة رصد متقدمة لتحديد اتجاه التيارات وسرعتها، مما يسهل معرفة المكان الذي يمكن أن توجد فيه الأدلة المادية.</p>
+    <p>ومن الضروري أن يتولى العمل في هذا النوع من المسارح خبراء متخصصون في الغوص والأدلة المائية لضمان استخراج العينات والأدلة بطريقة علمية دقيقة دون إتلافها.</p>
+    <p>كما يجب تأمين منطقة الماء ومنع اقتراب الأشخاص حتى وصول فريق التحقيق، لأن أي اضطراب في المياه قد يؤدي إلى ضياع الأدلة نهائيًا.</p>
+  </div>
+</div>
+
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <p>تُعد هذه المعاينة الدقيقة لمسرح الجريمة ضرورية لتحديد الأماكن الواجب تفتيشها من قبل مأمور الضبط القضائي، وضبط الأشياء المتخلفة عن الجريمة كأدلة مادية قد تساهم في إثبات الواقعة.</p>
+    <p>يُسهم مسرح الجريمة المفتوح كذلك في تحديد الخبراء الفنيين الواجب الاستعانة بهم في مجال الأدلة الجنائية، مثل خبراء البصمات، وخبراء التصوير، وفنيي المعمل الجنائي.</p>
+    <p>كما يساعد تحديد المسرح على معرفة الشهود الذين يمكن الاستماع إلى شهاداتهم، حيث تسهم أقوالهم في رسم تسلسل الأحداث وبيان تطورها في الجريمة.</p>
+    <p>ونظرًا لأن هذا النوع من المسارح يكون مكشوفًا لعامة الناس، فإن من الضروري الوصول إليه بسرعة والمحافظة على محتوياته، لأن أي تأخير قد يؤدي إلى ضياع أو عبث بالأدلة.</p>
+    <p>ومن أبرز التحديات في المسارح المفتوحة أنها تسمح لأي شخص بالدخول إليها أو لمس الأدلة دون قصد، مما يفرض على رجال الأمن إحاطتها بشريط بلاستيكي أو حواجز واضحة لحمايتها فورًا.</p>
+  </div>
+</div>
+
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h3 style="font-size: 14pt; font-weight: bold;">[ب] مسرح الجريمة المفتوح (الخارجي):</h3>
+    <p>يُقصد بمسرح الجريمة المفتوح أنه المكان الذي لا تحده جدران أو أسوار، وتكون مساحته واسعة وغير مغلقة، مثل الأراضي الزراعية، أو الطرق السريعة، أو الحدائق العامة، أو الأماكن المهجورة المكشوفة.</p>
+    <p>في هذا النوع من المسارح، يجنح الجاني غالبًا إلى اختيار موقع بعيد عن الأنظار، على أمل أن يتم طمس معالم الأدلة التي يتركها، والتي قد تسهم في كشف غموض الجريمة وتحديد فاعلها.</p>
+    <p>يمتاز المسرح المفتوح بعدة خصائص، من أبرزها أنه يساعد في تحديد ما إذا كانت الجريمة قد ارتكبت في ذات المكان الذي تم اكتشافها فيه، أم أن فصولها دارت في مكان آخر ثم نُقلت إليه لاحقًا، مما يدل على احتمالية نقل مسرح الجريمة.</p>
+    <p>كما يمكن من خلال الآثار المتروكة في المكان، مثل آثار الأقدام أو إطارات السيارات، تحديد خط سير الجناة أثناء الوصول أو الهروب، والوسائل التي استخدموها في ذلك.</p>
+    <p>وتظهر الصلة بين الجاني والمجني عليه أحيانًا من خلال آثار العنف أو تمزق الملابس، أو ما يُترك من أدلة على مقاومة الضحية.</p>
+  </div>
+</div>
+
+
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.6;">
+    <h2 style="font-size: 14pt; font-weight: bold;">أنواع مسرح الجريمة</h2>
+    <p>مسرح الجريمة قد يقع في أماكن خارج المباني كالمناطق الخلوية والزراعية، أو الحدائق أو المياه، وإلى غير ذلك من الأماكن غير المحددة بأسوار وجدران، ويُطلق عليه <b>المسرح المفتوح</b>، وقد يقع مسرح الجريمة داخل المباني أو المنازل أو الحجرات، ويُطلق عليه <b>المسرح المغلق</b>.</p>
+
+    <h3 style="font-size: 13pt; font-weight: bold; margin-top: 20px;">[أ] مسرح الجريمة المغلق (الداخلي):</h3>
+    <p>هو المكان المحدد الذي ارتكبت فيه الجريمة ويمكن غلقه، ويوجد داخل المباني السكنية أو التجارية، وكل الأماكن التي يمكن غلقها والسيطرة عليها. يشمل المسرح أيضاً أماكن الدخول والخروج بالإضافة إلى ملحقات المسرح من أبنية وكذلك منطقة الدرج والدهاليز.</p>
+    <p>يكون له مداخل ومنافذ يمكن فحصها ومعاينتها تتمثل في باب المكان، والذي بفحصه يمكن تحديد طريقة الدخول وطريق الجاني في الوصول إلى داخل مسرح الجريمة.</p>
+    <p>والمثال على ذلك العثور على أداة إضاءة يدوية تم استخدامها في الحادث تفيد بأن الجريمة ارتكبت ليلاً، كاستخدام المصباح اليدوي. كما يمكن من خلال الأدلة تحديد عدد الجناة المنفذين للجريمة، ولكل واحد منهم دور محدد. مثال ذلك وجود خزنة كبيرة وثقيلة تم تحريكها من مكانها، وهو دليل على تعدد الجناة.</p>
+  </div>
+</div>
+
+<div class="page" data-density="soft">
+  <div class="content" dir="rtl" style="font-family: Arial; font-size: 12pt; text-align: right; line-height: 1.4; margin: 0; padding: 10px;">
+    <h2 style="font-size: 16pt; font-weight: bold; text-align: center; margin-bottom: 10px;">فهرس المحتويات</h2>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 3px;">
+      <p style="margin: 0;"><b>الصفحة 2:</b> مقدمة – تعريف مسرح الجريمة وأهميته في التحقيق الجنائي.</p>
+      <p style="margin: 0;"><b>الصفحة 3:</b> مسرح الجريمة المفتوح (الخارجي) – خصائصه ومميزاته.</p>
+      <p style="margin: 0;"><b>الصفحة 4:</b> استكمال مسرح الجريمة المفتوح – المعاينة الميدانية وأهميتها.</p>
+      <p style="margin: 0;"><b>الصفحة 5:</b> مسرح الجريمة تحت الماء – طبيعة هذا النوع وأساليبه.</p>
+      <p style="margin: 0;"><b>الصفحة 6:</b> المحافظة على الأدلة المائية وإجراءات التعامل معها.</p>
+      <p style="margin: 0;"><b>الصفحة 7:</b> مسرح الجريمة المتحرك – الطائرات، السفن، والمركبات.</p>
+      <p style="margin: 0;"><b>الصفحة 8:</b> نطاق مسرح الجريمة – الامتداد والعلاقة بين المواقع المختلفة.</p>
+      <p style="margin: 0;"><b>الصفحة 9:</b> امتداد مسرح الجريمة إلى أكثر من دولة – الجرائم العابرة للحدود.</p>
+      <p style="margin: 0;"><b>الصفحة 10:</b> التعاون الدولي وتوثيق الأدلة في الجرائم المشتركة.</p>
+      <p style="margin: 0;"><b>الصفحة 11:</b> إجراءات المحافظة على مسرح الجريمة والعمل بداخله.</p>
+      <p style="margin: 0;"><b>الصفحة 12:</b> المحافظة على المسارح المغلقة – الضوابط والتوثيق.</p>
+      <p style="margin: 0;"><b>الصفحة 13:</b> المحافظة على المسارح المفتوحة – الأساليب الميدانية.</p>
+      <p style="margin: 0;"><b>الصفحة 14:</b> المحافظة على المسارح تحت الماء – الأدلة المائية.</p>
+      <p style="margin: 0;"><b>الصفحة 15:</b> التوثيق الزمني والإجراءات الختامية للتحقيق الميداني.</p>
+      <p style="margin: 0;"><b>الصفحة 16:</b> الأدلة المادية – تعريفها وأهميتها في التحقيق.</p>
+      <p style="margin: 0;"><b>الصفحة 17:</b> الأدلة المعنوية ودورها في كشف الحقيقة.</p>
+      <p style="margin: 0;"><b>الصفحة 18:</b> الخاتمة – أهمية مسرح الجريمة في تحقيق العدالة.</p>
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+<div class="controls">
+  <button id="next" class="nav-btn">
+    <span> ⮞ </span><span>السابق</span> 
+  </button>
+  <button id="prev" class="nav-btn">
+     <span>التالي</span><span> ⮜ </span>
+  </button>
+</div>
+
+
+<script>
+const bookEl = document.getElementById('book');
+const flipS  = document.getElementById('flipS');
+const wooshS = document.getElementById('wooshS');
+
+const pageFlip = new St.PageFlip(bookEl, {
+  width: 500,
+  height: 600,
+  size: 'fixed',
+  maxShadowOpacity: 0.35,
+  showCover: false,
+  usePortrait: false,
+  mobileScrollSupport: false,
+  flippingTime: 1200,
+  startPage: 17, // يبدأ من الصفحة الأخيرة
+});
+
+// تحميل الصفحات
+pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+
+// تشغيل الصوت
+pageFlip.on('flip', () => {
+  try { flipS.currentTime = 0; flipS.play(); } catch(e){}
+  try { wooshS.currentTime = 0; wooshS.play(); } catch(e){}
+});
+
+// الأزرار (عربي)
+document.getElementById('next').addEventListener('click', () => pageFlip.flipNext());
+document.getElementById('prev').addEventListener('click', () => pageFlip.flipPrev());
+// ✅ السماح بتحديد النص داخل الصفحات بدون تقليب
+let isSelecting = false;
+
+document.querySelectorAll(".page .content").forEach(el => {
+  el.addEventListener("mousedown", e => {
+    isSelecting = true;
+    e.stopPropagation(); // يمنع المكتبة من التقليب
+  });
+  el.addEventListener("mouseup", () => {
+    isSelecting = false;
+  });
+  el.addEventListener("mousemove", e => {
+    if (isSelecting) e.stopPropagation(); // يمنع التقليب أثناء السحب
+  });
+  el.style.userSelect = "text";
+  el.style.webkitUserSelect = "text";
+  el.style.cursor = "text";
+});
+
+// تعطيل التقليب أثناء التحديد فقط
+bookEl.addEventListener("mousedown", e => {
+  if (window.getSelection().toString().length > 0) e.stopPropagation();
+});
+// ✅ ترقيم الصفحات بالعكس (الصفحة الأخيرة رقمها 1)
+const pages = document.querySelectorAll(".page");
+const total = pages.length;
+pages.forEach((page, index) => {
+  page.setAttribute("data-page", total - index);
+});
+
+</script>
+
+<!-- ================= CINEMATIC NOTEBOOKLM PORTAL (Exact Position • Hidden Box) ================= -->
+<style>
+  :root{--gold:#d4af37}
+  body{background:#000;color:#fff;font-family:"Tajawal",system-ui,Arial}
+
+  /* الخلفية السينمائية */
+  #nbkCineBack{
+    position:fixed;inset:0;z-index:2147483600;display:none;
+    background:radial-gradient(1200px 700px at 50% 45%, rgba(212,175,55,0.1), rgba(0,0,0,0)) , rgba(0,0,0,0.6);
+    backdrop-filter:blur(8px);
+  }
+
+  /* المربع الشفاف (مخفي بصريًا لكنه يُستخدم لحساب الإحداثيات) */
+  #nbkHiddenBox{
+    position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    width:min(1100px,94vw);height:min(720px,88vh);
+    opacity:0;pointer-events:none;
+  }
+
+  /* واجهة التحكم */
+  #nbkPanel{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(1100px,94vw);height:min(720px,88vh);
+    border-radius:20px;background:rgba(20,25,32,.75);
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 0 60px rgba(0,0,0,.7),0 0 0 2px rgba(212,175,55,.1) inset;
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+
+  header#nbkHead{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.1)
+  }
+
+  .nbkBtn{background:#111a22;border:1px solid rgba(255,255,255,.1);color:#fff;padding:7px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+  .nbkBtn.gold{background:var(--gold);color:#000;border:0}
+  #nbkBody{display:flex;flex:1;overflow:hidden}
+  #nbkLeft{width:280px;background:rgba(255,255,255,.03);border-inline-end:1px solid rgba(255,255,255,.1);overflow:auto;padding:10px}
+  #nbkRight{flex:1;padding:14px;display:flex;flex-direction:column;justify-content:space-between}
+  .nbkItem{padding:8px;border-radius:10px;margin-bottom:8px;background:rgba(255,255,255,.05);cursor:pointer;font-size:14px}
+  .nbkItem.active{background:rgba(255,215,0,.15);border:1px solid var(--gold)}
+  #nbkTop{display:flex;justify-content:space-between;align-items:center}
+
+  /* الوميض الذهبي */
+  #nbkFlash{
+    position:absolute;inset:0;background:radial-gradient(500px 250px at 50% 50%, rgba(255,230,120,.35), transparent 60%);
+    mix-blend-mode:screen;opacity:0;pointer-events:none;transition:opacity .25s ease;
+  }
+  .flashOn{opacity:1}
+</style>
+
+<div id="nbkCineBack">
+  <div id="nbkFlash"></div>
+
+  <!-- الصندوق الشفاف (مكان البوابة) -->
+  <div id="nbkHiddenBox"></div>
+
+  <!-- الواجهة -->
+  <div id="nbkPanel">
+    <header id="nbkHead">
+      <strong style="color:var(--gold)">🧠 NotebookLM — وضع سينمائي</strong>
+      <div>
+        <button class="nbkBtn" id="nbkHow">؟ تعليمات</button>
+        <button class="nbkBtn gold" id="nbkClose">إغلاق</button>
+      </div>
+    </header>
+
+    <div id="nbkBody">
+      <aside id="nbkLeft">
+        <div class="nbkItem active" data-url="https://notebooklm.google.com/notebook/d4f1d4ef-fec3-496e-b11e-1bb38d405ce5">📘 الدفتر الرئيسي</div>
+        <div class="nbkItem" data-url="https://notebooklm.google.com/notebook/d4f1d4ef-fec3-496e-b11e-1bb38d405ce5?artifactId=d1d2c9f3-e698-41eb-8de1-0025156e0982">📗 البطاقات التعليمية</div>
+        <div class="nbkItem" data-url="https://notebooklm.google.com/notebook/d4f1d4ef-fec3-496e-b11e-1bb38d405ce5?artifactId=8b77cc97-9149-4b9e-b56b-e103f332fb71">📕 اختبار المعاينة</div>
+        <div class="nbkItem" data-url="https://notebooklm.google.com/notebook/d4f1d4ef-fec3-496e-b11e-1bb38d405ce5?artifactId=5ad196ea-d6c2-49a8-8874-65636fa6262d">📙 البودكاست</div>
+      </aside>
+
+      <section id="nbkRight">
+        <div id="nbkTop">
+          <div><strong style="color:var(--gold)">فتح مباشر فوق نفس الإطار</strong></div>
+          <div><button class="nbkBtn gold" id="nbkStart">▶️ ابدأ التفاعل</button></div>
+        </div>
+        <p style="opacity:.7;font-size:13px;margin-top:10px">
+          سيتم فتح الصفحة فوق هذا الإطار بنفس الحجم والمكان تمامًا ✨
+        </p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const back=document.getElementById('nbkCineBack');
+  const box=document.getElementById('nbkHiddenBox');
+  const flash=document.getElementById('nbkFlash');
+  const closeBtn=document.getElementById('nbkClose');
+  const startBtn=document.getElementById('nbkStart');
+  const howBtn=document.getElementById('nbkHow');
+  const items=document.querySelectorAll('.nbkItem');
+  let currentUrl=items[0].dataset.url;
+  let popup=null,watch=null;
+
+  // صوت خفيف للبوابة
+  function sfx(freq=280){
+    try{
+      const ctx=new (window.AudioContext||window.webkitAudioContext)();
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.25,ctx.currentTime+0.05);
+      g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.3);
+      o.connect(g).connect(ctx.destination);o.start();o.stop(ctx.currentTime+0.35);
+    }catch(e){}
+  }
+
+  function openPortal(){
+    back.style.display='block';
+    requestAnimationFrame(()=>back.classList.add('show'));
+    sfx(280);
+  }
+
+  function closePortal(){
+    back.classList.remove('show');
+    setTimeout(()=>back.style.display='none',300);
+    sfx(180);
+  }
+
+  // تفعيل اختيار الفصل
+  items.forEach(card=>{
+    card.addEventListener('click',()=>{
+      items.forEach(x=>x.classList.remove('active'));
+      card.classList.add('active');
+      currentUrl=card.dataset.url;
+    });
+  });
+
+  // فتح نافذة بنفس مكان المربع
+  function openFloatingWindow(url){
+    const rect=box.getBoundingClientRect();
+    const left=window.screenX + rect.left;
+    const top=window.screenY + rect.top;
+    const w=Math.round(rect.width);
+    const h=Math.round(rect.height);
+
+    flash.classList.add('flashOn');
+    setTimeout(()=>flash.classList.remove('flashOn'),400);
+
+    popup=window.open(url,'nbkWindow',
+      `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+    if(!popup||popup.closed){
+      alert('⚠️ المتصفح منع النوافذ المنبثقة، فعّلها ثم أعد المحاولة.');
+      return;
+    }
+    popup.focus();
+
+    if(watch)clearInterval(watch);
+    watch=setInterval(()=>{
+      if(!popup||popup.closed){clearInterval(watch);watch=null;}
+    },700);
+  }
+
+  startBtn.addEventListener('click',()=>openFloatingWindow(currentUrl));
+  closeBtn.addEventListener('click',closePortal);
+  howBtn.addEventListener('click',()=>alert(
+    'اختر الفصل، ثم اضغط "ابدأ التفاعل". سيتم فتح صفحة جديدة بنفس حجم وموقع الإطار الشفاف الموجود في منتصف الشاشة.'
+  ));
+  back.addEventListener('click',e=>{if(e.target===back)closePortal();});
+  window.addEventListener('keydown',e=>{if(e.key==='Escape')closePortal();});
+  window.openNotebookCinematic=openPortal;
+})();
+</script>
+
+
+<!-- ================= /CINEMATIC NOTEBOOKLM PORTAL ================= -->
+<div id="reader-tools-root"></div>
+<script src="https://dns3uae-glitch.github.io/crime-book/assets/js/reader-tools1.js"></script>
+<!-- 🎭 مشهد أحمد في المنتصف بدون المربع أو الأسهم -->
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+
+<a-scene
+  embedded
+  vr-mode-ui="enabled: false"
+  inspector="enabled: false"
+  keyboard-shortcuts="enabled: false"
+  debug="false"
+  renderer="colorManagement: true; alpha: true;"
+  style="
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 45vw;
+    height: 80vh;
+    background: transparent;
+    z-index: 5;
+    pointer-events: none;
+  ">
+
+  
+  <!-- الإضاءة -->
+  <a-entity light="type:ambient; intensity:0.9"></a-entity>
+  <a-entity light="type:directional; intensity:1" position="2 4 3"></a-entity>
+
+
+<!-- كاميرا ثابتة بدون أي مربعات أو أسهم أو تحكم -->
+<a-entity 
+  camera
+  position="0 1.6 3"
+  look-controls="enabled:false"
+  wasd-controls="enabled:false"
+  touch-controls="enabled:false"
+  gamepad-controls="enabled:false"
+  joystick-controls="enabled:false"
+  universal-controls="enabled:false">
+</a-entity>
+
+
+  <!-- أحمد يتحرك طبيعي -->
+<a-entity id="avatar_ahmed"
+  gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/model.glb)"
+  position="0.40 -1.5 -3"
+  rotation="0 -2 0"
+  scale="3 3 3"
+  animation-mixer="clip: Male_Animation_Idle; loop: repeat; crossFadeDuration: 0.3;"
+  avatar-advanced-lipsync>
+</a-entity>
+<script>
+// 🎬 ترتيب المقاطع بالترتيب الصحيح:
+const scenes = [
+  "open_scene",
+  "crime_scope",
+  "physical_evidence",
+  "moral_evidence",
+  "preserve_scene",
+  "international_scene",
+  "underwater_scene",
+  "documentation",
+  "types_overview",
+  "moving_scene",
+  "fallback",
+  "closed_scene",
+  "conclusion"
+];
+
+// 🧠 تشغيل المقاطع واحد تلو الآخر
+let currentScene = 0;
+function playNextScene() {
+  const name = scenes[currentScene];
+  const audioPath = `https://dns3uae-glitch.github.io/crime-book/assets/audio/${name}.mp3`;
+  const jsonPath  = `https://dns3uae-glitch.github.io/crime-book/assets/audio/${name}.json`;
+
+  console.log(`🎧 تشغيل المقطع: ${name}`);
+
+    // نستخدم الدالة الأصلية لتشغيل الصوت وحركة الفم
+  playLipsyncWithJSON(audioPath, jsonPath);
+
+  // 🎭 تحديد المزاج المناسب لكل مشهد تلقائيًا
+  const moodMap = {
+    open_scene: "neutral",
+    crime_scope: "serious",
+    physical_evidence: "thinking",
+    moral_evidence: "serious",
+    preserve_scene: "thinking",
+    international_scene: "neutral",
+    underwater_scene: "serious",
+    documentation: "serious",
+    types_overview: "neutral",
+    moving_scene: "thinking",
+    fallback: "neutral",
+    closed_scene: "serious",
+    conclusion: "happy"
+  };
+
+  const mood = moodMap[name] || "neutral";
+  if (typeof setMood === "function") setMood(mood);
+  console.log(`🎭 الحالة الحالية: ${mood}`);
+
+
+  // نحمل الصوت لمعرفة متى ينتهي
+  const audio = new Audio(audioPath);
+  audio.onended = () => {
+    currentScene++;
+    if (currentScene < scenes.length) {
+      setTimeout(playNextScene, 1000); // ⏱️ مهلة ثانية قبل المشهد التالي
+    } else {
+      console.log("✅ انتهت جميع المقاطع!");
+    }
+  };
+  audio.play();
+}
+
+// 🚀 عند تحميل الصفحة يبدأ أول مشهد تلقائيًا
+window.addEventListener("DOMContentLoaded", playNextScene);
+</script>
+
+
+
+</a-scene>
+<script>
+(() => {
+  // -------------------------
+  // Utils: smoothing & lerp
+  // -------------------------
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function smooth(value, prev, smoothFactor) { return lerp(prev, value, 1 - Math.exp(-smoothFactor)); }
+
+  // -------------------------
+  // إعداد متغيرات عامة
+  // -------------------------
+  let audioCtx = null;
+  let analyser = null;
+  let sourceNode = null;
+  let audioElement = null;
+  let dataTime = null;
+  let dataFreq = null;
+  let rafId = null;
+
+  // -------------------------
+  // نبحث ونخزن مراجع المورف-تارجتس عند تحميل الموديل
+  // -------------------------
+  AFRAME.registerComponent("avatar-advanced-lipsync", {
+    init() {
+      const el = this.el;
+      this.targets = {}; // {name: {mesh, index}}
+      this.morphMeshes = []; // قائمة الميزشات التي فيها مورف
+
+      el.addEventListener("model-loaded", () => {
+        el.object3D.traverse(node => {
+          if (node.isMesh && node.morphTargetDictionary && node.morphTargetInfluences) {
+            // نخزن كل اسم-اندكس من dict
+            const dict = node.morphTargetDictionary;
+            for (const name in dict) {
+              // نحوّل الاسم لصيغة موحدة صغيرة
+              const key = name.trim();
+              this.targets[key] = this.targets[key] || [];
+              this.targets[key].push({ mesh: node, index: dict[name] });
+            }
+            this.morphMeshes.push(node);
+          }
+        });
+
+        console.log("✅ avatar-advanced-lipsync: found morph targets keys:", Object.keys(this.targets).slice(0,50));
+      });
+
+      // القيم smoothed الحالية لكل تارجت
+      this.current = {};
+      // قيم الهدف لكل frame
+      this.targetValues = {};
+
+      // افتراضي: لو ما في موروف للعين/حركة، ممكن تضيف أنيميشن CSS أو animation-mixer
+    },
+
+    // تطبق قيمة مورف محترفة مع smoothing
+    applyMorph(name, value) {
+      // clamp
+      const v = Math.max(0, Math.min(1, value));
+      // smoothing factor (يجرب 0.15 — زيِِّن حسب الحاجة)
+      const sf = 0.80;
+      const prev = this.current[name] || 0;
+      const next = smooth(v, prev, sf);
+      this.current[name] = next;
+
+      const targets = this.targets[name] || [];
+      for (const t of targets) {
+        t.mesh.morphTargetInfluences[t.index] = next;
+      }
+    },
+
+    // دالة تُستدعى من خارج (Audio processor) لتمرير القيم المستخرجة
+    setFeatureValues(featureMap) {
+      // featureMap مثال: { rms: 0.45, centroid: 0.6, zcr: 0.02, pitch: 220 }
+      // قاعدة تحويل بسيطة => morph targets
+      const rms = featureMap.rms || 0;
+      const centroid = featureMap.centroid || 0;
+      const zcr = featureMap.zcr || 0;
+      const pitch = featureMap.pitch || 0;
+
+      // 1) jaw / mouth open => يعتمد بشكل رئيسي على RMS (الطاقة)
+      const jawOpen = Math.min(1, rms * 0.4); // تضخيم طفيف
+      this.applyMorph("jawOpen", jawOpen);
+
+      // 2) mouthFunnel / mouthPucker => أصوات مدّية/مقربة (نسبة الطيف)
+      // طيف منخفض => more funnel/pucker (مثل أ- oo) -> نستخدم centroid العكس (1-centroid)
+      const pucker = Math.max(0, (1 - centroid)) * 0.9;
+      this.applyMorph("mouthPucker", pucker);
+
+      // 3) mouthSmile left/right correlated to centroid & rms subtle
+      const smile = Math.max(0, centroid - 0.45) * 0.9 * rms;
+      this.applyMorph("mouthSmileLeft", smile * 0.6);
+      this.applyMorph("mouthSmileRight", smile * 0.6);
+
+      // 4) mouthStretch (pull sideways) when centroid high (bright sounds)
+      this.applyMorph("mouthStretchLeft", Math.max(0, centroid - 0.5) * 0.6);
+      this.applyMorph("mouthStretchRight", Math.max(0, centroid - 0.5) * 0.6);
+
+      // 5) mouthClose / mouthPress for plosives: use sudden energy spike (zcr or transient)
+      const press = Math.min(1, zcr * 12); // scale
+      this.applyMorph("mouthPressLeft", press * 0.6);
+      this.applyMorph("mouthPressRight", press * 0.6);
+
+      // 6) jawForward/Left/Right small offsets with pitch movement
+      // normalize pitch (if available)
+      const pNorm = pitch ? Math.min(1, (pitch / 400)) : 0;
+      this.applyMorph("jawForward", pNorm * 0.2);
+
+      // 7) blinks: auto blink when RMS low for a short time OR random timer
+      // handled outside in the audio loop by dispatching eyeBlinkLeft/Right
+
+      // 8) cheek/nostril subtle:
+      this.applyMorph("noseSneerLeft", Math.max(0, (centroid - 0.7)) * 0.25);
+      this.applyMorph("noseSneerRight", Math.max(0, (centroid - 0.7)) * 0.25);
+    }
+  });
+
+
+
+  // -------------------------
+  // Audio processing: extract RMS, centroid, ZCR, pitch (simple)
+  // -------------------------
+  async function attachAudioToAvatar(audioEl, avatarEl) {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (sourceNode) {
+      try { sourceNode.disconnect(); } catch (e) {}
+    }
+
+    audioElement = audioEl;
+    sourceNode = audioCtx.createMediaElementSource(audioEl);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048; // دقة جيدة للموجة
+    sourceNode.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    dataTime = new Float32Array(analyser.fftSize);
+    dataFreq = new Float32Array(analyser.frequencyBinCount);
+
+    // الوصول للمكوّن اللي رجعناه
+    const comp = avatarEl.components["avatar-advanced-lipsync"];
+    if (!comp) {
+      console.warn("avatar-advanced-lipsync component not found on avatar element.");
+    }
+
+    // blink state & timers
+    let blinkTimer = 0;
+    let lastRms = 0;
+    let lastSpike = 0;
+
+    function audioLoop() {
+      analyser.getFloatTimeDomainData(dataTime);
+
+      // RMS = sqrt(mean(x^2))
+      let sum = 0;
+      for (let i = 0; i < dataTime.length; i++) {
+        sum += dataTime[i] * dataTime[i];
+      }
+      const rms = Math.sqrt(sum / dataTime.length); // 0.. ~0.5
+
+      // Frequency spectrum for centroid
+      analyser.getFloatFrequencyData(dataFreq); // in dB (negative)
+      // convert to linear
+      let specSum = 0;
+      let specWeighted = 0;
+      for (let i = 0; i < dataFreq.length; i++) {
+        const linear = Math.pow(10, dataFreq[i] / 20); // dB -> amplitude
+        specSum += linear;
+        specWeighted += linear * i;
+      }
+      const centroid = specSum ? (specWeighted / specSum) / dataFreq.length : 0; // 0..1 approx
+
+      // Zero-crossing rate (ZCR) — proxy for plosives & consonants
+      let zc = 0;
+      for (let i = 1; i < dataTime.length; i++) {
+        if ((dataTime[i - 1] >= 0 && dataTime[i] < 0) || (dataTime[i - 1] < 0 && dataTime[i] >= 0)) zc++;
+      }
+      const zcr = zc / dataTime.length;
+
+      // Simple pitch estimate via autocorrelation (lightweight)
+      function autoCorrelate(buf, sampleRate) {
+        // crude but ok for voiced detection
+        const SIZE = buf.length;
+        let rmsv = 0;
+        for (let i = 0; i < SIZE; i++) rmsv += buf[i] * buf[i];
+        rmsv = Math.sqrt(rmsv / SIZE);
+        if (rmsv < 0.01) return 0;
+        let r1 = 0, r2 = SIZE - 1;
+        for (let i = 0; i < SIZE / 2; i++) {
+          if (Math.abs(buf[i]) < 0.0001) { r1 = i; break; }
+        }
+        for (let i = 1; i < SIZE / 2; i++) {
+          if (Math.abs(buf[SIZE - i]) < 0.0001) { r2 = SIZE - i; break; }
+        }
+        buf = buf.slice(r1, r2);
+        const newSize = buf.length;
+        const c = new Array(newSize).fill(0);
+        for (let i = 0; i < newSize; i++) {
+          for (let j = 0; j < newSize - i; j++) c[i] = c[i] + buf[j] * buf[j + i];
+        }
+        let d = 0;
+        while (c[d] > c[d + 1]) d++;
+        let maxPos = -1, maxVal = -1;
+        for (let i = d; i < newSize; i++) {
+          if (c[i] > maxVal) {
+            maxVal = c[i];
+            maxPos = i;
+          }
+        }
+        let T0 = maxPos;
+        if (!T0) return 0;
+        return sampleRate / T0;
+      }
+      const pitch = autoCorrelate(dataTime, audioCtx.sampleRate) || 0;
+
+      // smoothing of metrics
+      const smoothRms = lerp(lastRms || 0, rms, 0.35);
+      lastRms = smoothRms;
+
+      // construct feature map normalized to 0..1
+      const featureMap = {
+        rms: Math.min(1, smoothRms * 6),                 // scale RMS to ~0..1
+        centroid: Math.min(1, centroid * 1.2),           // freq centroid 0..1
+        zcr: Math.min(1, zcr * 50),                      // scale zcr
+        pitch: Math.min(1000, pitch)                     // raw pitch (Hz) if needed
+      };
+
+      // deliver to component
+      if (comp) comp.setFeatureValues(featureMap);
+
+      // blinking logic: blink when low energy + random timer
+      if (featureMap.rms < 0.02) blinkTimer += 1;
+      else blinkTimer = Math.max(0, blinkTimer - 2);
+
+      if (Math.random() < 0.008 + (featureMap.rms * 0.02)) {
+        // random micro-blink during speech
+        dispatchBlinkOnce();
+      } else if (blinkTimer > 60) {
+        // forced blink when idle
+        dispatchBlinkOnce();
+        blinkTimer = 0;
+      }
+
+      rafId = requestAnimationFrame(audioLoop);
+    }
+
+    function dispatchBlinkOnce() {
+      // قصيرة جداً blink
+      if (comp) {
+        // عينين مع اختلاف بسيط
+        comp.applyMorph && comp.applyMorph("eyeBlinkLeft", 1);
+        comp.applyMorph && comp.applyMorph("eyeBlinkRight", 1);
+        setTimeout(() => {
+          comp.applyMorph && comp.applyMorph("eyeBlinkLeft", 0);
+          comp.applyMorph && comp.applyMorph("eyeBlinkRight", 0);
+        }, 120);
+      }
+    }
+
+    // start loop when audio plays
+    audioEl.addEventListener("play", () => {
+      // resume audio context if suspended
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      if (!rafId) rafId = requestAnimationFrame(audioLoop);
+    });
+
+    audioEl.addEventListener("ended", () => {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      // reset some morphs gently
+      if (comp) {
+        comp.applyMorph && comp.applyMorph("jawOpen", 0);
+        comp.applyMorph && comp.applyMorph("mouthPucker", 0);
+      }
+    });
+  }
+
+  // -------------------------
+  // Public helper: use when message arrives
+  // -------------------------
+  window.playAvatarAudioWithAdvancedLipsync = async function(audioUrl) {
+    // find avatar element (تأكد تغيير الـ selector لو عندك غير)
+    const avatar = document.querySelector("#avatar_ahmed");
+    if (!avatar) {
+      console.warn("Avatar element not found (#avatar_ahmed).");
+      // حاول إنشاء صوت عادي
+      const fallbackAudio = new Audio(audioUrl);
+      fallbackAudio.play().catch(()=>{ /* ignore */ });
+      return;
+    }
+
+    // if there's a currently playing audio, pause it
+    if (window.__ahmedAudioPlaying) {
+      try { window.__ahmedAudioPlaying.pause(); } catch(e){}
+      window.__ahmedAudioPlaying = null;
+    }
+
+    const a = new Audio(audioUrl);
+    window.__ahmedAudioPlaying = a;
+    // attach advanced processor
+    await attachAudioToAvatar(a, avatar);
+    // play
+    a.play().catch(err => console.warn("Can't play avatar audio:", err));
+  };
+
+  // -------------------------
+  // Hook message listener to use new helper
+  // -------------------------
+  window.addEventListener("message", (ev) => {
+    if (!ev.data || ev.data.type !== "ASK_TEACHER") return;
+    const audio = ev.data.audio;
+    if (audio) {
+      // to bypass autoplay restriction, you still need a user gesture once on page.
+      // If audio won't play due to autoplay policy, fall back to showing a press-to-play UI elsewhere.
+      window.playAvatarAudioWithAdvancedLipsync(audio);
+    }
+  }, false);
+
+})();
+</script>
+<script>
+(function() {
+  const avatar = document.querySelector("#avatar_ahmed");
+  if (!avatar) return;
+  const comp = avatar.components["avatar-advanced-lipsync"];
+  if (!comp) return;
+
+  let idleTimer = 0;
+  let idleActive = false;
+  const random = (min, max) => Math.random() * (max - min) + min;
+
+  // 🎞️ جدول حركات واقعية متاحة
+  const idleExpressions = [
+    ["eyeBlinkLeft", "eyeBlinkRight"],
+    ["mouthSmileLeft", "mouthSmileRight", "cheekSquintLeft", "cheekSquintRight"],
+    ["browInnerUp"],
+    ["browOuterUpLeft", "browOuterUpRight"],
+    ["browDownLeft", "browDownRight"],
+    ["eyeLookOutLeft", "eyeLookOutRight"],
+    ["mouthDimpleLeft", "mouthDimpleRight"],
+    ["mouthFrownLeft", "mouthFrownRight"],
+    ["noseSneerLeft", "noseSneerRight"]
+  ];
+
+  function idleLoop() {
+    requestAnimationFrame(idleLoop);
+    const jaw = comp.current["jawOpen"] || 0;
+    if (jaw < 0.05) {
+      idleTimer++;
+      if (idleTimer > 180 && !idleActive) { // بعد 3 ثواني صمت
+        idleActive = true;
+        triggerIdleMotion();
+      }
+    } else {
+      idleTimer = 0;
+      idleActive = false;
+    }
+  }
+
+  function triggerIdleMotion() {
+    const group = idleExpressions[Math.floor(Math.random() * idleExpressions.length)];
+    const intensity = random(0.3, 0.8);
+    const duration = random(800, 1600);
+
+    group.forEach(m => smoothMorph(m, intensity, duration));
+
+    // حركة رأس خفيفة
+    if (Math.random() > 0.7) {
+      const x = random(-2, 2);
+      const y = 20 + random(-4, 4);
+      avatar.setAttribute("rotation", { x, y, z: 0 });
+      setTimeout(() => avatar.setAttribute("rotation", { x: 0, y: 20, z: 0 }), duration + 600);
+    }
+
+    // رجوع تدريجي للوضع الطبيعي
+    setTimeout(() => {
+      group.forEach(m => smoothMorph(m, 0, 800));
+      idleActive = false;
+    }, duration + random(400, 800));
+  }
+
+  function smoothMorph(name, target, duration) {
+    const start = performance.now();
+    const startVal = comp.current[name] || 0;
+    const diff = target - startVal;
+
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const val = startVal + diff * t;
+      comp.applyMorph(name, val);
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  idleLoop();
+})();
+</script>
+<script>
+// 🎭 نظام المزاج (Mood System)
+(function() {
+  const avatar = document.querySelector("#avatar_ahmed");
+  if (!avatar) return;
+  const comp = avatar.components["avatar-advanced-lipsync"];
+  if (!comp) return;
+
+  let currentMood = "neutral"; // الحالة الافتراضية
+
+  // ✅ الحالات والتعابير الخاصة بكل Mood
+  const moods = {
+    neutral: {
+      morphs: {
+        eyeBlinkLeft: [0, 1],
+        eyeBlinkRight: [0, 1],
+        browInnerUp: [0.1, 0.3],
+      },
+      interval: [3000, 6000]
+    },
+    thinking: {
+      morphs: {
+        browInnerUp: [0.4, 0.8],
+        browOuterUpLeft: [0.3, 0.6],
+        browOuterUpRight: [0.3, 0.6],
+        eyeLookUpLeft: [0.1, 0.4],
+        eyeLookUpRight: [0.1, 0.4]
+      },
+      interval: [4000, 7000]
+    },
+    happy: {
+      morphs: {
+        mouthSmileLeft: [0.3, 0.7],
+        mouthSmileRight: [0.3, 0.7],
+        cheekSquintLeft: [0.2, 0.5],
+        cheekSquintRight: [0.2, 0.5],
+      },
+      interval: [2500, 4500]
+    },
+    serious: {
+      morphs: {
+        browDownLeft: [0.3, 0.7],
+        browDownRight: [0.3, 0.7],
+        mouthPressLeft: [0.3, 0.6],
+        mouthPressRight: [0.3, 0.6]
+      },
+      interval: [4000, 8000]
+    },
+    surprised: {
+      morphs: {
+        mouthOpen: [0.3, 0.6],
+        eyeWideLeft: [0.4, 0.8],
+        eyeWideRight: [0.4, 0.8]
+      },
+      interval: [3000, 5000]
+    }
+  };
+
+  // 🎬 تطبيق المزاج الحالي
+  function applyMood() {
+    const data = moods[currentMood];
+    if (!data) return;
+
+    for (const [morph, range] of Object.entries(data.morphs)) {
+      const val = range[0] + Math.random() * (range[1] - range[0]);
+      comp.applyMorph(morph, val);
+      setTimeout(() => comp.applyMorph(morph, 0), 1200 + Math.random() * 800);
+    }
+
+    setTimeout(applyMood, random(data.interval[0], data.interval[1]));
+  }
+
+  // 🔁 مولّد أرقام عشوائية
+  function random(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  // 🚀 يبدأ بعد 3 ثوانٍ من تشغيل الصفحة
+  setTimeout(applyMood, 3000);
+
+  // 🎛️ تغيير الحالة يدويًا (للتجربة)
+  window.setMood = (mood) => {
+    if (moods[mood]) {
+      currentMood = mood;
+      console.log(`🎭 تم تغيير المزاج إلى: ${mood}`);
+    } else {
+      console.warn(`⚠️ لا يوجد مزاج بهذا الاسم: ${mood}`);
+    }
+  };
+})();
+</script>
+<script>
+window.addEventListener('resize', () => {
+  const scene = document.querySelector('a-scene');
+  if (!scene) return;
+  const isMobile = window.innerWidth < 800;
+  scene.style.width = isMobile ? '90vw' : '45vw';
+  scene.style.height = isMobile ? '65vh' : '80vh';
+});
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
