@@ -1274,6 +1274,18 @@ window.addEventListener('message', (event) => {
   }
 });
 </script>
+<script>
+window.addEventListener('message', (event)=>{
+  if(event.data?.type === 'PLAY_SOUND_MANUAL'){
+    const sounds = document.querySelectorAll('audio');
+    sounds.forEach(a=>{
+      a.muted = false;
+      a.currentTime = 0;
+      a.play().catch(err=>console.warn('🎧 الصوت مرفوض إلا بعد تفاعل المستخدم:', err));
+    });
+  }
+});
+</script>
 
 </body>
 </html>
