@@ -140,10 +140,19 @@
         قبل الدخول إلى مشهد إعادة البناء ثلاثي الأبعاد.
       </p>
 
-      <div class="cta" role="region" aria-label="خيارات">
-        <button class="btn" id="btnStart">🔧 ابدأ بناء المسرح الآن</button>
-        <button class="btn secondary" id="btnPreview">معاينة سريعة</button>
-      </div>
+     <div class="cta" role="region" aria-label="خيارات">
+  <button class="btn" id="btnStart">🔧 ابدأ بناء المسرح الآن</button>
+  <button class="btn secondary" id="btnPreview">معاينة سريعة</button>
+  <button class="btn" id="btnNext">النهايــة </button>
+</div>
+
+<script>
+  // عند الضغط على زر "التالي" ينتقل إلى صفحة النهاية
+  document.getElementById("btnNext").addEventListener("click",()=>{
+    window.location.href="https://dns3uae-glitch.github.io/crime-book/end/";
+  });
+</script>
+
 
       <div class="meta" id="meta" style="margin-top:12px; font-size:.98rem; color:#cfe1ff; opacity:.9;">
         انقر للبدء أو انتظر لعرض التمهيد التلقائي.
