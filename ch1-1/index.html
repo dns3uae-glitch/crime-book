@@ -352,14 +352,18 @@ document.getElementById('nextPage').addEventListener('click', ()=> go('https://d
 <!-- 🔹 زر عائم فخم لفتح الكتاب -->
 <button id="openBook" class="floating-btn" title="فتح الكتاب الكامل">📖</button>
 
-<!-- 🔹 نافذة عرض الكتاب -->
-<iframe 
-  id="bookFrame" 
-  src="" 
-  frameborder="0"
-  allow="autoplay; fullscreen"
-  allowtransparency="true">
-</iframe>
+<!-- ✅ نافذة عرض الكتاب الكاملة -->
+<div id="bookOverlay">
+  <iframe 
+    id="bookFrame" 
+    src="" 
+    frameborder="0"
+    allow="autoplay; fullscreen"
+    allowtransparency="true">
+  </iframe>
+  <button id="closeBook">✖</button>
+</div>
+
 
 
 <style>
