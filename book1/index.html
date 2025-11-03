@@ -1268,25 +1268,25 @@ window.addEventListener('resize', () => {
 });
 </script>
 <script>
-window.addEventListener('message', (event) => {
-  if (event.data?.type === 'ALLOW_SOUND') {
-    document.querySelectorAll('audio').forEach(a => a.muted = false);
+// ✅ تفعيل الصوت عند أول تفاعل من المستخدم
+document.addEventListener('click', enableSoundOnce, { once: true });
+document.addEventListener('touchstart', enableSoundOnce, { once: true });
+
+function enableSoundOnce() {
+  const flipS  = document.getElementById('flipS');
+  const wooshS = document.getElementById('wooshS');
+
+  // نحاول تشغيل الصوت مرة لكسر سياسة الحظر
+  try {
+    flipS.muted = false;
+    wooshS.muted = false;
+    flipS.play().then(() => flipS.pause());
+    wooshS.play().then(() => wooshS.pause());
+    console.log('🎧 تم تفعيل الأصوات بنجاح بعد أول تفاعل.');
+  } catch (e) {
+    console.warn('⚠️ فشل التفعيل التلقائي، المستخدم يحتاج يضغط داخل الصفحة.', e);
   }
-});
-</script>
-<script>
-window.addEventListener('message', (event)=>{
-  if(event.data?.type === 'PLAY_AUDIO_FROM_PARENT'){
-    const audios = document.querySelectorAll('audio');
-    audios.forEach(a=>{
-      a.muted = false;
-      a.currentTime = 0;
-      a.play().catch(err=>{
-        console.warn('🎧 لم يتم التشغيل إلا بعد تفاعل داخل الإطار:', err);
-      });
-    });
-  }
-});
+}
 </script>
 
 
