@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🎓 ختام المشروع — Royal CrimeBook AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#FFD54A;
+  --gold-deep:#b78f2a;
+  --bg1:#020615;
+  --bg2:#0b152a;
+  --glass:rgba(255,255,255,0.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  height:100%;overflow:hidden;
+  font-family:"Cairo",system-ui,Segoe UI,Arial,sans-serif;
+  color:var(--gold);
+  background:radial-gradient(1000px 600px at 15% 20%,rgba(255,215,0,.05),transparent 20%),linear-gradient(180deg,var(--bg1),var(--bg2));
+}
+main{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100vh;text-align:center;position:relative;z-index:10;
+}
+main::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at center,rgba(255,215,0,.06),transparent 60%);
+  filter:blur(80px);
+  animation:glow 6s ease-in-out infinite alternate;
+}
+@keyframes glow{
+  from{opacity:.5;transform:scale(1);}
+  to{opacity:.9;transform:scale(1.2);}
+}
+h1{
+  font-size:clamp(2rem,5vw,3rem);
+  text-shadow:0 0 18px rgba(255,215,0,.4);
+  margin-bottom:18px;
+}
+p{
+  color:#dcdcdc;
+  font-size:1.1rem;
+  max-width:700px;
+  margin:auto;
+  line-height:2;
+  text-shadow:0 0 10px rgba(255,255,255,.1);
+}
+.section{
+  background:var(--glass);
+  border:1px solid rgba(255,215,0,.25);
+  border-radius:20px;
+  box-shadow:0 0 30px rgba(10,107,255,.25),inset 0 0 18px rgba(255,215,0,.1);
+  padding:40px;
+  backdrop-filter:blur(8px);
+  animation:fadeIn 1.8s ease;
+}
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(30px);}
+  to{opacity:1;transform:translateY(0);}
+}
+button{
+  margin-top:30px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-deep));
+  color:#000;
+  font-weight:800;
+  padding:12px 28px;
+  font-size:1.1rem;
+  border:none;border-radius:12px;
+  cursor:pointer;
+  box-shadow:0 0 18px rgba(255,215,0,.4);
+  transition:transform .2s ease, box-shadow .3s ease;
+}
+button:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 30px rgba(255,215,0,.7);
+}
+footer{
+  position:fixed;bottom:10px;left:0;width:100%;text-align:center;
+  color:var(--gold);
+  font-size:.95rem;
+  text-shadow:0 0 8px rgba(255,215,0,.3);
+}
+#spark{
+  position:absolute;
+  width:100%;height:100%;
+  pointer-events:none;
+  background:radial-gradient(circle at center,rgba(255,215,0,.05),transparent 60%);
+  animation:spark 8s infinite linear;
+}
+@keyframes spark{
+  0%{background-position:0 0;}
+  100%{background-position:100% 100%;}
+}
+</style>
+</head>
+<body>
+
+<div id="spark"></div>
+
+<main>
+  <div class="section">
+    <h1>🎓 ختام مشروع كتاب مسرح الجريمة التفاعلي </h1>
+    <p>
+      لقد وصلت إلى نهاية الرحلة التعليمية في هذا المشروع الذكي الذي جمع بين
+      <strong>التقنيات المتقدمة</strong>، و<strong>التحقيق الواقعي</strong>،
+      و<strong>الإبداع الأكاديمي</strong>.<br>
+      نشكرك على التزامك، دقتك، وروحك القيادية في التعامل مع الأدلة والمشاهد التفاعلية.
+    </p>
+    <p style="margin-top:20px;color:#FFD54A;font-weight:700;">
+      👮‍♂️ أكاديمية الشارقة للعلوم الشرطية —  نحو مستقبل تعليم تفاعلي تطبيقي .
+    </p>
+    <button onclick="location.href='https://dns3uae-glitch.github.io/crime-book/book/'">🔙 العودة إلى البوابة الرئيسية</button>
+  </div>
+</main>
+
+<footer>© أكاديمية شرطة الشارقة 2025 — Royal CrimeBook AI</footer>
+
+</body>
+</html>
