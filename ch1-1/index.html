@@ -436,26 +436,20 @@ document.getElementById('nextPage').addEventListener('click', ()=> go('https://d
 
 <script>
 const openBtn = document.getElementById('openBook');
-const overlay = document.getElementById('bookOverlay');
-const frame = document.getElementById('bookFrame');
-const closeBtn = document.getElementById('closeBook');
-
 openBtn.addEventListener('click', ()=>{
-  // 🔹 نعرض نافذة الكتاب
-  overlay.classList.add('active');
-  document.body.classList.add('modal-open');
-
-  // 🔹 نفتح صفحة الكتاب داخل الإطار
-  frame.src = 'https://dns3uae-glitch.github.io/crime-book/book1/index.html';
-});
-
-closeBtn.addEventListener('click', ()=>{
-  // 🔹 إغلاق نافذة الكتاب
-  overlay.classList.remove('active');
-  document.body.classList.remove('modal-open');
-  setTimeout(()=>{ frame.src=''; }, 400);
+  const url = 'https://dns3uae-glitch.github.io/crime-book/book1/index.html';
+  const w = Math.round(window.innerWidth * 0.92);
+  const h = Math.round(window.innerHeight * 0.92);
+  const left = Math.round(window.screenX + (window.innerWidth - w) / 2);
+  const top  = Math.round(window.screenY + (window.innerHeight - h) / 2);
+  const popup = window.open(url, 'crimeBookPopup', `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+  if(!popup) alert('المتصفح منع النوافذ المنبثقة — فعّل النوافذ المنبثقة ثم جرّب مجددًا.');
+  else popup.focus();
 });
 </script>
+
+
+
 
 
 
