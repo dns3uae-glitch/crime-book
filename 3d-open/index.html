@@ -552,6 +552,19 @@ input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid
     </div>
   </div>
 </div>
+<script>
+  const taskStartBtn = document.getElementById("taskStart");
+
+  // لما الطالب يضغط "ابدأ المهمة"
+  taskStartBtn.addEventListener("click", () => {
+    // ⏳ هنا يبدأ المشهد (فتح المدينة والانفجارات والرسالة)
+    // بعد ما تبدأ الأحداث بثانيتين مثلاً نعرض الزر
+    setTimeout(() => {
+      window.dispatchEvent(new Event("show-mission-button"));
+    }, 2000); // ⏱️ عدّل الوقت لو تبغاه يظهر بعد أكثر
+  });
+</script>
+
 <!-- 🔊 صوت بداية المهمة -->
 <audio id="missionVoice"
        src="https://dns3uae-glitch.github.io/crime-book/assets/audio/mission_open.mp3"
@@ -2455,6 +2468,54 @@ function addAnimatedModel(url, opts={}){
 
 // مثال اختبار سريع (احذف السطر لو ما تبغاه):
 // addAnimatedModel('https://dns3uae-glitch.github.io/crime-book/assets/3d/man2.glb', {position:{x:0,y:0,z:-3}, scale:0.5});
+</script>
+<!-- 🔙 زر العودة -->
+<button id="btnBack">⮐ العودة</button>
+
+<style>
+  #btnBack {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 30000;
+    background: linear-gradient(90deg, #d4af37, #b78f2a);
+    color: #000;
+    font-weight: 900;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 22px;
+    box-shadow: 0 0 14px rgba(212,175,55,.5);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, filter 0.3s ease;
+    display: none;
+  }
+
+  #btnBack:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 24px rgba(212,175,55,.7);
+    filter: brightness(1.1);
+  }
+</style>
+
+<script>
+  const btnBack = document.getElementById('btnBack');
+
+  // عند الضغط يرجع للمسرح الرئيسي
+  btnBack.addEventListener('click', () => {
+    window.location.href = 'https://dns3uae-glitch.github.io/crime-book/3d-2';
+  });
+
+  // 🧠 ننتظر لحظة رسالة "مرحباً بك عزيزي الطالب الضابط"
+  // إذا عندك كود فعلي يشغلها، اربطه هنا (مثلاً بعد دالة تشغيل الصوت أو عرض النص)
+  // لكن مؤقتاً نربطها بحدث مخصص اسمه "show-mission-button"
+  window.addEventListener('show-mission-button', () => {
+    btnBack.style.display = 'block';
+    btnBack.animate([
+      { opacity: 0, transform: 'scale(0.8)' },
+      { opacity: 1, transform: 'scale(1)' }
+    ], { duration: 600, fill: 'forwards', easing: 'ease-out' });
+  });
 </script>
 
 </body>
