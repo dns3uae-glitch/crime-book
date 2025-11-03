@@ -14,17 +14,70 @@
 <style>
 
 :root { --W:1000px; --H:600px; }
-
-body {
-  margin:0;
-  font-family:"Tajawal",system-ui,Arial;
-  background: transparent; /* ✅ لا خلفية إطلاقًا */
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  overflow:hidden;
+/* ================================
+   👑 الإطار الذهبي والغلاف الخلفي
+   ================================ */
+.royal-stage {
+  position: relative;
+  width: 1180px;
+  height: 700px;
+  background: linear-gradient(180deg, #f7f7f7 0%, #d3d3d4 100%);
+  border-radius: 20px;
+  box-shadow:
+    0 18px 40px rgba(0,0,0,0.25),
+    inset 0 0 60px rgba(255,255,255,0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
+
+.royal-frame {
+  position: relative;
+  padding: 14px;
+  background: linear-gradient(135deg, #cfa94f 0%, #f9e79f 40%, #b28322 100%);
+  border-radius: 14px;
+  box-shadow:
+    0 6px 16px rgba(0,0,0,0.35),
+    inset 0 0 25px rgba(255,255,255,0.45);
+}
+
+.royal-frame::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 10px;
+  background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.45), transparent 55%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.royal-frame > .flip-book {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 35px rgba(0,0,0,0.05),
+    0 12px 28px rgba(0,0,0,0.25);
+  background: #fff;
+}
+
+/* خلفية ناعمة متناسقة مع الإطار الذهبي */
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(
+      circle at center,
+      #ece9e6 0%,
+      #d5d4d0 40%,
+      #c2bebe 80%,
+      #a8a7a5 100%
+  );
+  font-family: "Tajawal", system-ui, sans-serif;
+}
+
 
 /* نحذف الصندوق الخارجي تمامًا */
 .stage {
@@ -108,17 +161,17 @@ button:active { transform:translateY(1px); }
   font-size:13px;
 }
 /* يعطي شعور السمك والانحناء */
-.flip-book::before,
-.flip-book::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  width: 40px;
-  height: 100%;
-  z-index: 0;
+/* 🔸 الفاصل اللاصق بين الصفحتين (من نسيج الكتاب نفسه) */
+
+
+  box-shadow:
+    inset 0 0 14px rgba(0, 0, 0, 0.7),
+    0 0 10px rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  z-index: 5;
 }
+
 
 /* ظل يسار الكتاب */
 .flip-book::before {
@@ -130,13 +183,6 @@ button:active { transform:translateY(1px); }
 }
 
 /* ظل يمين الكتاب */
-.flip-book::after {
-  right: -5px;
-  background: linear-gradient(to left, rgba(0,0,0,0.25), rgba(0,0,0,0));
-  filter: blur(1px);
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
-}
 
 /* تأثير بسيط على الحواف الداخلية للصفحات */
 .page {
@@ -149,11 +195,13 @@ button:active { transform:translateY(1px); }
 }
 /* يجعل النص مندمج في الورقة وليس عائم */
 .page p, .page h1, .page h2, .page h3 {
-  color: #2a2418;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.6),
-               0 0 2px rgba(0,0,0,0.05);
-  mix-blend-mode: multiply;
+  color: #1a1a1a; /* 🔹 أسود واضح لكن أنيق */
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.3),
+    0 0 3px rgba(0,0,0,0.1);
+  mix-blend-mode: normal; /* 🔹 ألغينا الدمج حتى يصير اللون صافي */
 }
+
 /* رقم الصفحة */
 .page::after {
   content: attr(data-page);
@@ -167,6 +215,116 @@ button:active { transform:translateY(1px); }
   opacity: 0.9;
   font-weight: bold;
 }
+/* شاشة رمادية ناعمة + تمركز الكتاب */
+body{
+  margin:0;
+  height:100vh;
+  background: radial-gradient(circle at center, #d4d4d6 0%, #b9b8bb 70%, #a7a6a8 100%);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:"Tajawal",system-ui,Arial;
+}
+
+/* الغلاف اللي يمسك الكتاب */
+.screen-frame{
+  position: relative;
+  width: 1180px;
+  height: 620px;
+  background: linear-gradient(180deg, #f3f3f5 0%, #d2d1d3 100%);
+  border-radius: 22px;
+  box-shadow: 0 14px 35px rgba(0,0,0,0.25);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow: hidden;
+}
+
+/* الكتاب نفسه */
+.book-tilt{
+  position: relative;
+  transform: rotateX(3deg) rotateY(-4deg);
+  transform-origin: center;
+  filter: drop-shadow(0 18px 25px rgba(0,0,0,0.23));
+}
+
+/* نحرص أن الـ flip-book تبقى بنفس مقاسك الحالي */
+.flip-book{
+  width:1000px;   /* نفس اللي عندك */
+  height:600px;
+  background:#fff;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 0 35px rgba(0,0,0,0.08),
+    0 0 10px rgba(0,0,0,0.18);
+  overflow:hidden;
+}
+
+/* الصفحة شكلها أنظف */
+.page{
+  background: #fcfcfd;
+  box-shadow: inset -12px 0 15px rgba(0,0,0,0.03);
+}
+
+/* عنوان ذهبي */
+.page h1, .page h2, .page h3{
+  color:#b58433;
+}
+/* 🔸 خط فاصل خفيف جدًا وظلال جانبية توحي بانحناء داخلي */
+.page:nth-child(even)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px; /* خط رفيع */
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+
+  /* ✨ الخط نفسه خفيف جدًا */
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+
+  /* 🌗 الظلال الجانبية لإظهار الانحناء */
+  box-shadow:
+    -10px 0 20px rgba(0, 0, 0, 0.45), /* ظل يسار */
+    10px 0 20px rgba(0, 0, 0, 0.45),  /* ظل يمين */
+    inset 2px 0 6px rgba(0, 0, 0, 0.25); /* عمق داخلي ناعم */
+
+  border-radius: 2px;
+  opacity: 0.9;
+  mix-blend-mode: multiply;
+}
+/* 👑 الإطار الملكي بزوايا مستقيمة */
+.flip-book {
+  position: relative;
+  border: 8px solid transparent;
+  border-image: linear-gradient(135deg, #B8AE95 0%, #B8AE95 40%, #B8AE95 100%) 1;
+  border-radius: 0; /* 🔹 الزوايا الآن مستقيمة */
+  box-shadow:
+    inset 0 0 12px rgba(255, 240, 180, 0.4),
+    inset 0 0 40px rgba(255, 255, 255, 0.08),
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    0 0 80px rgba(212,175,55,0.25);
+  background: linear-gradient(145deg, #faf9f6, #f2f0e9);
+  overflow: hidden;
+}
+
+/* ✨ اللمعة الجانبية الخفيفة */
+.flip-book::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  background: radial-gradient(circle at 25% 20%, rgba(255,255,255,0.25), transparent 50%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
 
 </style>
 </head>
@@ -178,7 +336,9 @@ button:active { transform:translateY(1px); }
 <audio id="wooshS" preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/02/audio_35f03c2e7b.mp3"></audio>
 
 <!-- فقط الكتاب -->
-<div class="flip-book" id="book">
+<div class="royal-stage">
+  <div class="royal-frame">
+    <div class="flip-book" id="book">
 
 
 <div class="page" data-density="soft">
@@ -1289,6 +1449,22 @@ function enableSoundOnce() {
 }
 </script>
 
+<script>
+// ✅ استقبال أمر تفعيل الصوت من الصفحة الأم
+window.addEventListener('message', (event) => {
+  if (event.data?.type === 'ENABLE_BOOK_SOUND') {
+    document.querySelectorAll('audio').forEach(a => {
+      try {
+        a.muted = false;
+        a.play().then(() => a.pause()).catch(()=>{});
+      } catch(e) {
+        console.warn('⚠️ الصوت يحتاج تفاعل المستخدم:', e);
+      }
+    });
+    console.log('🎧 تم تفعيل الصوت داخل الكتاب بنجاح');
+  }
+});
+</script>
 
 </body>
 </html>
