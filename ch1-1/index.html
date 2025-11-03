@@ -441,25 +441,23 @@ const frame = document.getElementById('bookFrame');
 const closeBtn = document.getElementById('closeBook');
 
 openBtn.addEventListener('click', ()=>{
+  // 🔹 نعرض نافذة الكتاب
   overlay.classList.add('active');
   document.body.classList.add('modal-open');
-  frame.src = 'https://dns3uae-glitch.github.io/crime-book/book1/index.html';
 
-  // 🎧 بعد تحميل الإطار نرسل رسالة لتشغيل الصوت داخله
-  frame.addEventListener('load', ()=>{
-    // ننتظر شوي للتأكد أن الصفحة الداخلية جاهزة
-    setTimeout(()=>{
-      frame.contentWindow?.postMessage({ type: 'PLAY_AUDIO_FROM_PARENT' }, '*');
-    }, 1000);
-  }, { once:true });
+  // 🔹 نفتح صفحة الكتاب داخل الإطار
+  frame.src = 'https://dns3uae-glitch.github.io/crime-book/book1/index.html';
 });
 
 closeBtn.addEventListener('click', ()=>{
+  // 🔹 إغلاق نافذة الكتاب
   overlay.classList.remove('active');
   document.body.classList.remove('modal-open');
   setTimeout(()=>{ frame.src=''; }, 400);
 });
 </script>
+
+
 
 
 </body>
