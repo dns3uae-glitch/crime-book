@@ -445,12 +445,13 @@ openBtn.addEventListener('click', ()=>{
   document.body.classList.add('modal-open');
   frame.src = 'https://dns3uae-glitch.github.io/crime-book/book1/index.html';
 
-  // 🟡 بعد تحميل الكتاب نرسل له أمر تشغيل الصوت
-  frame.addEventListener('load', () => {
+  // 🎧 بعد تحميل الإطار نرسل رسالة لتشغيل الصوت داخله
+  frame.addEventListener('load', ()=>{
+    // ننتظر شوي للتأكد أن الصفحة الداخلية جاهزة
     setTimeout(()=>{
-      frame.contentWindow?.postMessage({ type: 'PLAY_SOUND_MANUAL' }, '*');
+      frame.contentWindow?.postMessage({ type: 'PLAY_AUDIO_FROM_PARENT' }, '*');
     }, 1000);
-  }, { once: true });
+  }, { once:true });
 });
 
 closeBtn.addEventListener('click', ()=>{
@@ -459,6 +460,7 @@ closeBtn.addEventListener('click', ()=>{
   setTimeout(()=>{ frame.src=''; }, 400);
 });
 </script>
+
 
 </body>
 </html>
