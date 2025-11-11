@@ -3015,10 +3015,9 @@ function addAnimatedModel(url, opts={}){
     const ny = (r === 0) ? 0 : (dy / dist) * r;
 
     knob.style.transform = `translate(${nx}px,${ny}px)`;
-    // 🧮 نحولها -1..1 (عكس الاتجاه الأفقي)
-joyVec.x = -nx / maxR;   // ← عكس حركة اليمين/اليسار
-joyVec.y = ny / maxR;    // فوق/تحت تبقى كما هي
-
+// 🧮 نحولها -1..1 (نخليها طبيعية)
+joyVec.x = nx / maxR;    // ← بدون سالب
+joyVec.y = ny / maxR;    // نفس الشي
   }
 
   // حلقة التحريك
@@ -3028,8 +3027,8 @@ joyVec.y = ny / maxR;    // فوق/تحت تبقى كما هي
       if (sel) {
         const step = (typeof window.stepVal === "function") ? window.stepVal() : 0.1;
 
-const moveX = -joyVec.x * step; // ← عكس الاتجاه ليصبح السحب لليمين = تحرك يمين
-        const moveY = -joyVec.y * step;     // عكسناه لأن السحب لتحت = نزول
+const moveX = -joyVec.x * step; // ← نخلي العكس هنا بس عشان السحب يمين = تحريك يمين
+const moveY = -joyVec.y * step; // السحب لتحت = ينزل
 
         if (typeof window.tweenDeltaPosition === "function") {
           window.tweenDeltaPosition(sel, moveX, moveY, 0, 80);
