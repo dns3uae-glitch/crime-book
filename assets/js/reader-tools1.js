@@ -1148,81 +1148,82 @@ askBtn.addEventListener("click", () => {
 });
 
 
-/* -------------------- المساعد الذكي (بطاقات سؤال + جواب) -------------------- */
+/* -------------------- 🧠 المساعد الذكي (محسّن الأداء + تحميل تدريجي) -------------------- */
 const aiBtn = document.getElementById('rt-ai-ask');
 const aiInput = document.getElementById('rt-ai-input');
 const aiResponse = document.getElementById('rt-ai-response');
 
-aiBtn.addEventListener('click', sendAIMessage);
-aiInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
+// ✅ توحيد وظيفة الاتصال بالخادم لتقليل التكرار
+async function gptAsk(text) {
+  const res = await fetch("https://gpt-proxy-server-xs5u.onrender.com/ask", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question: text })
+  });
+  const data = await res.json();
+  return data.reply || "⚠️ لم يصل رد من المساعد.";
+}
+
+// ✅ واجهة الإدخال (زر أو Enter)
+aiBtn.addEventListener("click", handleAIQuery);
+aiInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
-    sendAIMessage();
+    handleAIQuery();
   }
 });
 
-async function sendAIMessage() {
-  const text = (aiInput.value || STATE.selectedText || '').trim();
-  if (!text) {
-    toast('اكتب سؤالك أو ظلّل فقرة ليشرحها المساعد');
-    return;
-  }
+// ✅ الوظيفة الأساسية لإرسال السؤال
+async function handleAIQuery() {
+  const text = (aiInput.value || STATE.selectedText || "").trim();
+  if (!text) return toast("🧠 اكتب سؤالك أولاً");
 
-  const card = appendAIMessagePair(text);
+  const msg = appendAIMessage(text);
+  aiInput.value = "";
+
+  // إظهار مؤشر تحميل
+  msg.answer.textContent = "🤖 جاري التفكير...";
+  msg.card.classList.add("loading");
 
   try {
-    const response = await fetch("https://gpt-proxy-server-xs5u.onrender.com/ask", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: text })
-    });
-
-    const data = await response.json();
-    updateLastAIMessage(data.reply || '⚠️ لم يصل رد من المساعد.');
-  } catch (error) {
-    updateLastAIMessage("⚠️ حدث خطأ أثناء الاتصال بالمساعد.");
+    const reply = await gptAsk(text);
+    await streamText(msg.answer, reply); // 🟡 عرض تدريجي
+  } catch (err) {
+    msg.answer.textContent = "⚠️ حدث خطأ أثناء الاتصال بالخادم.";
+  } finally {
+    msg.card.classList.remove("loading");
   }
-
-  aiInput.value = '';
 }
 
-function appendAIMessagePair(questionText) {
-  const container = document.getElementById('rt-ai-response');
+// ✅ دالة عرض تدريجي للنص مثل ChatGPT الحقيقي
+async function streamText(target, text) {
+  target.textContent = "";
+  for (const word of text.split(" ")) {
+    target.textContent += word + " ";
+    await new Promise(r => setTimeout(r, 20)); // سرعة الكتابة
+  }
+}
 
-  const card = document.createElement('div');
-  card.className = 'chat-message-pair';
-  card.style.margin = '10px 0';
-  card.style.padding = '10px';
-  card.style.borderRadius = '10px';
-  card.style.background = '#1e1e1e';
-  card.style.color = '#FFD54A';
-  card.style.border = '1px solid rgba(0,120,255,.3)';
-  card.dataset.pending = 'true';
-
-  card.innerHTML = `
-    <div style="font-weight:bold; color:#8fd3ff; margin-bottom:6px">🧠 سؤالك:</div>
-    <div class="ai-question" style="margin-bottom:8px; color:#e1f5fe">${questionText}</div>
-    <div class="ai-answer">🤖 ...جاري التفكير</div>
+// ✅ إنشاء البطاقة
+function appendAIMessage(questionText) {
+  const container = document.getElementById("rt-ai-response");
+  const card = document.createElement("div");
+  card.className = "chat-message-pair";
+  card.style.cssText = `
+    margin: 10px 0; padding: 10px; border-radius: 10px;
+    background: #1e1e1e; color: #FFD54A; border: 1px solid rgba(0,120,255,.3);
   `;
 
-  if (container.firstChild) {
-    container.insertBefore(card, container.firstChild);
-  } else {
-    container.appendChild(card);
-  }
+  card.innerHTML = `
+    <div style="font-weight:bold; color:#8fd3ff; margin-bottom:6px;">🧠 سؤالك:</div>
+    <div class="ai-question" style="margin-bottom:8px; color:#e1f5fe;">${questionText}</div>
+    <div class="ai-answer" style="color:#FFD54A;">🤖 ...جاري التفكير</div>
+  `;
 
-  return card;
+  container.prepend(card);
+  return { card, answer: card.querySelector(".ai-answer") };
 }
 
-function updateLastAIMessage(content) {
-  const container = document.getElementById('rt-ai-response');
-  const pendingCard = container.querySelector('.chat-message-pair[data-pending="true"]');
-  if (pendingCard) {
-    const answerDiv = pendingCard.querySelector('.ai-answer');
-    answerDiv.textContent = content;
-    pendingCard.removeAttribute('data-pending');
-  }
-}
 
 
 function appendAIMessagePair(questionText) {
