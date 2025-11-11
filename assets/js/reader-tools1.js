@@ -142,6 +142,13 @@
   color: #000;
   font-weight: bold;
 }
+.chat-msg {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+.chat-msg b {
+  color: #8fd3ff;
+}
 
   /* التظليلات */
   mark.rt-hl{ padding:0 .15em; border-radius:.2em; box-shadow:inset 0 -2px 0 rgba(0,0,0,.15); cursor:pointer }
@@ -230,6 +237,7 @@ document.head.appendChild(style);
   <button class="rt-tab" data-tab="quiz">🧩 اختبر نفسك</button>
    <button class="rt-tab" data-tab="ask">👮‍♂️ اسأل المحاضر</button>
   <button class="rt-tab" data-tab="ai">🤖 Ask AI</button>
+<button class="rt-tab-btn" data-tab="chat">💬 ChatGPT</button>
   <button class="rt-tab" data-tab="notebook">📔 NotebookLM</button>
 </div>
 
@@ -365,6 +373,29 @@ document.head.appendChild(style);
       style="min-height:60px;background:#1e1e1e;color:#FFD54A;padding:10px;border-radius:8px;">
       ✨ سيتم عرض الإجابة هنا أو سيجيبك أحمد صوتيًا...
     </div>
+  </div>
+</section>
+
+<!-- ✅ ChatGPT - خدمة المحادثة الذكية -->
+<section class="rt-sec" id="rt-sec-chat">
+  <div class="rt-title">💬 ChatGPT - المحادثة الذكية</div>
+
+  <div class="rt-row">
+    <div id="chatBox" class="chat-box" 
+         style="min-height:180px; max-height:300px; overflow-y:auto;
+                background:#1e1e1e; color:#FFD54A; padding:10px;
+                border-radius:8px; text-align:right;">
+      ✨ ابدأ محادثتك هنا مع الذكاء الاصطناعي...
+    </div>
+  </div>
+
+  <div class="rt-row" style="margin-top:10px;">
+    <textarea id="chatInput" class="rt-input" rows="2"
+              placeholder="اكتب سؤالك هنا..."></textarea>
+  </div>
+
+  <div class="rt-row">
+    <button class="rt-btn gold" id="chatSend">إرسال</button>
   </div>
 </section>
 
@@ -1147,6 +1178,55 @@ askBtn.addEventListener("click", () => {
   console.log("✅ تم إرسال الجواب إلى أحمد:", best.id);
 });
 
+/* -------------------- 💬 ChatGPT Helper -------------------- */
+const chatInput = document.getElementById("chatInput");
+const chatSend = document.getElementById("chatSend");
+const chatBox = document.getElementById("chatBox");
+
+if (chatSend) {
+  chatSend.addEventListener("click", sendChat);
+  chatInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendChat();
+    }
+  });
+}
+
+async function sendChat() {
+  const text = chatInput.value.trim();
+  if (!text) return;
+  appendChat("👨‍🎓 أنت", text);
+  chatInput.value = "";
+
+  appendChat("🤖 ChatGPT", "جاري التفكير...");
+
+  try {
+    const res = await fetch("https://gpt-proxy-server-xs5u.onrender.com/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: text })
+    });
+    const data = await res.json();
+    const answer = data.reply || "⚠️ لم يصل رد من النظام.";
+    updateLastChat(answer);
+  } catch {
+    updateLastChat("⚠️ حدث خطأ أثناء الاتصال بالمساعد.");
+  }
+}
+
+function appendChat(sender, msg) {
+  const div = document.createElement("div");
+  div.className = "chat-msg";
+  div.innerHTML = `<b>${sender}:</b> ${msg}`;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function updateLastChat(text) {
+  const msgs = chatBox.querySelectorAll(".chat-msg");
+  if (msgs.length > 0) msgs[msgs.length - 1].innerHTML = `<b>🤖 ChatGPT:</b> ${text}`;
+}
 
 /* -------------------- 🧠 المساعد الذكي (محسّن الأداء + تحميل تدريجي) -------------------- */
 const aiBtn = document.getElementById('rt-ai-ask');
