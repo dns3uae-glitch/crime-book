@@ -1,13 +1,13 @@
-<!DOCTYPE html>
-
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"/>
+<meta charset="UTF-8" />
 <title>AI Crime Scene – Elite Investigator Edition (v9-fixed+smooth)</title>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- A-Frame -->
 <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<!-- ✅ مهم: مكوّن animation-mixer من aframe-extras -->
+<script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
 <style>
-
 :root{--gold:#d4af37;--dark:#0a0c0f;--glass:#0f1317cc}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--dark);font-family:"Tajawal",system-ui,Arial;color:#fff}
@@ -33,28 +33,6 @@ a-scene{width:100%;height:100vh;z-index:1}
 #time{color:#d4af37}
 #status{color:#cfe1ff}
 #score{color:#39d98a}
-/* صندوق الأدلة المركزي */
-#evidenceBox{
-  position:fixed;
-  top:80px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:12001;
-  min-width:320px;
-  max-width:720px;
-  background:linear-gradient(180deg, rgba(10,12,15,0.85), rgba(8,10,12,0.7));
-  border:1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-  padding:12px 14px;
-  border-radius:12px;
-  text-align:center;
-  pointer-events:none; /* يجعل المشهد للتفاعل بينما يُعرض الصندوق */
-  color:#eaf0ff;
-  font-weight:800;
-}
-#evidenceTimer{ font-size:20px; color:#ffd96a; margin-bottom:8px; letter-spacing:1px;}
-#evidenceList{ font-size:15px; color:#d6e6ff; opacity:0.95;}
 
 /* طبقة الواجهة */
 #uiLayer{position:fixed;inset:0;z-index:10000;pointer-events:none}
@@ -75,317 +53,1638 @@ input,select,textarea{width:100%;padding:8px;border-radius:10px;border:1px solid
 .card:hover{box-shadow:0 0 20px rgba(212,175,55,.28)}
 .card .btn{width:100%;margin-top:6px}
 
-/* أزرار التحكم العامة */
-.dynamic-controls, .camera-controls {
+/* 🟡 مستطيل التحكّم العام */
+.dynamic-controls {
   position: fixed;
-  bottom: 20px;
-  background: rgba(0,0,0,0.6);
-  border-radius: 12px;
-  padding: 10px;
+  left: 20px;
+  bottom: 140px;
+  width: 420px;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  z-index: 10020;
+  /* 🚫 حذف الإطار والخلفية والظل */
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+
+/* 🎯 الدائرة */
+.obj-joystick {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(10,12,15,0.7);
+  border: 3px solid rgba(212,175,55,0.18);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+  touch-action: none;
+  margin-bottom: 6px; /* 🔹 مسافة صغيرة قبل المستطيل */
+}
+
+.obj-joy-knob {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, #d4af37);
+  transform: translate(0,0);
+  transition: transform 0.05s linear;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* 🔘 المستطيل السفلي */
+.controls-bar {
+  width: 100%;
+  background: rgba(4,5,7,0.45);
+  border: 2px solid rgba(212,175,55,0.15);
+  border-radius: 14px;
+  padding: 10px 8px;
+  display: flex;
+  justify-content: space-between; /* 🔹 توزيع الأزرار بالتساوي */
   gap: 6px;
-  z-index: 10002;
 }
 
-/* أدوات العناصر تبقى يسار الشاشة */
-.dynamic-controls { left: 20px; flex-direction: column; }
-
-/* أدوات الكاميرا في المنتصف أسفل */
-.camera-controls { left: 50%; transform: translateX(-50%); flex-direction: row; justify-content: center; }
-
-.dynamic-controls .row, .camera-controls .row { display: flex; gap: 6px; justify-content: center; }
-
-.ctrl-btn, .cam-btn {
-  background: var(--gold); border: none; border-radius: 8px; font-size: 18px; font-weight: bold; color: #000;
-  width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 6px rgba(212,175,55,.4); cursor: pointer; transition: transform 0.2s ease;
+/* الأزرار */
+.ctrl-btn {
+  flex: 1;
+  max-width: 45px;
+  height: 38px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212,175,55,0.4);
+  color: #FFD54A;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease;
 }
-.ctrl-btn:hover, .cam-btn:hover { transform: scale(1.1); }
 
+.ctrl-btn:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
 /* نافذة إدخال الملاحظة */
-#noteModal { position: fixed; inset: 0; display: none; place-items: center; z-index: 12001; background: radial-gradient(600px 320px at 50% 40%, rgba(212,175,55,.12), rgba(0,0,0,.65)); }
-.noteCard { width: min(92vw,520px); background: #0b0f13f2; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 14px; box-shadow: 0 0 22px rgba(212,175,55,.35); }
+#noteModal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  z-index: 12001;
+  background: radial-gradient(600px 320px at 50% 40%, rgba(212,175,55,.12), rgba(0,0,0,.65));
+}
+.noteCard {
+  width: min(92vw,520px);
+  background: #0b0f13f2;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 0 22px rgba(212,175,55,.35);
+}
 .noteCard .row { justify-content: flex-end; }
 
 /* Toast */
-.toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.75); padding: 10px 14px; border-radius: 10px; display: none; z-index: 11000; }
+.toast {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,.75);
+  padding: 10px 14px;
+  border-radius: 10px;
+  display: none;
+  z-index: 11000;
+}
 
-/* ميديا واستايلات أخرى محذوفة للاختصار — (هي نفسها من ملفك) */
+/* === التحسينات الجديدة للجوال والاتجاه === */
 @media (max-width: 768px) {
-  .dynamic-controls, .camera-controls { position: fixed; left: 50%; transform: translateX(-50%); background: rgba(10, 12, 15, 0.85); padding: 8px 10px; border-radius: 14px; box-shadow: 0 0 10px rgba(212,175,55,0.25); }
-  .dynamic-controls { bottom: 110px; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 8px; width: 92vw; }
-  .camera-controls { bottom: 20px; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 8px; width: 92vw; }
-  .ctrl-btn, .cam-btn { width: 38px; height: 38px; font-size: 16px; }
+  .dynamic-controls, .camera-controls {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 12, 15, 0.85);
+    padding: 8px 10px;
+    border-radius: 14px;
+    box-shadow: 0 0 10px rgba(212,175,55,0.25);
+  }
+
+  .dynamic-controls {
+    bottom: 110px; /* فوق الكاميرا */
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    width: 92vw;
+  }
+
+  .camera-controls {
+    bottom: 20px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    width: 92vw;
+  }
+
+  .ctrl-btn, .cam-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
 }
-@media (min-width: 769px) and (max-width: 1200px) { .dynamic-controls, .camera-controls { transform: none; left: auto; right: 20px; background: rgba(10,12,15,0.65); } }
+
+/* 💻 للشاشات المتوسطة */
+@media (min-width: 769px) and (max-width: 1200px) {
+  .dynamic-controls, .camera-controls {
+    transform: none;
+    left: auto;
+    right: 20px;
+    background: rgba(10,12,15,0.65);
+  }
+}
+
+@keyframes fadeInReport {
+  0% { opacity: 0; transform: scale(0.9); }
+  60% { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+#overlayEnd {
+  animation: fadeInReport 0.9s ease forwards;
+  opacity: 0;
+}
+
+
+/* 📱 الوضع العمودي (Portrait) */
 @media (orientation: portrait) {
-  .dynamic-controls { bottom: 110px; left: 50%; transform: translateX(-50%); flex-direction: row; flex-wrap: wrap; justify-content: center; width: 92vw; }
-  .camera-controls { bottom: 20px; left: 50%; transform: translateX(-50%); flex-direction: row; flex-wrap: wrap; justify-content: center; width: 92vw; }
-  #sidebar { width: 100%; height: 50%; bottom: 0; right: 0; border-left: none; border-top: 1px solid rgba(255,255,255,.12); border-radius: 12px 12px 0 0; }
+  .dynamic-controls {
+    bottom: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 92vw;
+  }
+  .camera-controls {
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 92vw;
+  }
+  #sidebar {
+    width: 100%;
+    height: 50%;
+    bottom: 0;
+    right: 0;
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px 12px 0 0;
+  }
 }
+
+/* 💻 الوضع الأفقي (Landscape) */
 @media (orientation: landscape) {
-  .dynamic-controls { bottom: 20px; left: 20px; flex-direction: column; gap: 6px; transform: none; }
-  .camera-controls { right: 20px; left: auto; bottom: 20px; transform: none; flex-direction: column; gap: 6px; }
-  #sidebar { width: 380px; height: 100%; top: 0; right: 0; border-left: 1px solid rgba(255,255,255,.12); border-top: none; border-radius: 0; }
+  .dynamic-controls {
+    bottom: 20px;
+    left: 20px;
+    flex-direction: column;
+    gap: 6px;
+    transform: none;
+  }
+  .camera-controls {
+    right: 20px;
+    left: auto;
+    bottom: 20px;
+    transform: none;
+    flex-direction: column;
+    gap: 6px;
+  }
+  #sidebar {
+    width: 380px;
+    height: 100%;
+    top: 0;
+    right: 0;
+    border-left: 1px solid rgba(255,255,255,.12);
+    border-top: none;
+    border-radius: 0;
+  }
 }
-@media (max-width: 600px) { .ctrl-btn, .cam-btn { width: 34px; height: 34px; font-size: 15px; } }
+
+/* fallback للهواتف الصغيرة جدًا */
+@media (max-width: 600px) {
+  .ctrl-btn, .cam-btn { width: 34px; height: 34px; font-size: 15px; }
+}
+/* 🎯 تحسين خاص للوضع الأفقي في الجوال لتجنب تغطية المشهد */
 @media (orientation: landscape) and (max-height: 500px) {
-  .dynamic-controls, .camera-controls { background: rgba(10,10,10,0.45); padding: 6px; border-radius: 10px; flex-direction: row; flex-wrap: nowrap; justify-content: center; gap: 4px; width: 96vw; left: 50%; transform: translateX(-50%); }
-  .dynamic-controls { bottom: 60px; }
-  .camera-controls { bottom: 10px; }
-  .ctrl-btn, .cam-btn { width: 32px; height: 32px; font-size: 14px; opacity: 0.85; }
-  #sidebar { width: 320px; background: rgba(15,15,15,0.9); }
+  .dynamic-controls, .camera-controls {
+    background: rgba(10,10,10,0.45); /* شفافية أكبر */
+    padding: 6px;
+    border-radius: 10px;
+    flex-direction: row; /* صف واحد فقط */
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 4px;
+    width: 96vw;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .dynamic-controls {
+    bottom: 60px; /* ترفعها قليلاً فوق أزرار الكاميرا */
+  }
+
+  .camera-controls {
+    bottom: 10px; /* تبقى في الأسفل */
+  }
+
+  .ctrl-btn, .cam-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    opacity: 0.85;
+  }
+
+  #sidebar {
+    width: 320px;
+    background: rgba(15,15,15,0.9);
+  }
 }
+/* 📱 ضمان ثبات الأزرار في المنتصف للجوال حتى عند الوضع الأفقي */
 @media (max-width: 900px) and (orientation: landscape) {
-  .camera-controls, .dynamic-controls { position: fixed; left: 50%; transform: translateX(-50%); width: auto; max-width: 90vw; flex-wrap: wrap; justify-content: center; }
-  .dynamic-controls { bottom: 100px; }
-  .camera-controls { bottom: 20px; }
-  .ctrl-btn, .cam-btn { width: 36px; height: 36px; font-size: 15px; }
+  .camera-controls,
+  .dynamic-controls {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%); /* تبقى في المنتصف */
+    width: auto;
+    max-width: 90vw;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .dynamic-controls {
+    bottom: 100px; /* فوق أزرار الكاميرا */
+  }
+
+  .camera-controls {
+    bottom: 20px; /* تبقى في الأسفل */
+  }
+
+  .ctrl-btn, .cam-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
 }
-/* ✨ الباب والانفجار */
-#doorOverlay { position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;z-index:20000;overflow:hidden; }
-#leftDoor, #rightDoor { position: absolute; top: 0; width: 50%; height: 100%;
-  background: linear-gradient(135deg, #b8b8b8 0%, #c7a06a 35%, #5f5f5f 100%); background-blend-mode: overlay;
-  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 6px),
+/* ✨ الباب البرمجي والانفجار */
+#doorOverlay {
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:#000;z-index:20000;overflow:hidden;
+}
+#leftDoor, #rightDoor {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+
+  /* ✨ مزيج من السلفر والنحاس */
+  background: linear-gradient(135deg, #b8b8b8 0%, #c7a06a 35%, #5f5f5f 100%);
+  background-blend-mode: overlay;
+
+  /* ✨ تأثير الصفائح المعدنية */
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,0.05) 0px,
+      rgba(255,255,255,0.05) 2px,
+      transparent 2px,
+      transparent 6px
+    ),
     linear-gradient(160deg, #d0b07833 0%, #333 100%);
-  border: 1px solid rgba(200,160,90,0.35); border-left: none; border-right: none;
-  box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.1), inset 0 0 25px rgba(0,0,0,0.6), 0 0 50px rgba(0,0,0,0.8);
-  filter: brightness(0.95) contrast(1.1); transition: transform 2.8s ease-in-out, filter 0.3s ease;
+
+  border: 1px solid rgba(200,160,90,0.35);
+  border-left: none;
+  border-right: none;
+
+  /* ✨ ظلال واقعية */
+  box-shadow:
+    inset 0 0 60px rgba(255, 255, 255, 0.1),
+    inset 0 0 25px rgba(0,0,0,0.6),
+    0 0 50px rgba(0,0,0,0.8);
+
+  filter: brightness(0.95) contrast(1.1);
+  transition: transform 2.8s ease-in-out, filter 0.3s ease;
 }
-#leftDoor:hover, #rightDoor:hover { filter: brightness(1.15) saturate(1.2); box-shadow: inset 0 0 80px rgba(255,220,150,0.25), 0 0 40px rgba(198,169,116,0.4); }
-#leftDoor::after, #rightDoor::after { content: ""; position: absolute; top: 50%; width: 18px; height: 80px; border-radius: 6px;
-  background: linear-gradient(180deg, #c6a974 0%, #7b5f2a 100%); box-shadow: inset 0 0 6px rgba(255,255,255,0.4), 0 0 10px rgba(0,0,0,0.6); }
-#leftDoor::after { right: 25px; transform: translateY(-50%); }
-#rightDoor::after { left: 25px; transform: translateY(-50%); }
-#leftDoor{left:0;transform-origin:left center;} #rightDoor{right:0;transform-origin:right center;}
+
+/* ✨ عند مرور الفأرة يعطي لمعة معدنية */
+#leftDoor:hover, #rightDoor:hover {
+  filter: brightness(1.15) saturate(1.2);
+  box-shadow:
+    inset 0 0 80px rgba(255,220,150,0.25),
+    0 0 40px rgba(198,169,116,0.4);
+}
+
+/* ✊ مقابض بسيطة بلون نحاسي في المنتصف */
+#leftDoor::after, #rightDoor::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 80px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #c6a974 0%, #7b5f2a 100%);
+  box-shadow:
+    inset 0 0 6px rgba(255,255,255,0.4),
+    0 0 10px rgba(0,0,0,0.6);
+}
+
+#leftDoor::after {
+  right: 25px;
+  transform: translateY(-50%);
+}
+#rightDoor::after {
+  left: 25px;
+  transform: translateY(-50%);
+}
+
+#leftDoor{left:0;transform-origin:left center;}
+#rightDoor{right:0;transform-origin:right center;}
 #fxSmoke,#fxParticles{position:absolute;inset:0;pointer-events:none;}
-.smoke{ position:absolute;width:240px;height:240px;border-radius:50%; background:radial-gradient(circle,rgba(80,160,255,.6),rgba(20,50,100,.2),transparent); opacity:0;mix-blend-mode:screen;filter:blur(5px) }
-.particle{ position:absolute;width:6px;height:6px;border-radius:50%; background:radial-gradient(circle,rgba(180,240,255,.9),rgba(0,100,200,.3),transparent); opacity:0; }
-@keyframes shake{0%,100%{transform:translate(0,0);}20%{transform:translate(-6px,-4px);}40%{transform:translate(6px,8px);}60%{transform:translate(-5px,4px);}80%{transform:translate(8px,-6px);}}
+.smoke{
+  position:absolute;width:240px;height:240px;border-radius:50%;
+  background:radial-gradient(circle,rgba(80,160,255,.6),rgba(20,50,100,.2),transparent);
+  opacity:0;mix-blend-mode:screen;filter:blur(5px)
+}
+.particle{
+  position:absolute;width:6px;height:6px;border-radius:50%;
+  background:radial-gradient(circle,rgba(180,240,255,.9),rgba(0,100,200,.3),transparent);
+  opacity:0;
+}
+@keyframes shake {
+  0%,100% {transform:translate(0,0);}
+  20% {transform:translate(-6px,-4px);}
+  40% {transform:translate(6px,8px);}
+  60% {transform:translate(-5px,4px);}
+  80% {transform:translate(8px,-6px);}
+}
 .shake {animation:shake 0.4s ease-in-out 4;}
-#btnDoorStart{ position: absolute; bottom: 140px; left: 50%; transform: translateX(-50%); z-index: 100; padding: 16px 46px;
-  border: 2px solid rgba(212,175,55,0.25); border-radius: 14px; cursor: pointer; font-size: 22px; font-weight: 800; color: #d4af37;
-  background: linear-gradient(180deg, #0a0c0f 0%, #162233 100%); box-shadow: inset 0 0 18px rgba(255,255,255,0.05), 0 0 22px rgba(13,27,42,0.6);
-  transition: transform 0.2s ease, box-shadow 0.3s ease, filter 0.3s ease; animation: deepGlow 2s infinite ease-in-out; }
-#btnDoorStart:hover{ transform: translateX(-50%) scale(1.08); box-shadow: inset 0 0 25px rgba(212,175,55,0.25), 0 0 30px rgba(212,175,55,0.3); filter: brightness(1.15); }
-@keyframes deepGlow{0%,100%{ box-shadow: 0 0 18px rgba(212,175,55,0.18);}50%{ box-shadow: 0 0 28px rgba(212,175,55,0.38);} }
+
+
+/* 🎨 زر البداية بلون واجهة المسرح */
+#btnDoorStart {
+  position: absolute;         /* 🔹 خله مطلق داخل الباب */
+  bottom: 140px;              /* 🔹 نزّل الزر تحت القبضات */
+  left: 50%;                  /* 🔹 وسط الصفحة */
+  transform: translateX(-50%);/* 🔹 لتوسيط الزر تماماً */
+
+  z-index: 100;
+  padding: 16px 46px;
+  border: 2px solid rgba(212,175,55,0.25);
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: 800;
+  color: #d4af37;
+  background: linear-gradient(180deg, #0a0c0f 0%, #162233 100%);
+  box-shadow: inset 0 0 18px rgba(255,255,255,0.05),
+              0 0 22px rgba(13,27,42,0.6);
+  transition: transform 0.2s ease, box-shadow 0.3s ease, filter 0.3s ease;
+  animation: deepGlow 2s infinite ease-in-out;
+}
+
+#btnDoorStart:hover {
+  transform: translateX(-50%) scale(1.08); /* 👈 موازنة اللمعة مع الموقع */
+  box-shadow: inset 0 0 25px rgba(212,175,55,0.25),
+              0 0 30px rgba(212,175,55,0.3);
+  filter: brightness(1.15);
+}
+
+@keyframes deepGlow {
+  0%, 100% { box-shadow: 0 0 18px rgba(212,175,55,0.18); }
+  50% { box-shadow: 0 0 28px rgba(212,175,55,0.38); }
+}
+
+/* 🔒 إخفاء زر VR تماماً في جميع نسخ A-Frame */
+a-enter-vr-button,
+a-enter-ar-button,
+button.a-enter-vr-button,
+button.a-enter-ar {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
 </style>
 </head>
 <body>
-<!-- إعدادات تفاعل الأبواب -->
+
+<!-- ✅ شاشة البداية الجديدة (نظيفة بدون التكرار) -->
 <style>
 #doorOverlay * { pointer-events: auto; }
 #leftDoor, #rightDoor, #fxSmoke, #fxParticles { pointer-events: none; }
 </style>
+
 <div id="doorOverlay">
-<div id="leftDoor"></div>
-<div id="rightDoor"></div>
-<div id="fxSmoke"></div>
-<div id="fxParticles"></div>
-<button id="btnDoorStart" onclick="startTimer()">ابدأ</button>
-<audio id="doorSfx" preload="auto">
-<source src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_81c287eb63.mp3?filename=gate-heavy-openclose-wav-103288.mp3" type="audio/mpeg"/>
-</audio>
+  <div id="leftDoor"></div>
+  <div id="rightDoor"></div>
+  <div id="fxSmoke"></div>
+  <div id="fxParticles"></div>
+  <button id="btnDoorStart">ابدأ</button>
+  <audio id="doorSfx" preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_81c287eb63.mp3?filename=gate-heavy-openclose-wav-103288.mp3" type="audio/mpeg">
+  </audio>
 </div>
-<!-- بلاغ غرفة العمليات -->
-<div id="reportOverlay" style="display:none;position:fixed;inset:0;z-index:26000;align-items:center;justify-content:center;">
-<div style="
-    position:absolute;inset:0;
-    background:
-      radial-gradient(circle at 60% 30%, rgba(40,50,70,.25) 0%, rgba(10,10,20,.9) 80%),
-      linear-gradient(to bottom, rgba(0,0,0,.65), rgba(0,0,0,.85)),
-      url('http://dns3uae-glitch.github.io/crime-book/assets/A_digital_photograph_captures_a_nighttime_cityscap.png') center/cover no-repeat;
-    filter: blur(1.8px) brightness(.45) saturate(1.2);
-    opacity:.98;">
+
+
+
+<!-- 💎 Royal Mission Interface (ثابتة تمامًا بدون أي حركة جانبية) -->
+<style>
+  @keyframes toastFadeInStable {
+    0%   {opacity:0; transform:translate(-50%,-50%) scale(0.9);}
+    60%  {opacity:1; transform:translate(-50%,-50%) scale(1.05);}
+    100% {opacity:1; transform:translate(-50%,-50%) scale(1);}
+  }
+  @keyframes glowPulse {
+    0%,100% {box-shadow:0 0 18px rgba(212,175,55,.25);}
+    50%     {box-shadow:0 0 36px rgba(212,175,55,.55);}
+  }
+
+  #taskToastBtn{
+    position:fixed;top:50%;left:50%;
+    transform:translate(-50%,-50%) scale(1);
+    width:min(84vw,520px);
+    z-index:25000;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:16px 20px;border-radius:16px;
+    background:radial-gradient(circle at 20% 30%,rgba(212,175,55,.15),rgba(10,12,15,.85));
+    border:1px solid rgba(212,175,55,.25);color:var(--gold);
+    font-weight:800;cursor:pointer;backdrop-filter:blur(6px);
+    opacity:0;visibility:hidden;will-change:opacity,transform;
+  }
+  #taskToastBtn.show{
+    visibility:visible;
+    animation:toastFadeInStable 1s ease forwards, glowPulse 3s ease-in-out infinite;
+  }
+  #taskToastBtn .badge{
+    width:48px;height:48px;border-radius:10px;
+    background:linear-gradient(180deg,var(--gold),#b78f2a);
+    display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:20px;
+    box-shadow:0 0 15px rgba(212,175,55,.3);
+  }
+  #taskToastBtn .txt{flex:1;text-align:right;padding-right:12px;font-size:15px;color:#fff;}
+
+  /* المودال */
+  #taskModal{
+    position:fixed;inset:0;display:none;z-index:26000;
+    align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 40%,rgba(0,0,0,.35),rgba(0,0,0,.75));
+    backdrop-filter:blur(8px);
+  }
+  .taskCard{
+    width:min(92vw,700px);border-radius:18px;padding:24px;
+    background:linear-gradient(180deg,rgba(12,17,20,0.85),rgba(20,25,30,0.95));
+    border:1px solid rgba(212,175,55,.25);
+    box-shadow:0 0 40px rgba(212,175,55,.25), inset 0 0 12px rgba(255,255,255,.05);
+    color:#f3f6ff;direction:rtl;text-align:right;
+    animation:toastFadeInStable 0.9s ease;
+  }
+  .taskCard h3{
+    color:var(--gold);font-weight:900;margin:0 0 12px 0;
+    text-shadow:0 0 10px rgba(212,175,55,.4);
+  }
+  .taskCard ol{margin:10px 0;padding-right:22px;line-height:1.7;}
+  .taskFooter{display:flex;justify-content:flex-end;margin-top:16px;gap:10px;}
+  .taskBtnPrimary{background:linear-gradient(90deg,var(--gold),#b78f2a);color:#000;border:none;
+    padding:10px 20px;border-radius:10px;font-weight:900;cursor:pointer;box-shadow:0 0 15px rgba(212,175,55,.4);}
+  .taskBtnGhost{background:transparent;color:#ddd;border:1px solid rgba(255,255,255,.2);
+    padding:10px 16px;border-radius:10px;cursor:pointer;}
+</style>
+
+<div id="taskToastBtn">
+  <div class="txt">
+    <div style="font-weight:900;font-size:15px">مرحباً بك عزيزي الطالب الضابط</div>
+    <div style="font-weight:600;font-size:13px;color:#d6e0f8">اضغط هنا لبدء مهمة التحقيق — جريمة قتل</div>
+  </div>
+  <div class="badge">⚠️</div>
 </div>
-<div id="reportCard" style="
-    position:relative;width:min(92vw,780px);
-    background:linear-gradient(180deg,#071017,#0b1116);
-    border:1px solid rgba(212,175,55,.14);
-    border-radius:14px;padding:18px 18px 14px;
-    box-shadow:0 10px 40px rgba(0,0,0,.7); color:#e9edf5; direction:rtl; text-align:right;">
-<div style="color:#d4af37;font-weight:900;font-size:20px;margin-bottom:8px">بلاغ عاجل — غرفة عمليات شرطة الشارقة</div>
-<div id="reportText" style="line-height:1.9;font-size:17px;max-height:260px;overflow:auto;margin-bottom:12px">
-      التاريخ: الأحد، الساعة 21:35 مساءً — الموقع: منطقة المجاز 3، برج الأفق — الطابق 12، الشقة 1205.<br/>
-      وردت مكالمة من حارس المبنى عن سماع أصوات شجار تلتها صرخة ودوي سقوط جسم ثقيل. منذ 10 دقائق انقطعت الأصوات ولا يوجد رد عند طرق الباب. لوحظت بقع داكنة قرب العتبة مع آثار سحب نحو الداخل. يُطلب الانتقال فورًا، تأمين المدخل، وتقييم الوضع الأوّلي.
+
+<div id="taskModal">
+  <div class="taskCard">
+    <h3>عزيز الطالب الضابط</h3>
+    <p>
+      أمامك <strong>3 دقائق</strong> لفحص مسرح الجريمة وجمع الأدلة وهي:
+    </p>
+    <ol>
+      <li>الجثة</li>
+      <li>المسدس</li>
+      <li>الهاتف</li>
+      <li>بقعة الدم</li>
+      <li>الكوب المكسور</li>
+      <li>آثار القدم</li>
+    </ol>
+    <div class="taskFooter">
+      <button id="taskDismiss" class="taskBtnGhost">إغلاق</button>
+      <button id="taskStart" class="taskBtnPrimary">ابدأ المهمة</button>
     </div>
-<div style="display:flex;gap:8px;justify-content:flex-end">
-<button id="reportStartMission" style="background:transparent;border:1px solid rgba(255,255,255,.22);color:#d6dbe3;border-radius:10px;padding:10px 14px;cursor:pointer">ابدأ المهمة</button>
+  </div>
 </div>
-<audio id="reportAudio" preload="auto">
-<source src="http://dns3uae-glitch.github.io/crime-book/assets/audio/CrimeScene_Closed_Majaz_Report.mp3" type="audio/mpeg"/>
-</audio>
-</div>
-</div>
-<!-- مشهد الغوص داخل المدينة -->
-<div id="cityDive" style="display:none;position:fixed;inset:0;z-index:25000;overflow:hidden;">
-<img id="cityImg" src="http://dns3uae-glitch.github.io/crime-book/assets/A_digital_photograph_captures_a_nighttime_cityscap.png" style="width:100%;height:100%;object-fit:cover;transform-origin:center;transition:transform 5s ease-in-out;filter:brightness(0.9);"/>
-</div>
+<script>
+  const taskStartBtn = document.getElementById("taskStart");
+
+  // لما الطالب يضغط "ابدأ المهمة"
+  taskStartBtn.addEventListener("click", () => {
+    // ⏳ هنا يبدأ المشهد (فتح المدينة والانفجارات والرسالة)
+    // بعد ما تبدأ الأحداث بثانيتين مثلاً نعرض الزر
+    setTimeout(() => {
+      window.dispatchEvent(new Event("show-mission-button"));
+    }, 2000); // ⏱️ عدّل الوقت لو تبغاه يظهر بعد أكثر
+  });
+</script>
+
+
+
+<script>
+
+// ✅ تفعيل animation-mixer تلقائيًا لأي نموذج GLB يحتوي على حركة
+function enableAnimationMixer(el, url){
+  el.addEventListener('model-loaded', ()=>{
+    el.setAttribute('animation-mixer', 'clip:*; loop:repeat; timeScale:1');
+    console.log('🎬 Animation enabled for', url);
+  });
+}
+
+(function(){
+  const toast = document.getElementById('taskToastBtn');
+  const modal = document.getElementById('taskModal');
+  const startBtn = document.getElementById('taskStart');
+  const dismissBtn = document.getElementById('taskDismiss');
+  const doorOverlay = document.getElementById('doorOverlay');
+
+  /* ✅ إمساك عنصر الصوت */
+  const missionVoice = document.getElementById('missionVoice');
+// -------- إعداد متغيرات الحالة العامة ----------
+window.missionStarted = false; // يصبح true بعد الضغط على "ابدأ المهمة"
+window.ahmedActive = false;    // يمنع تفعيل رسالة أحمد قبل الأوان
+// ---------------------------------------------
+
+  /* ✅ تشغيل الصوت عند فتح الرسالة */
+  function playMissionVoice(){
+    if(!missionVoice) return;
+    try{
+      missionVoice.currentTime = 0;
+      missionVoice.volume = 0.9;   // قلّلها لو تحب (0..1)
+      missionVoice.play().catch(()=>{});
+    }catch(e){}
+  }
+
+  /* ✅ إيقاف الصوت عند بدء المهمة/الإغلاق */
+  function stopMissionVoice(){
+    if(!missionVoice) return;
+    try{ missionVoice.pause(); }catch(e){}
+  }
+
+// 🎬 مراقبة اختفاء شاشة البداية
+const observer = new MutationObserver(() => {
+  const doorGone = (doorOverlay.style.display === 'none' || doorOverlay.style.opacity === '0');
+  if (doorGone) {
+    observer.disconnect();
+    // ✅ بعد 3 ثواني من اختفاء الشاشة، تظهر رسالة البداية
+
+  }
+});
+observer.observe(doorOverlay, { attributes:true, attributeFilter:['style'] });
+
+
+  // 🟡 فتح الرسالة + تشغيل الصوت
+  toast.addEventListener('click', ()=> {
+    toast.classList.remove('show');
+    modal.style.display='flex';
+    playMissionVoice();  // << تشغيل الصوت هنا
+  });
+
+// 🟢 ابدأ المهمة — إغلاق الرسالة + إيقاف الصوت
+startBtn.addEventListener('click', ()=> {
+  modal.style.display='none';
+  stopMissionVoice();  // << إيقاف الصوت هنا
+  const statusEl = document.getElementById('status');
+  if(statusEl) statusEl.textContent='🚨 المهمة: التحقيق في جريمة القتل';
+  // ✅ إظهار "الأدلة المجمعة" داخل شريط الـ HUD
+  const collectedHUD = document.getElementById('collected');
+  if (collectedHUD) {
+    collectedHUD.style.display = 'inline';
+    const itemsEl = document.getElementById('collectedItems');
+    if (itemsEl) itemsEl.textContent = 'لا يوجد';
+  }
+
+  // ✅ المهمة بدأت الآن
+  window.missionStarted = true;
+// 🚀 بدء العد التنازلي تلقائياً عند بدء المهمة
+startCountdown(180);
+  // ✅ إظهار شريط الأدلة بعد البدء
+  const evidenceUI = document.getElementById('evidenceList');
+  if(evidenceUI) evidenceUI.style.display = 'block';
+
+  // ✅ تحديث قائمة الأدلة المجمعة
+  const collected = document.getElementById('collectedList');
+  if(collected) {
+    collected.style.display = 'block';
+    collected.innerHTML = '<div class="colTitle">🧠 الأدلة المجمعة:</div><div class="items">لا يوجد</div>';
+  }
+});
+
+
+// ✅ تشغيل العداد التنازلي بعد الضغط على "ابدأ المهمة"
+window.countdownInterval = null;
+const overlayEnd = document.createElement('div');
+overlayEnd.style.cssText = `
+  position:fixed;inset:0;z-index:999999;
+
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.85);color:#FFD54A;
+  font-family:'Tajawal';font-size:26px;font-weight:800;text-align:center;
+`;
+document.body.appendChild(overlayEnd);
+
+function startCountdown(seconds = 180) {
+  const timeEl = document.getElementById('time');
+  clearInterval(countdownInterval);
+
+  countdownInterval = setInterval(() => {
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    timeEl.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+    seconds--;
+
+    if (seconds < 0) {
+      clearInterval(countdownInterval);
+      endMission();
+    }
+  }, 1000);
+}
+
+function endMission(success = false) {
+  clearInterval(window.countdownInterval); // ⏹️ تأكد من توقف الوقت
+
+  const itemsEl = document.getElementById('collectedItems');
+  const scoreEl = document.getElementById('score');
+  const statusEl = document.getElementById('status');
+
+  const collectedText = itemsEl ? itemsEl.textContent.trim() : '';
+  const required = ['بقعة دم', 'مسدس', 'جثة', 'آثار قدم', 'كؤوس مكسورة', 'هاتف'];
+  const collected = collectedText.split('،').map(s => s.trim()).filter(Boolean);
+  const missing = required.filter(item => !collected.includes(item));
+
+  overlayEnd.style.display = 'flex';
+overlayEnd.style.animation = "fadeInReport 0.9s ease forwards";
+overlayEnd.style.opacity = "0";
+  overlayEnd.style.background = 'radial-gradient(circle at 50% 40%, rgba(0,0,0,0.9), rgba(10,10,10,0.96))';
+  overlayEnd.style.flexDirection = 'column';
+  overlayEnd.style.alignItems = 'center';
+  overlayEnd.style.justifyContent = 'center';
+
+  // 🟡 إعداد النقاط التفصيلية
+  let total = 0;
+  let reportHTML = `
+  <div style="background:rgba(255,255,255,0.05);padding:20px 30px;border-radius:16px;
+              border:1px solid rgba(212,175,55,0.25);box-shadow:0 0 25px rgba(212,175,55,0.2);">
+  <table style="margin:auto;border-collapse:collapse;font-size:20px;min-width:300px">
+  <tr style="color:#FFD54A;text-shadow:0 0 8px rgba(255,215,0,0.3);font-size:22px">
+    <th style="padding:10px 22px;border-bottom:2px solid rgba(255,215,0,0.3)">الدليل</th>
+    <th style="padding:10px 22px;border-bottom:2px solid rgba(255,215,0,0.3)">النقاط</th>
+  </tr>`;
+
+  required.forEach(item => {
+    const found = collected.includes(item);
+    const color = found ? '#39d98a' : '#ff5555';
+    const points = found ? 10 : 0;
+    total += points;
+    reportHTML += `
+      <tr style="color:${color}">
+        <td style="padding:6px 18px;border-bottom:1px solid rgba(255,255,255,0.1);">${item}</td>
+        <td style="padding:6px 18px;text-align:center;">${points}</td>
+      </tr>`;
+  });
+
+  reportHTML += `
+    <tr style="color:#FFD54A;font-weight:900;font-size:22px;">
+      <td style="padding:8px 18px;border-top:2px solid rgba(255,255,255,0.3)">الإجمالي</td>
+      <td style="padding:8px 18px;text-align:center;border-top:2px solid rgba(255,255,255,0.3)">
+        ${total} / 60
+      </td>
+    </tr>
+  </table></div>`;
+
+  // 🔘 زر إعادة المحاولة (نفس الموجود عندك تقريبًا)
+const retryButton = `
+  <button id="retryBtn"
+    style="background:linear-gradient(90deg,#FFD54A,#b78f2a);color:#000;
+           padding:12px 34px;border:none;border-radius:12px;
+           font-size:18px;font-weight:800;cursor:pointer;
+           box-shadow:0 0 20px rgba(212,175,55,.4);margin-left:12px;">
+    🔁 إعادة المحاولة
+  </button>`;
+
+// 🔙 زر العودة للرابط
+const backButton = `
+  <button id="backBtn"
+    style="background:transparent;border:2px solid rgba(255,255,255,0.12);color:#FFD54A;
+           padding:10px 26px;border-radius:12px;font-size:18px;font-weight:800;cursor:pointer;
+           box-shadow:0 0 12px rgba(0,0,0,0.4);">
+    ⬅️ العودة
+  </button>`;
+
+
+  // 🟢 المحتوى النهائي
+  const title = success && missing.length === 0
+    ? `<h2 style="color:#39d98a;text-shadow:0 0 10px #39d98a;">🎉 أحسنت!</h2>
+       <p style="color:#fff;">لقد تم اختيار جميع الأدلة بنجاح.</p>`
+    : `<h2 style="color:#FFD54A;text-shadow:0 0 10px #FFD54A;">انتهى الوقت ⏱</h2>
+       <p style="color:#ff7777;">الأدلة الناقصة: ${missing.join('، ') || '—'}</p>`;
+
+  overlayEnd.innerHTML = `
+    <div style="text-align:center;">
+      ${title}
+      ${reportHTML}
+     <div style="margin-top:18px;display:flex;gap:10px;justify-content:center;">
+      ${retryButton}
+      ${backButton}
+    </div>
+    </div>`;
+
+    // 🔁 زر إعادة المحاولة
+  const btnRetry = document.getElementById('retryBtn');
+  if (btnRetry) {
+    btnRetry.addEventListener('click', () => {
+      overlayEnd.style.display = 'none';
+      if (scoreEl) scoreEl.textContent = '0';
+      if (statusEl) statusEl.textContent = '🔄 تمت إعادة المهمة';
+      if (itemsEl) itemsEl.textContent = 'لا يوجد';
+      window.missionStarted = true;
+      startCountdown(180);
+    });
+  }
+
+  // 🔙 زر العودة إلى صفحة أخرى
+  const btnBack = document.getElementById('backBtn');
+  if (btnBack) {
+    btnBack.addEventListener('click', () => {
+      // افتح الصفحة في نفس النافذة
+      window.location.href = 'https://dns3uae-glitch.github.io/crime-book/3d-2/';
+      // أو لو تبيه في تبويب جديد استخدم السطر التالي بدل السابق:
+      // window.open('https://dns3uae-glitch.github.io/crime-book/3d-2/', '_blank');
+    });
+  }
+
+  // 🟢 إجبار التقرير على الظهور في المنتصف وفوق كل شيء
+  overlayEnd.style.zIndex = "999999";
+  overlayEnd.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  overlayEnd.focus();
+}
+
+// ✅ مهم جداً: نجعل الدالة متاحة لباقي السكربتات
+window.endMission = endMission;
+
+
+
+
+
+
+
+
+  // ⚪ إغلاق الرسالة — إيقاف الصوت
+  dismissBtn.addEventListener('click', ()=> {
+    modal.style.display='none';
+    stopMissionVoice();  // << إيقاف الصوت هنا
+  });
+})();
+</script>
+
 <!-- HUD -->
-<!-- ===== واجهة جمع الأدلة المركزية (موجودة فوق، في منتصف الشاشة) ===== -->
-<div id="evidenceCenter" style="position:fixed;left:50%;top:10%;transform:translateX(-50%);z-index:12000;pointer-events:auto;display:flex;justify-content:center;align-items:center;">
-<div id="evidenceCenterBox" style="backdrop-filter: blur(6px); background: linear-gradient(180deg, rgba(10,10,10,0.6), rgba(8,8,10,0.4)); border:1px solid rgba(255,255,255,0.06); padding:12px 18px; border-radius:12px; min-width:360px; text-align:center;">
-<div style="display:flex;align-items:center;justify-content:center;gap:12px">
-<div style="font-weight:900;color:var(--gold);font-size:18px">⏳ العد التنازلي</div>
-<div id="evidenceCenterTime" style="font-weight:900;font-size:18px;color:#fff">03:00</div>
+<!-- 🎯 شريط الحالة العلوي (HUD) -->
+<div id="hud">
+  ⏱ <span id="time">--:--</span> |
+  <span id="status">جاهز</span> |
+  🧮 <span id="score">0</span> |
+  <span id="collected" style="display:none; color:#FFD54A; font-weight:600;">
+    🧠 الأدلة المجمعة: <span id="collectedItems">لا يوجد</span>
+  </span>
 </div>
-<div id="evidenceCenterList" style="margin-top:9px; max-height:120px; overflow:auto; text-align:right; direction:rtl;"></div>
-</div>
-</div>
-<!-- المودال الزجاجي النهائي عند انتهاء الوقت -->
-<div id="finalGlassModal" style="display:none; position:fixed; inset:0; z-index:26000; align-items:center; justify-content:center; pointer-events:auto;">
-<div style="position:absolute; inset:0; background: rgba(7,9,12,0.7); backdrop-filter: blur(6px);"></div>
-<div id="finalGlassCard" style="position:relative; width:min(92vw,760px); background: linear-gradient(180deg, rgba(10,10,12,0.92), rgba(6,6,8,0.95)); border-radius:14px; padding:20px; color:#e9edf5; border:1px solid rgba(212,175,55,0.08); box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-<div style="font-size:20px;color:var(--gold);font-weight:900">تقرير الأدلة — المهمة انتهت</div>
-<button id="finalCloseBtn" style="background:transparent;border:1px solid rgba(255,255,255,0.12);padding:6px 10px;border-radius:8px;cursor:pointer;color:#fff">اغلاق</button>
-</div>
-<div id="finalReportDetails" style="line-height:1.8; font-size:16px; max-height:360px; overflow:auto;"></div>
-</div>
-</div>
+
+
+<script>
+AFRAME.registerComponent('collect-evidence', {
+  init: function () {
+    const el = this.el;
+
+    // helpers لتغيير لون النموذج (gltf أو mesh)
+    const traverseSetColor = (obj, colorHex) => {
+      obj.traverse(node => {
+        if (node.isMesh && node.material) {
+          if (!node.userData._origMaterial) {
+            node.userData._origMaterial = {};
+            if (node.material.color) node.userData._origMaterial.color = node.material.color.clone();
+            if (node.material.emissive) node.userData._origMaterial.emissive = node.material.emissive.clone();
+          }
+          try {
+            if (node.material.color) node.material.color.set(colorHex);
+            if (node.material.emissive) node.material.emissive.set(colorHex);
+            node.material.needsUpdate = true;
+          } catch (e) {}
+        }
+      });
+    };
+
+    const restoreOriginalColor = (obj) => {
+      obj.traverse(node => {
+        if (node.isMesh && node.material && node.userData._origMaterial) {
+          try {
+            if (node.material.color && node.userData._origMaterial.color)
+              node.material.color.copy(node.userData._origMaterial.color);
+            if (node.material.emissive && node.userData._origMaterial.emissive)
+              node.material.emissive.copy(node.userData._origMaterial.emissive);
+            node.material.needsUpdate = true;
+          } catch (e) {}
+        }
+      });
+    };
+
+    // لتغيّر لون الـ a-plane أو أي عنصر مباشراً عبر setAttribute
+    const setFlatColor = (element, color) => {
+      try {
+        element.setAttribute('material', `color: ${color};`);
+      } catch (e) {}
+    };
+
+    // 🎯 تحديد اسم الدليل حسب الـ id
+    const getLabelFromId = (id) => {
+      if (!id) return '';
+      const sid = id.toLowerCase();
+
+      if (sid.includes('gun')) return 'مسدس';
+      if (sid.includes('corpse')) return 'جثة';
+      if (sid.includes('foot') || sid.includes('f.png') || sid.includes('اثار') || sid.includes('اثر')) return 'آثار قدم';
+      if (sid.includes('blood') || sid.includes('دم')) return 'بقعة دم';
+      if (sid.includes('broken') || sid.includes('cup') || sid.includes('glass')) return 'كؤوس مكسورة';
+      if (sid.includes('mobile') || sid.includes('phone')) return 'هاتف';
+
+      return 'دليل';
+    };
+
+    // تأكد أن الـ model محمّل قبل التفاعل (للـ gltf)
+    const ensureModelReady = (callback) => {
+      if (el.getObject3D('mesh')) return callback();
+      el.addEventListener('model-loaded', () => callback(), { once: true });
+    };
+
+    el.addEventListener('click', () => {
+      if (typeof window.missionStarted !== 'undefined' && !window.missionStarted) return;
+
+      const id = el.getAttribute('id') || '';
+      const label = getLabelFromId(id);
+
+      const scoreEl = document.getElementById('score');
+      const itemsEl = document.getElementById('collectedItems');
+      const statusEl = document.getElementById('status');
+      let currentScore = parseInt(scoreEl?.textContent) || 0;
+      let items = itemsEl?.textContent.split('،').map(s => s.trim()).filter(Boolean) || [];
+
+      const already = el.dataset.collected === 'true';
+
+      // ⚡️ تطبيق التلوين الأخضر عند الجمع
+      const applyVisualSelected = (selected) => {
+        if (el.tagName && el.tagName.toLowerCase() === 'a-plane') {
+          if (selected) setFlatColor(el, '#39d98a');
+          else setFlatColor(el, '#ffffff');
+          return;
+        }
+
+        const mesh = el.getObject3D('mesh');
+        if (mesh) {
+          if (selected) traverseSetColor(mesh, '#39d98a');
+          else restoreOriginalColor(mesh);
+          return;
+        }
+
+        ensureModelReady(() => {
+          const loadedMesh = el.getObject3D('mesh');
+          if (loadedMesh) {
+            if (selected) traverseSetColor(loadedMesh, '#39d98a');
+            else restoreOriginalColor(loadedMesh);
+          }
+        });
+      };
+
+      // 🔁 تبديل حالة الجمع/الإلغاء
+      if (already) {
+        el.dataset.collected = 'false';
+        currentScore = Math.max(0, currentScore - 10);
+        scoreEl.textContent = currentScore;
+        items = items.filter(item => item !== label);
+        itemsEl.textContent = items.length ? items.join('، ') : 'لا يوجد';
+        statusEl.textContent = `❌ تم إلغاء دليل: ${label} (-10 نقاط)`;
+        applyVisualSelected(false);
+      } else {
+        el.dataset.collected = 'true';
+        currentScore += 10;
+        scoreEl.textContent = currentScore;
+
+        if (!itemsEl || itemsEl.textContent.trim() === '' || itemsEl.textContent.includes('لا يوجد')) {
+          itemsEl.textContent = label;
+        } else {
+          itemsEl.textContent += `، ${label}`;
+        }
+
+        statusEl.textContent = `🧠 تم جمع دليل: ${label} (+10 نقاط)`;
+        applyVisualSelected(true);
+// ✅ تحقق إذا تم جمع كل الأدلة المطلوبة
+const required = ['بقعة دم', 'مسدس', 'جثة', 'آثار قدم', 'كؤوس مكسورة', 'هاتف'];
+const collectedNow = itemsEl.textContent.split('،').map(s => s.trim()).filter(Boolean);
+const allCollected = required.every(item => collectedNow.includes(item));
+
+if (allCollected) {
+  // ⏹️ أوقف العدّ فورًا
+  clearInterval(window.countdownInterval);
+
+  // 🕓 انتظر ثانية واحدة لتجربة ناعمة ثم انتقل للتقرير
+  setTimeout(() => {
+    endMission(true); // 🎯 افتح صفحة التقرير
+
+    // 🎵 مؤثر صوتي اختياري
+    const sfx = new Audio("https://cdn.pixabay.com/download/audio/2022/03/15/audio_2b9b701f28.mp3?filename=success-1-6297.mp3");
+    sfx.volume = 0.6;
+    sfx.play().catch(()=>{});
+  }, 1000);
+}
+
+
+
+      }
+    });
+  }
+});
+</script>
+
 <!-- المشهد -->
-<a-scene embedded="" renderer="antialias:true; colorManagement:true" touch-action="pan-y">
-<a-entity id="rig" movement-controls="fly:false; speed:0.2" position="0 0.7 5.5" rotation="0 0 0" smooth-collision="room:#room;
-    marginFront:0.55; marginBack:0.45;
-    marginLeft:0.5; marginRight:0.5;
-    minY:0.6; maxY:2.8">
-<a-entity camera="" id="cam" look-controls="" wasd-controls="acceleration:30"></a-entity>
+<a-scene 
+  embedded
+  renderer="antialias:true; colorManagement:true"
+  touch-action="pan-y"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false">
+<!-- 🏠 الغرفة ثلاثية الأبعاد الجديدة -->
+<a-entity id="crimeRoom" 
+          gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/room66.glb)" 
+          position="0 0 0"
+          shadow="receive:true">
 </a-entity>
-<a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/room66.glb)" id="room" position="0 0 0" shadow="receive:true" visible="false"></a-entity>
-<a-entity class="clickable" gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/blood.glb)" id="ev_4_blood" position="2.7 -0.03 -3.1" rotation="0 90 0" scale="0.10254404522189213 0.10254404522189213 0.10254404522189213" shadow="receive:true; cast:true"></a-entity>
+
 <a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/broken_chair.glb)" id="custom_2_broken_chair" position="5.0 0 -2.65" rotation="0 -105 0" scale="1.113960206249105 1.113960206249105 1.113960206249105" shadow="receive:true; cast:true"></a-entity>
-<a-entity class="clickable" gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/broken_glass_cups.glb)" id="custom_3_broken_cup" position="4.45 0 -2.7" rotation="0 0 0" scale="1.569226594089098 1.569226594089098 1.569226594089098" shadow="receive:true; cast:true"></a-entity>
-<a-entity class="clickable" gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/mobile_phone.glb)" id="custom_4_mobile" position="0.65 0 -2.8" rotation="-90 6 -6" scale="2.2353661105660914 2.2353661105660914 2.2353661105660914" shadow="receive:true; cast:true"></a-entity>
 <a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/small_table.glb)" id="custom_5_small_table" position="4.7 0 -3.4" rotation="0 0 0" scale="0.0016665891364265834 0.0016665891364265834 0.0016665891364265834" shadow="receive:true; cast:true"></a-entity>
 <a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/lamp_27.glb)" id="custom_7_lamp" position="-0.55 4.2 0.95" rotation="0 0 0" scale="1.209230746879588 1.209230746879588 1.209230746879588" shadow="receive:true; cast:true"></a-entity>
 <a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/old_cabinet.glb)" id="custom_8_old_cabinet" position="-4.3 0.6 -4.45" rotation="0 12 0" scale="1.0928584753134105 1.0928584753134105 1.0928584753134105" shadow="receive:true; cast:true"></a-entity>
 <a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/old_double_bed.glb)" id="custom_9_old_bed" position="0.05 0 -5.0" rotation="0 0 0" scale="0.010165990208361732 0.010165990208361732 0.010165990208361732" shadow="receive:true; cast:true"></a-entity>
 <a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/plant_pot.glb)" id="custom_10_vase" position="-4.75 0 -3.25" rotation="0 0 0" scale="1.7136295377455988 1.7136295377455988 1.7136295377455988" shadow="receive:true; cast:true"></a-entity>
 <a-entity gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/window__wodden_4_mb.glb)" id="custom_11_window" position="5.75 -0.1 0.05" rotation="0 -90 0" scale="2.715339009539666 2.715339009539666 2.715339009539666" shadow="receive:true; cast:true"></a-entity>
-<a-entity class="clickable" gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/cadaver.glb)" id="custom_12_corpse" position="2.8 0.15 -2.55" rotation="0 0 0" scale="0.7300307961477923 0.7300307961477923 0.7300307961477923" shadow="receive:true; cast:true"></a-entity>
-<a-entity class="clickable" gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/gun1.glb)" id="custom_13_gun" position="-7.6 0 4.75" rotation="-82.5 -1.5 0" scale="0.2472377118304502 0.2472377118304502 0.2472377118304502" shadow="receive:true; cast:true"></a-entity>
-<a-entity light="type:ambient; intensity:0.55"></a-entity>
-<a-entity cursor="rayOrigin:mouse" id="ray" raycaster="objects:.clickable,.placed,.noteMarker"></a-entity>
+
+
+<script>
+  // حضّر قائمة Mesh خاصة بالمدينة لاستخدامها في الراي كاست (الأرض/المباني فقط)
+  window.CITY_GROUND = [];
+  const city = document.getElementById('crimeRoom');
+  city.addEventListener('model-loaded', (e)=>{
+    const root = e.detail.model || city.getObject3D('mesh');
+    window.CITY_GROUND = [];
+    if (root) {
+      root.traverse(n => { if (n.isMesh && n.visible !== false) window.CITY_GROUND.push(n); });
+    }
+    console.log('✅ CITY_GROUND ready:', window.CITY_GROUND.length, 'meshes');
+  });
+</script>
+
+<script>
+document.querySelectorAll('[gltf-model]').forEach(ent=>{
+  const url = ent.getAttribute('gltf-model');
+  if(url) enableAnimationMixer(ent, url);
+});
+</script>
+
+
+<!-- أثر قدم يحسب +10 ويظهر في الأدلة المجمعة -->
+<a-entity
+  id="ev_foot_1"
+  class="clickable"
+  collect-evidence
+  evidence-select
+  position="-3.78 0.05 1.57"
+  rotation="270 137 0"
+  scale="2.38 2.38 2.38">
+  <a-plane
+    src="https://dns3uae-glitch.github.io/crime-book/assets/f.png"
+    transparent="true"
+    material="shader: standard; opacity: 1; roughness: 1; metalness: 0;">
+  </a-plane>
+</a-entity>
+<a-entity
+  class="clickable"
+  collect-evidence
+  gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/blood.glb)"
+  id="ev_4_blood"
+  position="2.7 -0.03 -3.1"
+  rotation="0 90 0"
+  scale="0.10254404522189213 0.10254404522189213 0.10254404522189213"
+  shadow="receive:true; cast:true">
+</a-entity>
+<!-- 🔫 المسدس -->
+<a-entity
+  class="clickable"
+  collect-evidence
+  gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/gun1.glb)"
+  id="custom_13_gun"
+  position="-7.6 0 4.75"
+  rotation="-82.5 -1.5 0"
+  scale="0.2472377118304502 0.2472377118304502 0.2472377118304502"
+  shadow="receive:true; cast:true">
+</a-entity>
+
+<!-- 🥛 الكؤوس المكسورة -->
+<a-entity
+  class="clickable"
+  collect-evidence
+  gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/broken_glass_cups.glb)"
+  id="custom_3_broken_cup"
+  position="4.45 0 -2.7"
+  rotation="0 0 0"
+  scale="1.569226594089098 1.569226594089098 1.569226594089098"
+  shadow="receive:true; cast:true">
+</a-entity>
+
+<!-- 📱 الهاتف -->
+<a-entity
+  class="clickable"
+  collect-evidence
+  gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/mobile_phone.glb)"
+  id="custom_4_mobile"
+  position="0.65 0 -2.8"
+  rotation="-90 6 -6"
+  scale="2.2353661105660914 2.2353661105660914 2.2353661105660914"
+  shadow="receive:true; cast:true">
+</a-entity>
+<!-- 🧍‍♂️ الجثة -->
+<a-entity
+  class="clickable"
+  collect-evidence
+  gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/cadaver.glb)"
+  id="custom_12_corpse"
+  position="2.8 0.15 -2.55"
+  rotation="0 0 0"
+  scale="0.7300307961477923 0.7300307961477923 0.7300307961477923"
+  shadow="receive:true; cast:true">
+</a-entity>
+
+  <a-entity light="type:ambient; intensity:0.55"></a-entity>
+
+<a-entity id="rig" position="0 1.6 0">
+<a-entity camera look-controls></a-entity>
+</a-entity>
+  <a-entity id="ray" cursor="rayOrigin:mouse" raycaster="objects:.clickable,.placed,.noteMarker"></a-entity>
+
 </a-scene>
+
+
 <!-- واجهة -->
 <div id="uiLayer">
-<button id="btnOpen">≡</button>
-<aside class="hidden" id="sidebar">
-<div id="sidebarHead">
-<div style="color:#d4af37;font-weight:800">لوحة التحكم</div>
-<button id="btnClose" title="إغلاق">✕</button>
-</div>
-<h2>📦 مكتبة الأدلة</h2>
-<div class="library" id="library"></div>
-<h2>➕ إضافة عنصر خارجي</h2>
+  <button id="btnOpen">≡</button>
+  <aside id="sidebar" class="hidden">
+    <div id="sidebarHead">
+      <div style="color:#d4af37;font-weight:800">لوحة التحكم</div>
+      <button id="btnClose" title="إغلاق">✕</button>
+    </div>
+
+    <!-- مكتبة الأدلة -->
+    <h2>📦 مكتبة الأدلة</h2>
+    <div id="library" class="library"></div>
+
+    <h2>➕ إضافة عنصر خارجي</h2>
+    <div class="row">
+      <input id="customName" type="text" placeholder="اسم العنصر">
+      <input id="customURL" type="text" placeholder="رابط النموذج (.glb)">
+      <button class="btn" id="btnAddCustom">إضافة</button>
+    </div>
+<h2>🖼️ إضافة صورة PNG</h2>
 <div class="row">
-<input id="customName" placeholder="اسم العنصر" type="text"/>
-<input id="customURL" placeholder="رابط النموذج (.glb)" type="text"/>
-<button class="btn" id="btnAddCustom">إضافة</button>
+  <input id="imgName" type="text" placeholder="اسم الصورة">
+  <input id="imgURL" type="text" placeholder="رابط الصورة (.png)">
+  <button class="btn" id="btnAddImg">إضافة صورة</button>
 </div>
-<h2>🧩 العناصر الموضوعة</h2>
-<select id="placedList" size="6" style="width:100%"></select>
-<div class="row">
-<button class="btn-ghost" id="btnDelete">🗑 حذف العنصر</button>
-<button class="btn-ghost" id="btnReset">🔄 إعادة ضبط المشهد</button>
-</div>
-<h2>✅❌ تقييم الأدلة</h2>
-<div class="row">
-<select id="evidenceSel">
-<option selected="" value="none">— بدون تقييم —</option>
-<option value="true">✔️ دليل صحيح</option>
-<option value="false">❌ دليل خاطئ</option>
-</select>
-<button class="btn" id="btnApplyEvidence">تطبيق</button>
-</div>
-<h2>🧪 الاختبار</h2>
-<div class="row">
-<input id="duration" title="المدة بالثواني" type="number" value="120"/>
-<button class="btn" id="btnGameStart">بدء</button>
-<button class="btn-ghost" id="btnGameStop">إيقاف</button>
-<button class="btn-ghost" id="btnGameFinalize">اعتماد</button>
-</div>
+
+    <h2>🧩 العناصر الموضوعة</h2>
+    <select id="placedList" size="6" style="width:100%"></select>
+    <div class="row">
+      <button class="btn-ghost" id="btnDelete">🗑 حذف العنصر</button>
+      <button class="btn-ghost" id="btnReset">🔄 إعادة ضبط المشهد</button>
+    </div>
+
+    <h2>✅❌ تقييم الأدلة</h2>
+    <div class="row">
+      <select id="evidenceSel">
+        <option value="none" selected>— بدون تقييم —</option>
+        <option value="true">✔️ دليل صحيح</option>
+        <option value="false">❌ دليل خاطئ</option>
+      </select>
+      <button class="btn" id="btnApplyEvidence">تطبيق</button>
+    </div>
+
+    <h2>🧪 الاختبار</h2>
+    <div class="row">
+      <input id="duration" type="number" value="120" title="المدة بالثواني">
+      <button class="btn" id="btnGameStart">بدء</button>
+      <button class="btn-ghost" id="btnGameStop">إيقاف</button>
+      <button class="btn-ghost" id="btnGameFinalize">اعتماد</button>
+    </div>
+
 <h2>🗒️ الملاحظات</h2>
 <div class="row">
-<button class="btn" id="btnNoteMode">➕ إضافة ملاحظة</button>
-<button class="btn-ghost" onclick="deleteNotes()">🗑️ حذف الملاحظات</button>
+  <button class="btn" id="btnNoteMode">➕ إضافة ملاحظة</button>
+  <button class="btn-ghost" onclick="deleteNotes()">🗑️ حذف الملاحظات</button>
 </div>
-<h2>⚙️ إعدادات التحريك</h2>
-<div class="row">
-<label style="font-size:12px;color:#cdd6e1">سرعة الحركة:</label>
-<select id="stepSel">
-<option value="0.05">بطيئة (0.05)</option>
-<option selected="" value="0.1">متوسطة (0.1)</option>
-<option value="0.25">سريعة (0.25)</option>
-<option value="0.5">عالية (0.5)</option>
-</select>
+
+    <h2>⚙️ إعدادات التحريك</h2>
+    <div class="row">
+      <label style="font-size:12px;color:#cdd6e1">سرعة الحركة:</label>
+      <select id="stepSel">
+        <option value="0.05">بطيئة (0.05)</option>
+        <option value="0.1" selected>متوسطة (0.1)</option>
+        <option value="0.25">سريعة (0.25)</option>
+        <option value="0.5">عالية (0.5)</option>
+      </select>
+    </div>
+  </aside>
 </div>
-</aside>
+
+<!-- تحكم بالعنصر (يسار) -->
+<div id="controls" class="dynamic-controls">
+
+  <!-- 🕹️ دائرة التحريك -->
+  <div class="obj-joystick" id="objJoy">
+    <div class="obj-joy-knob" id="objJoyKnob"></div>
+  </div>
+
+  <!-- 🔘 الأزرار داخل مستطيل واحد -->
+  <div class="controls-bar">
+    <button class="ctrl-btn" data-act="zoomIn" title="امام">🔼</button>
+    <button class="ctrl-btn" data-act="zoomOut" title="خلف">🔽</button>
+    <button class="ctrl-btn" data-act="rotL" title="تدوير يمين">⟳</button>
+    <button class="ctrl-btn" data-act="rotR" title="تدوير يسار">⟲</button>
+    <button class="ctrl-btn" data-act="tilt" title="ميل">📐</button>
+    <button class="ctrl-btn" data-act="shrink" title="تصغير">🔹</button>
+    <button class="ctrl-btn" data-act="grow" title="تكبير">➕</button>
+  </div>
+
 </div>
-<!-- تحكم بالعنصر -->
-<div class="dynamic-controls" id="controls">
-<div class="row">
-<button class="ctrl-btn" data-act="up">⬆️</button>
-<button class="ctrl-btn" data-act="down">⬇️</button>
+
+<!-- 🎮 تحكم بالكاميرا (Joystick + Zoom Levels + Walk + Lift) -->
+<style>
+  /* 🎨 تصميم جديد لواجهة الكاميرا */
+.camera-joystick {
+  position: fixed;
+  right: 20px;              /* 🔹 نقلها لليمين */
+  bottom: 18px;
+  z-index: 10005;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  pointer-events: auto;
+  transition: right 0.45s ease; /* ✅ حركة ناعمة */
+}
+
+/* 🎯 تعديل مستوى زر الانخفاض / الارتفاع فقط */
+.ctrl-section:last-child {
+  margin-top: -12px !important; /* 🔹 ارفع الزر قليلاً */
+}
+
+/* 🎯 الدائرة */
+.joy-wrap {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: rgba(10, 12, 15, 0.55); /* 🔹 تم توحيد الشفافية */
+  border: 3px solid rgba(212,175,55,0.22);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+  touch-action: none;
+}
+.joy-knob {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, #d4af37);
+  transform: translate(0,0);
+  transition: transform 0.05s linear;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* 🔹 شريط الأزرار */
+.camera-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px; /* 🔹 تقليل الفراغ */
+  background: rgba(10, 12, 15, 0.55);
+  border-radius: 14px;
+  padding: 10px 8px; /* 🔹 نفس قيمة مستطيل العنصر */
+  border: 2px solid rgba(212,175,55,0.22);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  width: 100%;
+  max-width: 420px; /* 🔹 يجعل الحجم مطابق تقريبًا للمستطيل الآخر */
+}
+
+
+/* 🔘 كل قسم (زر + شريط) */
+.ctrl-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 🔹 نرفع فقط سلايدر الانخفاض/الارتفاع */
+.ctrl-section:nth-child(3) {
+  margin-top: -14px; /* ← عدّل الرقم لو احتجت رفع أكثر */
+}
+
+
+.ctrl-section label {
+  font-size: 12px;
+  color: #ffd700;
+  font-weight: 700;
+}
+.ctrl-section input[type="range"] {
+  -webkit-appearance: none;
+  width: 90px;
+  height: 8px;
+  border-radius: 6px;
+  background: rgba(212,175,55,0.25);
+}
+/* نفس لون الكرة الذهبية الكبيرة */
+.ctrl-section input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, #d4af37); /* نفس اللي فوق */
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.ctrl-section input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.08);
+}
+
+
+</style>
+
+<!-- 🎮 واجهة تحكم الكاميرا (تصميم جديد) -->
+<div id="cameraPanelNew" class="camera-joystick">
+  
+  <!-- 🎯 دائرة الجويستك -->
+  <div class="joy-wrap" id="joyWrap" title="اسحب للتدوير">
+    <div class="joy-knob" id="joyKnob"></div>
+  </div>
+
+  <!-- 🔹 مستطيل الأزرار السفلي -->
+  <div class="camera-controls-bar">
+    <div class="ctrl-section">
+      <label> تقريب</label>
+      <input id="zoomSlider" type="range" min="0" max="10" step="0.05" value="0">
+    </div>
+
+    <div class="ctrl-section">
+      <label> خلف / أمام</label>
+      <input id="walkSlider" type="range" min="-1" max="1" step="0.01" value="0">
+    </div>
+<div class="ctrl-section">
+  <label> يمين / يسار</label>
+  <div style="position: relative; width: 90px; height: 8px;">
+    <div style="
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: rgba(255,215,0,0.8);
+      border-radius: 2px;
+      transform: translateX(-50%);
+      z-index: 2;
+      pointer-events: none;
+    "></div>
+    <input id="sideSlider" type="range" min="-1" max="1" step="0.01" value="0"
+           style="position: relative; z-index: 3; width: 100%;">
+  </div>
 </div>
-<div class="row">
-<button class="ctrl-btn" data-act="right">➡️</button>
-<button class="ctrl-btn" data-act="left">⬅️</button>
+
+    <div class="ctrl-section" style="position: relative;">
+  <label> انخفاض / ارتفاع</label>
+  <div style="position: relative; width: 90px; height: 8px;">
+    <!-- 🟡 الخط الفاصل (مستوى الكاميرا الطبيعي) -->
+    <div style="
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: rgba(255,215,0,0.8);
+      border-radius: 2px;
+      transform: translateX(-50%);
+      z-index: 2;
+      pointer-events: none;
+    "></div>
+    <input id="liftSlider" type="range" min="-1" max="1" step="0.01" value="0" 
+           style="position: relative; z-index: 3; width: 100%;">
+  </div>
 </div>
-<div class="row">
-<button class="ctrl-btn" data-act="zoomIn">🔼</button>
-<button class="ctrl-btn" data-act="zoomOut">🔽</button>
+
+  </div>
 </div>
-<div class="row">
-<button class="ctrl-btn" data-act="rotL">⟲</button>
-<button class="ctrl-btn" data-act="rotR">⟳</button>
-</div>
-<div class="row">
-<button class="ctrl-btn" data-act="tilt">📐</button>
-<button class="ctrl-btn" data-act="shrink">🔹</button>
-</div>
-<div class="row">
-<button class="ctrl-btn" data-act="grow">➕</button>
-</div>
-</div>
-<!-- تحكم بالكاميرا -->
-<div class="camera-controls" id="cameraPanel">
-<button class="cam-btn" data-cam="up">⬆️</button>
-<button class="cam-btn" data-cam="down">⬇️</button>
-<button class="cam-btn" data-cam="right">➡️</button>
-<button class="cam-btn" data-cam="left">⬅️</button>
-<button class="cam-btn" data-cam="back">🔼</button>
-<button class="cam-btn" data-cam="fwd">🔽</button>
-<button class="cam-btn" data-cam="yawL">⟲</button>
-<button class="cam-btn" data-cam="yawR">⟳</button>
-</div>
+
+
+<script>
+(function(){
+  const rig = document.getElementById("rig");
+  const joyWrap = document.getElementById("joyWrap");
+  const joyKnob = document.getElementById("joyKnob");
+  const zoomSlider = document.getElementById("zoomSlider");
+  const walkSlider = document.getElementById("walkSlider");
+  const liftSlider = document.getElementById("liftSlider");
+  const cam = document.querySelector("[camera]");
+  const sideSlider = document.getElementById("sideSlider");
+  if (!rig || !cam) return;
+
+  // 🧭 إعدادات عامة
+  const rotationSmooth = 0.15;
+  const walkSpeed = 0.22;
+  const baseFOV = 80;   // FOV الأساسي
+  const minFOV  = 8;   // أقوى تقريب
+  const maxZoom = 10;   // حد السلايدر
+  const zoomSmooth = 0.15;
+  let pendingFOV = baseFOV;
+
+  // 🎮 حالة الجويستك
+  let active=false, baseRect, maxRadius=36, current={x:0,y:0}, yaw=0,pitch=0;
+
+  function startJoy(e){
+    e.preventDefault();
+    active=true;
+    baseRect=joyWrap.getBoundingClientRect();
+    maxRadius=Math.min(baseRect.width,baseRect.height)*0.38;
+    updateJoy(e);
+  }
+  function stopJoy(){
+    active=false;
+    current={x:0,y:0};
+    joyKnob.style.transform="translate(0,0)";
+joyKnob.style.transition = "transform 0.25s cubic-bezier(.34,1.56,.64,1)";
+  }
+  function updateJoy(e){
+    const t=(e.touches&&e.touches[0])||e;
+    const cx=baseRect.left+baseRect.width/2;
+    const cy=baseRect.top+baseRect.height/2;
+    const dx=t.clientX-cx;
+    const dy=t.clientY-cy;
+    const dist=Math.hypot(dx,dy);
+    const r=Math.min(dist,maxRadius);
+    const nx=(r===0)?0:(dx/dist)*r;
+    const ny=(r===0)?0:(dy/dist)*r;
+    joyKnob.style.transform=`translate(${nx}px,${ny}px)`;
+    current.x=nx/maxRadius;
+    current.y=ny/maxRadius;
+  }
+
+  // ⚙️ الحركة الأمامية والخلفية
+  let walkValue = 0;
+  walkSlider.addEventListener("input", e => {
+    walkValue = parseFloat(e.target.value);
+  });
+  function resetWalkToCenter(){
+    let animFrame;
+    const smoothReturn = () => {
+      let val = parseFloat(walkSlider.value);
+      if (Math.abs(val) <= 0.03) {
+        walkSlider.value = 0;
+        walkValue = 0;
+        cancelAnimationFrame(animFrame);
+        return;
+      }
+      val *= 0.55;
+      walkSlider.value = val.toFixed(3);
+      walkValue = parseFloat(val);
+      animFrame = requestAnimationFrame(smoothReturn);
+    };
+    animFrame = requestAnimationFrame(smoothReturn);
+  }
+  walkSlider.addEventListener("mouseup", resetWalkToCenter);
+  walkSlider.addEventListener("touchend", resetWalkToCenter);
+  walkSlider.addEventListener("mouseleave", resetWalkToCenter);
+
+  // ⬆️⬇️ الارتفاع
+  let liftValue = 0;
+  liftSlider.addEventListener("input", e => {
+    liftValue = parseFloat(e.target.value);
+  });
+  // ↔️ التحرك يمين / يسار
+  let sideValue = 0;
+  sideSlider.addEventListener("input", e => {
+    sideValue = parseFloat(e.target.value);
+  });
+// 🧲 رجوع تلقائي للسلايدر للمنتصف عند عدم اللمس
+sideSlider.addEventListener("mouseup", () => {
+  smoothReturnToCenter();
+});
+sideSlider.addEventListener("touchend", () => {
+  smoothReturnToCenter();
+});
+
+function smoothReturnToCenter() {
+  const start = parseFloat(sideSlider.value);
+  const duration = 250; // ⏱ مدة الرجوع بالمللي ثانية (يمكن تقليلها لسرعة أكبر)
+  const startTime = performance.now();
+
+  function animateReturn(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / duration); // نسبة التقدم 0 → 1
+    const eased = 1 - Math.pow(1 - t, 3); // منحنى تخفيف CubicEaseOut
+    const newVal = start * (1 - eased);
+
+    sideSlider.value = newVal.toFixed(3);
+    sideValue = parseFloat(sideSlider.value);
+
+    if (t < 1) {
+      requestAnimationFrame(animateReturn);
+    } else {
+      sideSlider.value = 0;
+      sideValue = 0;
+    }
+  }
+
+  requestAnimationFrame(animateReturn);
+}
+
+
+  // 🔭 الزووم البصري الحقيقي (FOV Zoom)
+  zoomSlider.addEventListener("input", e => {
+    const val = parseFloat(e.target.value);
+    const t = val / maxZoom;
+    pendingFOV = THREE.MathUtils.lerp(baseFOV, minFOV, t);
+  });
+
+  // 🔁 الحلقة الرئيسية
+  function tick(){
+    if(active){
+      yaw += (-current.x) * 1.8;
+      pitch += (-current.y) * 1.4;
+      pitch = Math.max(-80, Math.min(80, pitch));
+    }
+
+    const rot = rig.getAttribute("rotation");
+const newYaw   = rot.y + (yaw - rot.y) * rotationSmooth;
+const newPitch = rot.x + (pitch - rot.x) * rotationSmooth;
+rig.setAttribute("rotation", `${newPitch} ${newYaw} 0`);
+
+const pos = rig.getAttribute("position");
+
+// 🔹 تحديد موقع الكاميرا الابتدائي (مرة واحدة فقط)
+if (!window.initialCameraSet) {
+  // 📍 نفس إحداثيات المشهد اللي أرسلتها بالضبط
+  pos.x = -0.15;
+  pos.y = 0.92;
+  pos.z = 5.6;
+
+  rig.setAttribute("rotation", "0 -27 0"); // نفس زاوية المشهد
+
+  window.initialCameraSet = true;
+}
+
+
+pos.y += ((1.6 + liftValue * 6.0) - pos.y) * 0.1;
+
+if (Math.abs(walkValue) > 0.0001){
+  const dir = new THREE.Vector3();
+  cam.object3D.getWorldDirection(dir);
+  dir.y = 0;
+  dir.normalize();
+
+  // 🔄 عكس الاتجاه: سحب لليمين = للخلف، سحب لليسار = للأمامa
+  pos.x -= dir.x * walkValue * walkSpeed;
+  pos.z -= dir.z * walkValue * walkSpeed;
+}
+
+  // حركة السحب يمين / يسار (اتجاه صحيح)
+if (Math.abs(sideValue) > 0.0001) {
+  const right = new THREE.Vector3();
+  cam.object3D.getWorldDirection(right);
+  right.y = 0;
+  right.normalize();
+  // 👇 بدّل الترتيب لعكس الاتجاه العكسي الخطأ
+  right.crossVectors(new THREE.Vector3(0, 1, 0), right);
+pos.x -= right.x * sideValue * walkSpeed;
+pos.z -= right.z * sideValue * walkSpeed;
+
+}
+
+
+
+    // 🔧 تحديث الزاوية البصرية (زووم)
+    const camObj = cam.getObject3D("camera");
+    if (camObj && camObj.isCamera) {
+      camObj.fov += (pendingFOV - camObj.fov) * zoomSmooth;
+      camObj.updateProjectionMatrix();
+    }
+
+    rig.setAttribute("position", `${pos.x} ${pos.y} ${pos.z}`);
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  // تفعيل الجويستك
+  joyWrap.addEventListener("pointerdown",(e)=>{joyWrap.setPointerCapture(e.pointerId);startJoy(e);});
+  window.addEventListener("pointermove",(e)=>{if(active)updateJoy(e);});
+  window.addEventListener("pointerup",()=>{if(active)stopJoy();});
+
+  // لوحة المفاتيح
+  window.addEventListener("keydown", e => {
+    const pos = rig.getAttribute("position");
+    const dir = new THREE.Vector3();
+    cam.object3D.getWorldDirection(dir);
+    dir.y = 0;
+    dir.normalize();
+    const step = 0.25;
+    switch (e.code) {
+      case "ArrowUp":case "KeyW": pos.x += dir.x * step; pos.z += dir.z * step; break;
+      case "ArrowDown":case "KeyS": pos.x -= dir.x * step; pos.z -= dir.z * step; break;
+      case "ArrowLeft":case "KeyA": pos.x += dir.z * step; pos.z -= dir.x * step; break;
+      case "ArrowRight":case "KeyD": pos.x -= dir.z * step; pos.z += dir.x * step; break;
+    }
+    rig.setAttribute("position", `${pos.x} ${pos.y} ${pos.z}`);
+  });
+
+})();
+</script>
+
+
+
+<!-- ===== كاميرا: واجهة جديدة (Joystick + Mouse + Smooth Zoom) ===== -->
+
+<!-- نافذة إدخال الملاحظة -->
 <div id="noteModal">
-<div class="noteCard">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-<strong style="color:#d4af37">إضافة ملاحظة باللغة الانجليزية</strong>
-<button class="btn-ghost" id="noteCancel">إلغاء</button>
+  <div class="noteCard">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <strong style="color:#d4af37">إضافة ملاحظة باللغة الانجليزية</strong>
+      <button class="btn-ghost" id="noteCancel">إلغاء</button>
+    </div>
+    <label>النص:</label>
+    <textarea id="noteText" rows="5" placeholder="اكتب الملاحظة باللغة الانجليزية فقط..."></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" id="noteSave">حفظ</button>
+    </div>
+  </div>
 </div>
-<label>النص:</label>
-<textarea id="noteText" placeholder="اكتب الملاحظة باللغة الانجليزية فقط..." rows="5"></textarea>
-<div class="row" style="margin-top:10px">
-<button class="btn" id="noteSave">حفظ</button>
-</div>
-</div>
-</div>
+
 <div class="toast" id="toast"></div>
+
 <script>
 /* ===== بدء التطبيق ===== */
-window.missionStarted = false;
-
-// إزالة شاشة بداية قديمة إن وجدت
 window.startApp = function(){
   const ov = document.getElementById('overlayStart');
   if(ov){ ov.style.transition='opacity .6s ease'; ov.style.opacity='0'; setTimeout(()=> ov.remove(),650); }
+
 };
 
 const sidebar = document.getElementById('sidebar');
-document.getElementById('btnOpen').onclick  = ()=> sidebar.classList.remove('hidden');
-document.getElementById('btnClose').onclick = ()=> sidebar.classList.add('hidden');
+const cameraPanel = document.getElementById('cameraPanelNew');
+
+document.getElementById('btnOpen').onclick = () => {
+  sidebar.classList.remove('hidden');
+  // 🔹 حرك أزرار الكاميرا يسارًا قليلاً لما تفتح القائمة
+  if (cameraPanel) cameraPanel.style.right = '440px';
+};
+
+document.getElementById('btnClose').onclick = () => {
+  sidebar.classList.add('hidden');
+  // 🔹 ترجع لمكانها الطبيعي لما تغلق القائمة
+  if (cameraPanel) cameraPanel.style.right = '20px';
+};
+
 
 const toast = document.getElementById('toast');
 function msg(t){ toast.textContent=t; toast.style.display='block'; setTimeout(()=>toast.style.display='none',1100); }
@@ -395,16 +1694,8 @@ const scoreEl = document.getElementById('score');
 
 const scene = document.querySelector('a-scene');
 const ray   = document.getElementById('ray');
-document.getElementById('room').setAttribute('visible','false');
 
-// إخفاء المشهد والواجهة في البداية
-window.addEventListener('load', ()=>{
-  document.querySelector('a-scene').style.display = 'none';
-  const ui = document.querySelectorAll('#hud, #controls, #cameraPanel, #uiLayer');
-  ui.forEach(el => el.style.display = 'none');
-});
-
-/* أدوات مساعدة للحركة */
+/* ========== أدوات مساعدة للتحريك السلس ========== */
 function lerp(a,b,t){ return a + (b-a)*t; }
 function animate(duration, step, done){
   const start = performance.now();
@@ -416,40 +1707,66 @@ function animate(duration, step, done){
   requestAnimationFrame(frame);
 }
 function getVec3(attr){ return {x:attr.x||0,y:attr.y||0,z:attr.z||0}; }
+
 function tweenPosition(ent, to, duration=200){
   const from = getVec3(ent.getAttribute('position')||{x:0,y:0,z:0});
-  animate(duration, p=>{ ent.setAttribute('position', {x:lerp(from.x,to.x,p), y:lerp(from.y,to.y,p), z:lerp(from.z,to.z,p)}); });
+  animate(duration, p=>{
+    ent.setAttribute('position', {x:lerp(from.x,to.x,p), y:lerp(from.y,to.y,p), z:lerp(from.z,to.z,p)});
+  });
 }
-function tweenDeltaPosition(ent, dx,dy,dz, duration=200){
-  const from = getVec3(ent.getAttribute('position')||{x:0,y:0,z:0});
-  tweenPosition(ent, {x:from.x+dx,y:from.y+dy,z:from.z+dz}, duration);
+function tweenDeltaPosition(ent, dx, dy, dz, duration = 200) {
+  const from = getVec3(ent.getAttribute('position') || { x: 0, y: 0, z: 0 });
+
+  // 🧭 احصل على اتجاه الكاميرا
+  const cam = document.querySelector("[camera]");
+  if (!cam) return;
+
+  const dir = new THREE.Vector3();
+  cam.object3D.getWorldDirection(dir);
+  dir.y = 0; // تجاهل الميل العمودي
+  dir.normalize();
+
+  // 🧮 احسب الاتجاه الجانبي (يمين / يسار)
+  const right = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize();
+
+  // ✅ نحدد الحركة بناءً على منظور الكاميرا
+  const delta = new THREE.Vector3();
+  delta.addScaledVector(right, dx);  // ← يمين/يسار
+  delta.addScaledVector(new THREE.Vector3(0, 1, 0), dy); // ← ارتفاع/انخفاض
+  delta.addScaledVector(dir, dz);    // ← للأمام/الخلف
+
+  const target = {
+    x: from.x + delta.x,
+    y: from.y + delta.y,
+    z: from.z + delta.z
+  };
+
+  tweenPosition(ent, target, duration);
 }
+
 function tweenRotationY(ent, deltaDeg, duration=200){
   const from = ent.getAttribute('rotation') || {x:0,y:0,z:0};
   const toY = from.y + deltaDeg;
-  animate(duration, p=>{ ent.setAttribute('rotation', {x:from.x,y:lerp(from.y,toY,p),z:from.z}); });
+  animate(duration, p=>{
+    ent.setAttribute('rotation', {x:from.x,y:lerp(from.y,toY,p),z:from.z});
+  });
 }
 function tweenScaleFactor(ent, factor, duration=200){
   const s = ent.getAttribute('scale') || {x:1,y:1,z:1};
   const to = {x:s.x*factor, y:s.y*factor, z:s.z*factor};
-  animate(duration, p=>{ ent.setAttribute('scale',{x:lerp(s.x,to.x,p), y:lerp(s.y,to.y,p), z:lerp(s.z,to.z,p)}); });
+  animate(duration, p=>{
+    ent.setAttribute('scale',{x:lerp(s.x,to.x,p), y:lerp(s.y,to.y,p), z:lerp(s.z,to.z,p)});
+  });
 }
 
 /* مكتبة الأدلة */
 const library = [
-  {name:'سلاح كلاشنكوف', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/gun.glb'},
-  {name:'سلاح', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/gun1.glb'},
-  {name:'غرفة', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/room.glb'},
-  {name:'منزل', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/home.glb'},
-  {name:'منزل1', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/home1.glb'},
-  {name:'داخل قطار', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/qtar.glb'},
-  {name:'سرير', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/bed.glb'},
-  {name:'جثة', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/corpse.glb'},
-  {name:'يد مقطوعة', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/hand_sculpt.glb'},
-  {name:'بقعة دم', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/blood.glb'},
-  {name:'قبضة حديد', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/scene_compressed.glb'},
-  {name:'شارع', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/stret.glb'},
-  {name:'سيف', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/siaf.glb'}
+  {name:'حاجز جريمة', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/hajez.glb'},
+ {name:'حاجز طريق', url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/border.glb'},
+  {name:'قمع',     url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/traffic_cone.glb'},
+   {name:'حاجز شرطة',     url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/line.glb'},
+   {name:'قبضة حديد',          url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/scene_compressed.glb'},
+  {name:'مربع حواجز',           url:'https://dns3uae-glitch.github.io/crime-book/assets/3d/barriers.glb'}
 ];
 function renderLibrary(){
   const lib = document.getElementById('library'); lib.innerHTML = '';
@@ -460,6 +1777,54 @@ function renderLibrary(){
     lib.appendChild(card);
   });
 }
+/* =========================================================
+   🖼️ إضافة صورة PNG أمام الكاميرا (يمكن تحريكها مثل GLB)
+   ========================================================= */
+async function placeImage(url, name="صورة") {
+  const THREE = AFRAME.THREE;
+  const cam = document.querySelector("[camera]");
+  const camPos = new THREE.Vector3();
+  const camDir = new THREE.Vector3();
+  cam.object3D.getWorldPosition(camPos);
+  cam.object3D.getWorldDirection(camDir);
+  camDir.normalize();
+
+const spawnPos = camPos.clone().add(camDir.clone().multiplyScalar(3.5));
+  spawnPos.y = 1.2;
+
+  const id = "img-" + Date.now();
+  const ent = document.createElement("a-entity");
+  ent.setAttribute("id", id);
+  ent.setAttribute("class", "placed clickable");
+  ent.setAttribute("position", `${spawnPos.x} ${spawnPos.y} ${spawnPos.z}`);
+  ent.setAttribute("rotation", "0 180 0");
+  ent.innerHTML = `
+    <a-plane src="${url}"
+             width="1"
+             height="1"
+             material="shader: standard; opacity:1; transparent:true;">
+    </a-plane>
+  `;
+  scene.appendChild(ent);
+  placed.push({ id, name, el: ent, scored: false });
+
+  const opt = document.createElement("option");
+  opt.value = id;
+  opt.textContent = name;
+  placedList.appendChild(opt);
+  selectById(id);
+
+  msg("✅ تمت إضافة صورة PNG بنجاح أمام الكاميرا");
+}
+
+// 🔹 زر إضافة الصورة
+document.getElementById('btnAddImg').onclick = ()=>{
+  const name = document.getElementById('imgName').value.trim() || "صورة";
+  const url  = document.getElementById('imgURL').value.trim();
+  if(!url.endsWith(".png")){ msg("⚠️ الرابط يجب أن يكون صورة .png"); return; }
+  placeImage(url, name);
+};
+
 renderLibrary();
 document.getElementById('btnAddCustom').onclick = ()=>{
   const name = document.getElementById('customName').value.trim();
@@ -472,12 +1837,16 @@ let placed = []; // {id,name,el,scored:false}
 let selected = null;
 const placedList = document.getElementById('placedList');
 const evidenceSel = document.getElementById('evidenceSel');
-
 document.getElementById('btnApplyEvidence').onclick = ()=>{
   if(!selected){ msg('اختر عنصرًا أولًا'); return; }
+
   const val = evidenceSel.value;
   selected.setAttribute('data-valid', val);
+
+  // إزالة الهالة السابقة إن وجدت
   [...selected.children].filter(c=> c.classList && c.classList.contains('evidenceHalo')).forEach(h=>selected.removeChild(h));
+
+  // إضافة الهالة حسب التقييم
   if(val==='true' || val==='false'){
     const halo = document.createElement('a-torus');
     halo.classList.add('evidenceHalo');
@@ -487,45 +1856,111 @@ document.getElementById('btnApplyEvidence').onclick = ()=>{
     halo.setAttribute('material',`color:${col}; emissive:${col}; emissiveIntensity:0.5; opacity:0.85; transparent:true`);
     selected.appendChild(halo);
   }
-  msg('✅ تم تقييم العنصر'); saveScene();
+
+
+
+  msg('✅ تم تقييم العنصر');
+  saveScene();
 };
 
-/* وضع عنصر */
-function placeModel(i){
-  const m = library[i]; if(!m) return;
-  const id = 'ent-' + Date.now();
-  const ent = document.createElement('a-entity');
-  ent.setAttribute('id', id);
-  ent.setAttribute('gltf-model', m.url);
-  ent.classList.add('placed', 'clickable');
-  ent.setAttribute('data-valid', 'none');
-  ent.setAttribute('data-scored', 'no');
-  ent.setAttribute('position', '0 0 -2.8');
-  ent.setAttribute('rotation', '0 180 0');
 
-  ent.addEventListener('model-loaded', (e)=>{
-    const THREE = (window.AFRAME && AFRAME.THREE) ? AFRAME.THREE : window.THREE;
-    if(!THREE) { console.warn('THREE غير متاح'); return; }
-    const root = e.detail.model || ent.getObject3D('mesh'); if(!root){ console.warn('لم يتم العثور على جذر النموذج'); return; }
-    const bbox = new THREE.Box3().setFromObject(root);
-    const size = bbox.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z);
-    let s = Math.min(0.35, 1.0 / (maxDim || 1)); if(!isFinite(s) || s <= 0) s = 0.2;
-    ent.setAttribute('scale', `${s} ${s} ${s}`);
-    const minY = bbox.min.y; const groundY = 0.02;
-    const pos = ent.getAttribute('position'); pos.x=0; pos.z=-2.8; pos.y = groundY - (s * minY);
-    ent.setAttribute('position', pos);
+/* ========================
+   🧩 وضع العنصر في منتصف الغرفة بحجم ذكي
+   ======================== */
+/* ========================
+/* ========================
+   🧩 وضع العنصر داخل الغرفة بدقة فوق الأرضية + تصغير تلقائي
+   ======================== */
+async function placeModel(i) {
+  const m = library[i];
+  if (!m) return;
+
+// 🚫 تم تعطيل اختيار المرجع — الآن العنصر يُضاف أمام الكاميرا مباشرة
+const refId = "none";
+
+
+  const THREE = AFRAME.THREE;
+  const spawnPos = new THREE.Vector3();
+
+  if (refId && refId !== "none") {
+    const refEl = document.getElementById(refId);
+    if (refEl && refEl.object3D) {
+      const refMesh = refEl.getObject3D("mesh");
+      const box = new THREE.Box3().setFromObject(refMesh);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      // 👇 العنصر الجديد يوضع تمامًا فوق المرجع (وليس مركزه)
+      spawnPos.copy(center);
+      spawnPos.y = box.max.y + 0.05;
+    }
+  } else {
+    // أمام الكاميرا في حال عدم اختيار مرجع
+    const cam = document.querySelector("[camera]");
+    const camPos = new THREE.Vector3();
+    const camDir = new THREE.Vector3();
+    cam.object3D.getWorldPosition(camPos);
+    cam.object3D.getWorldDirection(camDir);
+    camDir.normalize();
+spawnPos.copy(camPos.clone().add(camDir.clone().multiplyScalar(-1.5)));
+    spawnPos.y = 1.2;
+  }
+
+  // 🧱 إنشاء العنصر الجديد
+  const id = "ent-" + Date.now();
+  const ent = document.createElement("a-entity");
+  ent.setAttribute("id", id);
+  ent.setAttribute("gltf-model", m.url);
+  enableAnimationMixer(ent, m.url);
+  ent.classList.add("placed", "clickable");
+  ent.setAttribute("data-valid", "none");
+  ent.setAttribute("data-scored", "no");
+  ent.object3D.position.copy(spawnPos);
+
+  // ✅ تصحيح المركز والمقياس بعد تحميل النموذج
+  ent.addEventListener("model-loaded", () => {
+    const root = ent.getObject3D("mesh");
+    if (!root) return;
+
+    const box = new THREE.Box3().setFromObject(root);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+
+    // مركز على الأرض
+    root.position.sub(center);
+    root.position.y -= box.min.y;
+
+    const maxDim = Math.max(size.x, size.y, size.z) || 1;
+    const scale = 1.2 / maxDim;
+    ent.setAttribute("scale", `${scale} ${scale} ${scale}`);
+
+    ent.setAttribute("animation__appear", {
+      property: "scale",
+      from: "0 0 0",
+      to: `${scale} ${scale} ${scale}`,
+      dur: 700,
+      easing: "easeOutElastic"
+    });
   });
 
-  const col = document.createElement('a-box');
-  col.setAttribute('width','1.2'); col.setAttribute('height','1.8'); col.setAttribute('depth','1.2'); col.setAttribute('opacity','0'); col.setAttribute('position','0 0.9 0');
-  col.classList.add('clickable'); ent.appendChild(col);
+scene.appendChild(ent);
+placed.push({ id, name: m.name, el: ent, scored: false });
+const opt = document.createElement("option");
+opt.value = id;
+opt.textContent = m.name;
+placedList.appendChild(opt);
 
-  scene.appendChild(ent);
-  placed.push({ id, name: m.name, el: ent, scored: false });
-  const opt = document.createElement('option'); opt.value = id; opt.textContent = m.name; placedList.appendChild(opt);
-  selectById(id); msg('تم وضع ' + m.name + ' داخل الغرفة'); saveScene();
+selectById(id);
+msg(`✅ تم وضع ${m.name} ${refId !== "none" ? "قرب " + refId : "أمام الكاميرا"}`);
+
+// 💡 حفظ المشهد بعد تحميل النموذج فعلياً
+ent.addEventListener("model-loaded", () => {
+  saveScene();
+  console.log("✅ النموذج تم تحميله وحُفظ بنجاح:", id);
+});
+
 }
+
+
 
 function selectById(id){
   const rec = placed.find(p=>p.id===id); if(!rec) return;
@@ -533,30 +1968,68 @@ function selectById(id){
   evidenceSel.value = selected.getAttribute('data-valid') || 'none';
 }
 placedList.onchange = e => selectById(e.target.value);
+scene.addEventListener('click', e => {
+  const target = e.target;
+  const clickedEntity = findAncestor(target, el => el.classList.contains('placed'));
+  if(!clickedEntity) return;
+
+  const rec = placed.find(p => p.el === clickedEntity);
+  if(!rec || rec.scored) return;
+
+  const val = clickedEntity.getAttribute('data-valid');
+  if(val === 'true'){
+    addScore(10);
+    rec.scored = true;
+    clickedEntity.setAttribute('data-scored','yes');
+    msg('✅ تم احتساب نقطة للدليل الصحيح');
+  } else if(val === 'false'){
+    addScore(-5);
+    rec.scored = true;
+    clickedEntity.setAttribute('data-scored','yes');
+    msg('❌ تم خصم نقطة للدليل الخاطئ');
+  }
+});
 
 function findAncestor(el, pred){
   let cur = el;
-  while(cur && cur !== scene){ if(pred(cur)) return cur; cur = cur.parentEl; }
+  while(cur && cur !== scene){
+    if(pred(cur)) return cur;
+    cur = cur.parentEl;
+  }
   return null;
 }
 
-/* تحريك عنصر */
+/* تحريك العنصر تدريجيًا: زوم إن/أوت، تكبير/تصغير تدريجي */
 function stepVal(){ return parseFloat(document.getElementById('stepSel').value)||0.1; }
-function zoomSelected(deltaZ){ if(!selected){ msg('اختر عنصرًا أولًا'); return; } tweenDeltaPosition(selected, 0, 0, deltaZ, 220); }
-function rotateSelected(deltaY){ if(!selected){ msg('اختر عنصرًا أولًا'); return; } tweenRotationY(selected, deltaY, 220); }
+function zoomSelected(deltaZ){
+  if(!selected){ msg('اختر عنصرًا أولًا'); return; }
+  const p = selected.getAttribute('position') || {x:0,y:0,z:0};
+  tweenDeltaPosition(selected, 0, 0, deltaZ, 220);
+}
+function rotateSelected(deltaY){
+  if(!selected){ msg('اختر عنصرًا أولًا'); return; }
+  tweenRotationY(selected, deltaY, 220);
+}
 function tiltSelected(){
   if(!selected){ msg('اختر عنصرًا أولًا'); return; }
   const r = selected.getAttribute('rotation') || {x:0,y:0,z:0};
-  const toX = r.x + 90; const from = r.x;
-  animate(220, p=>{ selected.setAttribute('rotation', {x:lerp(from,toX,p), y:r.y, z:r.z}); });
+  tweenRotationY(selected, 0, 0); // no-op just to keep timing
+  const toX = r.x + 90;
+  const from = r.x;
+  animate(220, p=>{
+    selected.setAttribute('rotation', {x:lerp(from,toX,p), y:r.y, z:r.z});
+  });
 }
 
 let moveObjInterval;
+
 document.querySelectorAll('#controls .ctrl-btn').forEach(btn=>{
   const act = btn.dataset.act;
   const start = ()=> {
     const step = stepVal();
-    if(['up','down','left','right','zoomIn','zoomOut','rotL','rotR','tilt','grow','shrink'].includes(act) && !selected){ msg('اختر عنصرًا أولًا'); return; }
+    if(['up','down','left','right','zoomIn','zoomOut','rotL','rotR','tilt','grow','shrink'].includes(act) && !selected){
+      msg('اختر عنصرًا أولًا'); return;
+    }
     moveObjInterval = setInterval(()=>{
       if(act==='up')   tweenDeltaPosition(selected, 0, +step, 0, 100);
       if(act==='down') tweenDeltaPosition(selected, 0, -step, 0, 100);
@@ -579,42 +2052,73 @@ document.querySelectorAll('#controls .ctrl-btn').forEach(btn=>{
   btn.addEventListener('touchend', stop);
 });
 
-/* كاميرا */
+
+
+/* كاميرا: تحريك ودوران تدريجي */
 function moveCam(dx, dy, dz){
   const rig = document.getElementById('rig');
-  const cam = rig.querySelector('[camera]');
-  const rot = cam.getAttribute('rotation') || {y:0};
+  const cam = rig.querySelector('[camera]'); // 🎯 الكاميرا الفعلية داخل الـrig
+  const rot = cam.getAttribute('rotation') || {y:0}; // زاوية الكاميرا الفعلية
   const yaw = (rot.y || 0) * Math.PI / 180;
   const pos = rig.getAttribute('position') || {x:0, y:1.6, z:0};
-  const forward = { x: -Math.sin(yaw), z: -Math.cos(yaw) };
-  const right   = { x:  Math.cos(yaw), z: -Math.sin(yaw) };
-  const newPos = { x: pos.x + forward.x * dz + right.x * dx, y: pos.y + dy, z: pos.z + forward.z * dz + right.z * dx };
+
+
+  // ✅ تصحيح اتجاهات الحركة بناءً على دوران الكاميرا الحقيقي
+const forward = { x: -Math.sin(yaw), z: -Math.cos(yaw) };
+const right   = { x:  Math.cos(yaw), z:  Math.sin(yaw) }; // ← تم تصحيح الإشارة هنا
+
+
+  // ✅ تحريك دقيق بناءً على اتجاه النظر
+  const newPos = {
+    x: pos.x + forward.x * dz + right.x * dx,
+    y: pos.y + dy,
+    z: pos.z + forward.z * dz + right.z * dx
+  };
+
   tweenPosition(rig, newPos, 220);
 }
+
+
 function yawCam(delta) {
   const rig = document.getElementById('rig');
   const cam = rig.querySelector('[camera]');
   const rot = cam.getAttribute('rotation') || {x: 0, y: 0, z: 0};
-  const targetY = rot.y + delta;
+  const targetY = rot.y + delta; // الزاوية الجديدة المستهدفة
+
   const THREE = AFRAME.THREE;
   const startY = rot.y;
-  const duration = 500;
+  const duration = 500; // ⏱️ مدة الدوران بالملّي ثانية (زِدها لو تبغى دوران أبطأ)
   const startTime = performance.now();
+
   function animateTurn(now) {
     const progress = Math.min((now - startTime) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
+    const eased = 1 - Math.pow(1 - progress, 3); // 🎢 انحناءة خفيفة (ease-out cubic)
     const newY = startY + (targetY - startY) * eased;
+
     cam.setAttribute('rotation', {x: rot.x, y: newY, z: rot.z});
+
+    // ✅ مزامنة مع look-controls حتى تظل الكاميرا صحيحة بعد السحب أو التاتش
     if (cam.components['look-controls']) {
-      cam.object3D.rotation.set(THREE.MathUtils.degToRad(rot.x), THREE.MathUtils.degToRad(newY), THREE.MathUtils.degToRad(rot.z));
+      cam.object3D.rotation.set(
+        THREE.MathUtils.degToRad(rot.x),
+        THREE.MathUtils.degToRad(newY),
+        THREE.MathUtils.degToRad(rot.z)
+      );
       cam.components['look-controls'].pitchObject.rotation.x = THREE.MathUtils.degToRad(rot.x);
       cam.components['look-controls'].yawObject.rotation.y = THREE.MathUtils.degToRad(newY);
     }
+
     if (progress < 1) requestAnimationFrame(animateTurn);
   }
+
   requestAnimationFrame(animateTurn);
 }
+
+
+
+
 let moveInterval;
+
 document.querySelectorAll('#cameraPanel .cam-btn').forEach(btn=>{
   const act = btn.dataset.cam;
   const start = ()=>{
@@ -638,16 +2142,21 @@ document.querySelectorAll('#cameraPanel .cam-btn').forEach(btn=>{
   btn.addEventListener('touchend', stop);
 });
 
-/* الملاحظات */
+
+
+/* الملاحظات: فتح/إغلاق بالتبديل كل ضغطة */
 let noteModeActive = false;
 let pendingPoint = null;
 const noteModal = document.getElementById('noteModal');
 const noteText = document.getElementById('noteText');
 
 document.getElementById('btnNoteMode').onclick = ()=>{
-  noteModeActive=true; statusEl.textContent='وضع الملاحظات مفعل'; msg('اضغط في المشهد لتحديد مكان الملاحظة');
+  noteModeActive=true;
+  statusEl.textContent='وضع الملاحظات مفعل';
+  msg('اضغط في المشهد لتحديد مكان الملاحظة');
 };
 
+/* إنشاء الملاحظة */
 function createNoteAt(point, text) {
   const marker = document.createElement('a-entity');
   marker.classList.add('noteMarker','clickable');
@@ -657,230 +2166,154 @@ function createNoteAt(point, text) {
   const dot = document.createElement('a-sphere');
   dot.setAttribute('radius','0.09');
   dot.setAttribute('material','color:#d4af37; emissive:#b78f2a; emissiveIntensity:0.5; metalness:0.4; roughness:0.3');
-  dot.classList.add('clickable'); marker.appendChild(dot);
+  dot.classList.add('clickable');
+  marker.appendChild(dot);
 
-  const noteBox = document.createElement('a-entity'); noteBox.setAttribute('visible','false'); noteBox.setAttribute('position','0 1.0 0');
-  const bg = document.createElement('a-plane'); bg.setAttribute('width','3.2'); bg.setAttribute('height','1.6'); bg.setAttribute('material','color:#0a0c0f; opacity:0.88; side:double; metalness:0.2; roughness:0.4; emissive:#d4af37; emissiveIntensity:0.15'); noteBox.appendChild(bg);
-  const txt = document.createElement('a-entity'); txt.setAttribute('text', `value:${text}; color:#fff; align:center; wrapCount:40; width:3;`); txt.setAttribute('position','0 0 0.02'); noteBox.appendChild(txt);
+  // لوحة الملاحظة
+  const noteBox = document.createElement('a-entity');
+  noteBox.setAttribute('visible','false');
+  noteBox.setAttribute('position','0 1.0 0');
 
-  const btnEdit = document.createElement('a-entity'); btnEdit.setAttribute('text','value:✏️; color:#d4af37; align:left; width:1;'); btnEdit.setAttribute('position','-1.3 0.6 0.02'); btnEdit.classList.add('clickable'); noteBox.appendChild(btnEdit);
-  const btnDelete = document.createElement('a-entity'); btnDelete.setAttribute('text','value:🗑️; color:#d4af37; align:center; width:1;'); btnDelete.setAttribute('position','0 0.6 0.02'); btnDelete.classList.add('clickable'); noteBox.appendChild(btnDelete);
-  const btnClose = document.createElement('a-entity'); btnClose.setAttribute('text','value:✖️; color:#d4af37; align:right; width:1;'); btnClose.setAttribute('position','1.3 0.6 0.02'); btnClose.classList.add('clickable'); noteBox.appendChild(btnClose);
+  const bg = document.createElement('a-plane');
+  bg.setAttribute('width','3.2');
+  bg.setAttribute('height','1.6');
+  bg.setAttribute('material','color:#0a0c0f; opacity:0.88; side:double; metalness:0.2; roughness:0.4; emissive:#d4af37; emissiveIntensity:0.15');
+  noteBox.appendChild(bg);
+
+  const txt = document.createElement('a-entity');
+  txt.setAttribute('text', `value:${text}; color:#fff; align:center; wrapCount:40; width:3;`);
+  txt.setAttribute('position','0 0 0.02');
+  noteBox.appendChild(txt);
+
+  // أزرار التعديل والحذف والإغلاق
+  const btnEdit = document.createElement('a-entity');
+  btnEdit.setAttribute('text','value:✏️; color:#d4af37; align:left; width:1;');
+  btnEdit.setAttribute('position','-1.3 0.6 0.02');
+  btnEdit.classList.add('clickable');
+  noteBox.appendChild(btnEdit);
+
+  const btnDelete = document.createElement('a-entity');
+  btnDelete.setAttribute('text','value:🗑️; color:#d4af37; align:center; width:1;');
+  btnDelete.setAttribute('position','0 0.6 0.02');
+  btnDelete.classList.add('clickable');
+  noteBox.appendChild(btnDelete);
+
+  const btnClose = document.createElement('a-entity');
+  btnClose.setAttribute('text','value:✖️; color:#d4af37; align:right; width:1;');
+  btnClose.setAttribute('position','1.3 0.6 0.02');
+  btnClose.classList.add('clickable');
+  noteBox.appendChild(btnClose);
 
   marker.appendChild(noteBox);
   marker._label = noteBox;
   marker._text = txt;
 
-  function toggleNote(){ const vis = noteBox.getAttribute('visible'); noteBox.setAttribute('visible', !vis); }
+  // التفاعل
   dot.addEventListener('click', e => { e.stopPropagation(); toggleNote(); });
   btnClose.addEventListener('click', e => { e.stopPropagation(); noteBox.setAttribute('visible','false'); });
-  btnDelete.addEventListener('click', e => { e.stopPropagation(); marker.remove(); saveNotes(); });
+  btnDelete.addEventListener('click', e => {
+    e.stopPropagation();
+    marker.remove();
+    saveNotes();
+  });
   btnEdit.addEventListener('click', e => {
     e.stopPropagation();
     const newText = prompt('📝 عدّل الملاحظة:', marker.getAttribute('data-note') || '');
-    if(newText !== null){ marker.setAttribute('data-note', newText); txt.setAttribute('text', `value:${newText}; color:#fff; align:center; wrapCount:40; width:3;`); saveNotes(); }
+    if(newText !== null){
+      marker.setAttribute('data-note', newText);
+      txt.setAttribute('text', `value:${newText}; color:#fff; align:center; wrapCount:40; width:3;`);
+      saveNotes();
+    }
   });
+
+  function toggleNote(){ const vis = noteBox.getAttribute('visible'); noteBox.setAttribute('visible', !vis); }
 
   scene.appendChild(marker);
   return marker;
 }
 
-/* no-op لتفادي أخطاء مرجعية إن استُخدمت */
-function handleNoteClick(){ /* intentionally empty */ }
-
+/* حفظ الملاحظات في Local Storage */
 function saveNotes(){
   const notes = [];
   document.querySelectorAll('.noteMarker').forEach(p=>{
-    notes.push({ position: p.getAttribute('position'), text: p.getAttribute('data-note') || '' });
+    notes.push({
+      position: p.getAttribute('position'),
+      text: p.getAttribute('data-note') || ''
+    });
   });
   localStorage.setItem('crimeNotes', JSON.stringify(notes));
 }
+
+/* تحميل الملاحظات عند فتح الصفحة */
 window.addEventListener('load', ()=>{
   const savedNotes = localStorage.getItem('crimeNotes');
-  if(savedNotes){ JSON.parse(savedNotes).forEach(n=>{ createNoteAt(n.position, n.text); }); }
+  if(savedNotes){
+    const notes = JSON.parse(savedNotes);
+    notes.forEach(n=>{
+      createNoteAt(n.position, n.text);
+    });
+    console.log('✅ تم تحميل الملاحظات المحفوظة');
+  }
 });
-function deleteNotes(){ document.querySelectorAll('.noteMarker').forEach(n=>n.remove()); localStorage.removeItem('crimeNotes'); msg('🗑️ تم حذف جميع الملاحظات'); }
+
+/* حذف جميع الملاحظات */
+function deleteNotes(){
+  document.querySelectorAll('.noteMarker').forEach(n=>n.remove());
+  localStorage.removeItem('crimeNotes');
+  msg('🗑️ تم حذف جميع الملاحظات');
+}
+
+/* عند حفظ الملاحظة */
 document.getElementById('noteSave').onclick = ()=>{
   const t = noteText.value.trim();
   if(!pendingPoint){ noteModal.style.display='none'; return; }
   const marker = createNoteAt(pendingPoint, t);
   marker._label.setAttribute('visible','true');
-  pendingPoint=null; noteModal.style.display='none'; noteModeActive=false; statusEl.textContent='جاهز'; saveNotes();
+  pendingPoint=null; noteModal.style.display='none';
+  noteModeActive=false; statusEl.textContent='جاهز';
+  saveNotes(); // ✅ حفظ بعد الإضافة
 };
-document.getElementById('noteCancel').onclick = ()=>{ pendingPoint=null; noteModal.style.display='none'; statusEl.textContent='جاهز'; noteModeActive=false; };
+
+document.getElementById('noteCancel').onclick = ()=>{
+  pendingPoint=null;
+  noteModal.style.display='none';
+  statusEl.textContent='جاهز';
+  noteModeActive=false;
+};
+
+// التقاط النقرة داخل المشهد لإضافة الملاحظة
 ray.addEventListener('click', ev => {
-  if (!noteModeActive) return;
-  const point = ev.detail?.intersection?.point; if (!point) return;
-  pendingPoint = point; noteModal.style.display='grid'; noteText.value = ''; noteText.focus();
+  if (!noteModeActive) return; // إذا لم يكن وضع الملاحظات مفعّل، لا تعمل شيء
+  const point = ev.detail?.intersection?.point;
+  if (!point) return;
+
+  // حفظ موقع الملاحظة مؤقتاً
+  pendingPoint = point;
+
+  // فتح نافذة إدخال النص
+  noteModal.style.display = 'grid';
+  noteText.value = '';
+  noteText.focus();
 });
-/* ===== نظام جمع الأدلة والعداد المركزي (3 دقائق عند دخول الغرفة) ===== */
-let evidenceCollected = [];           // أسماء الأدلة التي تم جمعها
-let evidenceCountdown = null;         // interval id
-let evidenceTimeLeft = 180;           // 180 ثانية = 3 دقائق
-let evidenceCountdownStarted = false; // لمنع التشغيل المتكرر
-
-// دوال مساعدة
-function fmtSec(t){
-  const m = String(Math.floor(Math.max(0,t)/60)).padStart(2,'0');
-  const s = String(Math.max(0,t)%60).padStart(2,'0');
-  return `${m}:${s}`;
-}
-function updateCentralUI(){
-  const elTime = document.getElementById('evidenceCenterTime');
-  const list = document.getElementById('evidenceCenterList');
-  if(elTime) elTime.textContent = fmtSec(evidenceTimeLeft);
-  if(list){
-    list.innerHTML = '';
-    evidenceCollected.forEach(name=>{
-      const it = document.createElement('div');
-      it.className = 'evidence-center-item';
-      it.textContent = name;
-      list.appendChild(it);
-    });
-  }
-}
-
-// بدء العد عند الدخول للغرفة (يُستدعى عند إنشاء الغرفة/عند missionStarted أو عند إظهار room)
-function startEvidenceCountdownIfNeeded(){
-  if(evidenceCountdownStarted) return;
-  const room = document.getElementById('room');
-  const report = document.getElementById('reportOverlay');
-  if(!room || room.getAttribute('visible') !== 'true') return;
-  // لا نبدأ العد بينما البلاغ معروض
-  if(report && report.style.display !== 'none') return;
-
-  evidenceCountdownStarted = true;
-  evidenceTimeLeft = 180; // 3 دقائق
-  updateCentralUI();
-  // إظهار واجهة العد
-  const evidenceUI = document.getElementById('evidenceCenter');
-  if(evidenceUI) evidenceUI.style.display = 'flex';
-  statusEl.textContent = 'التحقيق قيد التنفيذ';
-
-  // 👇 نبدأ العد فعليًا
-  evidenceCountdown = setInterval(()=>{
-    evidenceTimeLeft--;
-
-    // تحديث العنصر مباشرة كل ثانية
-    const timerEl = document.getElementById('evidenceCenterTime');
-    if(timerEl) timerEl.textContent = fmtSec(evidenceTimeLeft);
-
-    updateCentralUI(); // يحدّث القائمة أيضًا
-
-    // عند انتهاء الوقت
-    if(evidenceTimeLeft <= 0){
-      clearInterval(evidenceCountdown);
-      evidenceCountdown = null;
-      // إخفاء واجهة العد قبل التقرير
-      const evidenceUI2 = document.getElementById('evidenceCenter');
-      if(evidenceUI2) evidenceUI2.style.display = 'none';
-      finalizeEvidenceReport();
-    }
-  }, 1000);
-}
 
 
-
-// دالة لإضافة دليل (تتفادى التكرار)
-function collectEvidence(name){
-  if(!name) return;
-  if(evidenceCollected.includes(name)) return; // لا تكرر
-  evidenceCollected.push(name);
-  updateCentralUI();
-  msg('تم جمع الدليل: ' + name);
-
-  const pulse = document.getElementById('evidenceCenter');
-  if(pulse) { pulse.classList.add('pulse'); setTimeout(()=>pulse.classList.remove('pulse'), 500); }
-
-  // ✅ إبقاء العداد ظاهر بعد الجمع
-  const box = document.getElementById('evidenceCenter');
-  if(box) box.style.display = 'block';
-
-  // ✅ لو تم جمع جميع الأدلة قبل انتهاء الوقت، أوقف العد وأظهر التقرير فوراً
-  const allEvidence = ['custom_13_gun','custom_12_corpse','custom_4_mobile','custom_3_broken_cup','ev_4_blood'];
-  if (allEvidence.every(id => evidenceCollected.includes(id))) {
-    clearInterval(evidenceCountdown);
-    evidenceCountdown = null;
-    finalizeEvidenceReport();
-  }
-}
-
-
-
-// دالة تلخيص/اعلان النتائج عند انتهاء الوقت
-function finalizeEvidenceReport(){
-  // بناء نص التقرير
-const allEvidence = ['custom_13_gun','custom_12_corpse','custom_4_mobile','custom_3_broken_cup','ev_4_blood'];
-const missing = allEvidence.filter(id => !evidenceCollected.includes(id));
-let details = '';
-if(evidenceCollected.length) {
-  details += '<strong>الأدلة التي تم العثور عليها:</strong><br>' + evidenceCollected.join('<br>');
-}
-if(missing.length) {
-  details += '<br><br><strong style="color:#ff5c5c">الأدلة التي لم يتم العثور عليها:</strong><br>' + missing.join('<br>');
-}
-if(!details) details = 'لم يتم العثور على أي دليل.';
-showFinalGlassReport(details);
-
-  // تعطيل التفاعل في المشهد (بسيط)
-  document.querySelectorAll('.clickable').forEach(el=> el.classList.add('disabled-click'));
-  // وضع حالة أنه انتهى
-  statusEl.textContent = 'انتهى الزمن — التقرير';
-
-  // إظهار المودال النهائي (تمت بالأساس في showFinalGlassReport)
-  // إذا أردنا إعادة الضبط لاحقًا يمكن استدعاء resetEvidenceCountdown()
-}
-
-// إذا أردت إعادة ضبط النظام (مثلاً زر إعادة الضبط أو بداية مهمة جديدة)
-function resetEvidenceCountdown(){
-  if(evidenceCountdown) { clearInterval(evidenceCountdown); evidenceCountdown = null; }
-  evidenceCollected = []; evidenceCountdownStarted = false; evidenceTimeLeft = 180;
-  updateCentralUI();
-  const evidenceUI = document.getElementById('evidenceCenter');
-  if(evidenceUI) evidenceUI.style.display = 'none';
-  timeEl.textContent = '--:--';
-  statusEl.textContent = 'جاهز';
-  document.querySelectorAll('.clickable').forEach(el=> el.classList.remove('disabled-click'));
-}
-
-/* ربط بدء العداد تلقائياً بعد الدخول للغرفة
-   في مشروعك، بعد انتهاء الـ cityDive دالة startCityDiveThenEnterRoom() تقوم بإظهار الغرفة
-   لذلك نراقب خاصية room.visible أو window.missionStarted */
-// ✅ مراقبة فتح الغرفة + التحكم في ظهور العداد الزمني (مباشرة)
-(function watchRoomVisibility(){
-  const room = document.getElementById('room');
-  if(!room) return;
-
-  const obs = new MutationObserver(()=>{
-    const report = document.getElementById('reportOverlay');
-    const evidenceUI = document.getElementById('evidenceCenter');
-
-    // ✅ عند ظهور الغرفة لأول مرة فقط نبدأ العدّ مباشرة
-    if(room.getAttribute('visible') === 'true' && !evidenceCountdownStarted){
-      // تأكد أن البلاغ أغلق أولاً
-      if(report && report.style.display !== 'none'){
-        const repObs = new MutationObserver(()=>{
-          if(report.style.display === 'none'){
-            repObs.disconnect();
-            if(evidenceUI) evidenceUI.style.display = 'flex';
-            startEvidenceCountdownIfNeeded();
-          }
-        });
-        repObs.observe(report, { attributes:true, attributeFilter:['style'] });
-      } else {
-        if(evidenceUI) evidenceUI.style.display = 'flex';
-        startEvidenceCountdownIfNeeded();
-      }
-    }
-  });
-
-  obs.observe(room, { attributes:true, attributeFilter:['visible'] });
-})();
-
-
-
-
-// احتفظنا بزر إعادة الضبط القديم بصيغة resetEvidenceCountdown() — إن أردت ربطه بزر في الـ sidebar افعل ذلك.
+/* المؤقت + النقاط (كما هي) */
+let timeLeft=0, timer=null, score=0;
+function fmt(t){ const m=String(Math.floor(t/60)).padStart(2,'0'); const s=String(t%60).padStart(2,'0'); return `${m}:${s}`; }
+function endTimer(resetOnly=false){ if(timer){ clearInterval(timer); timer=null; } if(resetOnly){ timeLeft=0; timeEl.textContent='--:--'; statusEl.textContent='جاهز'; return; } statusEl.textContent='انتهى الوقت'; }
+function animateNumber(el, from, to, dur=350){ const start=performance.now(); function step(now){ const p=Math.min(1,(now-start)/dur); const val = Math.round(from + (to-from)*p); el.textContent = String(val); if(p<1) requestAnimationFrame(step); } requestAnimationFrame(step); }
+function addScore(delta){ const prev=score; score = Math.max(0, score + delta); animateNumber(scoreEl, prev, score); }
+const durInp = document.getElementById('duration');
+document.getElementById('btnGameStart').onclick = ()=>{
+  timeLeft = parseInt(durInp.value)||120;
+  if(timer) clearInterval(timer);
+  timeEl.textContent = fmt(timeLeft);
+  statusEl.textContent='الاختبار قيد التنفيذ';
+  placed.forEach(p=>{ if(p.el) p.el.setAttribute('data-scored','no'); });
+  timer = setInterval(()=>{ timeLeft--; timeEl.textContent=fmt(timeLeft); if(timeLeft<=0){ endTimer(); msg('⏱️ انتهى الوقت'); } },1000);
+};
+document.getElementById('btnGameStop').onclick = ()=>{ endTimer(); msg('تم الإيقاف'); };
+document.getElementById('btnGameFinalize').onclick = ()=>{ msg(`تم الاعتماد — نقاطك: ${score}`); };
 
 function flashHalo(ent, color){
   const halo = document.createElement('a-ring');
@@ -890,461 +2323,1347 @@ function flashHalo(ent, color){
   setTimeout(()=>{ try{ ent.removeChild(halo);}catch(e){} }, 350);
 }
 
-/* تفاعل بالنقر المعدّل — يدعم: اختيار العناصر placed, وضع الملاحظات، وجمع الأدلة القابلة للنقر */
-ray.addEventListener('click',(ev)=>{
-  const el = ev.detail?.intersectedEl; if(!el) return;
+/* ========================
+   🎯 التفاعل بالنقر العام (إصلاح احتساب النقاط)
+   ======================== */
+/* 🎯 إصلاح شامل لاحتساب النقاط (مرة واحدة فقط لكل دليل) */
+ray.addEventListener('click', (ev) => {
+  const el = ev.detail?.intersectedEl;
+  if (!el) return;
 
-  // 1) إن كان النقر على عنصر 'placed' ضعف الاختيار كما قبل
-  const entPlaced = findAncestor(el, e => e.classList && e.classList.contains('placed'));
-  if(entPlaced){
-    const rec = placed.find(p => p.el === entPlaced || p.id === entPlaced.id);
-    if(rec) {
-      selectById(rec.id);
-      // لا نوقف هنا، لأن العنصر يمكن أن يكون دليلًا أيضاً (placed + clickable)
-    }
+  // ✅ اختيار العنصر عند النقر عليه
+  const ent = findAncestor(el, e => e.classList && e.classList.contains('placed'));
+  if (ent) {
+    const rec = placed.find(p => p.el === ent || p.id === ent.id);
+    if (rec) selectById(rec.id);
   }
 
-  // 2) دعم وضع الملاحظات (كما سابقاً)
-  handleNoteClick(ev);
+  // ✅ احتساب النقاط بدون تكرار
+  if (!window.missionStarted) return; // فقط بعد بدء المهمة
 
-  // 3) جمع الأدلة: ندعم عناصر لها id من قائمة الأدلة أو أي عنصر يحمل class 'clickable'
-  // قائمة الأدلة الأساسية (التي طلبتها) — اكتب أسماء الـ id كما في المشهد
-  const evidenceIds = ['custom_13_gun','custom_12_corpse','custom_4_mobile','custom_3_broken_cup','ev_4_blood'];
+  const target = findAncestor(el, e => e.classList && e.classList.contains('placed'));
+  if (!target) return;
 
-  // العثور على أي عنصر يمكن أن يمثل دليلاً (ابحث للأعلى في الشجرة)
-  const targetEvidence = findAncestor(el, e => {
-    if(!e) return false;
-    if(e.id && evidenceIds.includes(e.id)) return true;
-    if(e.classList && e.classList.contains('clickable')) return true;
-    return false;
-  });
+  const valid = target.getAttribute('data-valid');
+  const scored = target.getAttribute('data-scored');
 
-  if(targetEvidence){
-    // عطل التفاعل إن كانت العنصر مُعَلّم بتعطيل النقر
-    if(targetEvidence.classList && targetEvidence.classList.contains('disabled-click')) return;
+  // 🚫 منع احتساب مكرر
+  if (scored === 'yes' || valid === 'none') return;
 
-    // حدد اسمًا لعرضه — استخدم data-name لو متوفر، وإلا id
-    const evName = targetEvidence.getAttribute('data-name') || targetEvidence.id || 'دليل مجهول';
-    collectEvidence(evName);
-
-    // ضع تأثير بصري خفيف: وميض/حلقة
-    try{
-      const halo = document.createElement('a-ring');
-      halo.setAttribute('radius-inner','0.45'); halo.setAttribute('radius-outer','0.55'); halo.setAttribute('rotation','-90 0 0');
-      halo.setAttribute('material',`color:#ffd56b; opacity:0.9; transparent:true`);
-      targetEvidence.appendChild(halo);
-      setTimeout(()=>{ try{ targetEvidence.removeChild(halo);}catch(e){} }, 600);
-    }catch(e){}
+  if (valid === 'true') {
+    addScore(10);
+    flashHalo(target, '#39d98a');
+    msg('✅ تم احتساب نقطة للدليل الصحيح');
+  } else if (valid === 'false') {
+    addScore(-5);
+    flashHalo(target, '#ff5c5c');
+    msg('❌ تم خصم نقطة للدليل الخاطئ');
   }
+
+  // ✅ علّم العنصر أنه تم احتسابه
+  target.setAttribute('data-scored', 'yes');
+  saveScene();
 });
 
-
-/* حذف/إعادة ضبط */
+/* حذف وإعادة ضبط أكثر ثباتًا */
 document.getElementById('btnDelete').onclick = ()=>{
   if(!selected){ msg('اختر عنصرًا أولًا'); return; }
   const id = placedList.value;
   try{ selected.parentNode && selected.parentNode.removeChild(selected); }catch(e){}
   placed = placed.filter(p=>p.id!==id);
   [...placedList.options].forEach(o=>{ if(o.value===id) o.remove(); });
-  selected=null; evidenceSel.value='none'; msg('🗑 تم حذف العنصر'); saveScene();
+  selected=null; evidenceSel.value='none';
+  msg('🗑 تم حذف العنصر');
+  saveScene(); // ✅ تحديث الحفظ بعد الحذف
 };
+
+
+document.getElementById('btnReset').onclick = ()=>{
+  placed.forEach(p=>{ try{ p.el.parentNode && p.el.parentNode.removeChild(p.el); }catch(e){} });
+  placed=[]; placedList.innerHTML='';
+  document.querySelectorAll('.noteMarker').forEach(n=>{ try{ n.parentNode && n.parentNode.removeChild(n); }catch(e){} });
+  selected=null; evidenceSel.value='none';
+  endTimer(true);
+  score = 0; scoreEl.textContent='0'; statusEl.textContent='تمت إعادة الضبط';
+  msg('تمت إعادة ضبط المشهد');
+};
+document.getElementById('btnApplyEvidence').onclick = ()=>{
+  if(!selected){ msg('اختر عنصرًا أولًا'); return; }
+
+  const val = evidenceSel.value;
+  selected.setAttribute('data-valid', val);
+
+  // إزالة الهالة السابقة إن وجدت
+  [...selected.children].filter(c=> c.classList && c.classList.contains('evidenceHalo')).forEach(h=>selected.removeChild(h));
+
+  // إضافة الهالة حسب التقييم
+  if(val==='true' || val==='false'){
+    const halo = document.createElement('a-torus');
+    halo.classList.add('evidenceHalo');
+    halo.setAttribute('radius','0.6'); halo.setAttribute('radius-tubular','0.02');
+    halo.setAttribute('rotation','90 0 0'); halo.setAttribute('position','0 0.05 0');
+    const col = (val==='true') ? '#39d98a' : '#ff5c5c';
+    halo.setAttribute('material',`color:${col}; emissive:${col}; emissiveIntensity:0.5; opacity:0.85; transparent:true`);
+    selected.appendChild(halo);
+  }
+
+
+  msg('✅ تم تقييم العنصر');
+  saveScene();
+};
+// حفظ المشهد في Local Storage
+function saveScene() {
+  const sceneData = [];
+  document.querySelectorAll('a-entity[gltf-model]').forEach(ent => {
+    sceneData.push({
+      model: ent.getAttribute('gltf-model'),
+      position: ent.getAttribute('position'),
+      rotation: ent.getAttribute('rotation'),
+      scale: ent.getAttribute('scale')
+    });
+  });
+  localStorage.setItem('crimeSceneData', JSON.stringify(sceneData));
+  console.log("تم حفظ المشهد ✅");
+}
+
+/* ========================
+   ✅ تحميل المشهد من Local Storage
+   ======================== */
+/* ========================
+   ✅ تحميل المشهد من Local Storage مع إعادة التفاعل الكامل
+   ======================== */
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('crimeSceneData');
+  if (saved) {
+    const sceneData = JSON.parse(saved);
+    const scene = document.querySelector('a-scene');
+    const placedList = document.getElementById('placedList');
+
+    sceneData.forEach((item, idx) => {
+      const id = 'ent-' + Date.now() + '-' + idx;
+      const ent = document.createElement('a-entity');
+      ent.setAttribute('id', id);
+      ent.setAttribute('gltf-model', item.model);
+      ent.setAttribute('position', item.position);
+      ent.setAttribute('rotation', item.rotation);
+      ent.setAttribute('scale', item.scale);
+      ent.classList.add('placed', 'clickable');
+      ent.setAttribute('data-valid', 'none');
+      ent.setAttribute('data-scored', 'no');
+      scene.appendChild(ent);
+// 🪄 إجبار A-Frame على تحديث المشهد فوراً بعد إضافة العنصر
+scene.object3D.updateMatrixWorld(true);
+scene.renderer && scene.renderer.render(scene.object3D, scene.camera);
+
+      // أضف إلى المصفوفة
+      const name = item.model.split('/').pop();
+      placed.push({ id, name, el: ent, scored: false });
+
+      // أضف إلى قائمة العناصر
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = name;
+      placedList.appendChild(opt);
+
+      // ✅ إعادة تفعيل الضغط على العنصر بعد التحميل
+      ent.addEventListener('click', () => {
+        selectById(id);
+      });
+    });
+
+    // ✅ تفعيل اختيار العنصر من القائمة بعد التحميل
+    placedList.onchange = e => selectById(e.target.value);
+
+    msg("✅ تم استرجاع المشهد السابق والتحكم بالعناصر متاح");
+    console.log("✅ تم تحميل المشهد من Local Storage مع إعادة التفاعل الكامل");
+    saveScene(); // ✅ تحديث البيانات فور الاسترجاع
+  }
+});
+
+/* ========================
+   ✅ حفظ المشهد في Local Storage
+   ======================== */
+function saveScene() {
+  const data = [];
+  document.querySelectorAll('.placed').forEach(ent => {
+    data.push({
+      model: ent.getAttribute('gltf-model'),
+      position: ent.getAttribute('position'),
+      rotation: ent.getAttribute('rotation'),
+      scale: ent.getAttribute('scale')
+    });
+  });
+  localStorage.setItem('crimeSceneData', JSON.stringify(data));
+  console.log('💾 تم حفظ المشهد بنجاح');
+}
+
+/* ========================
+   🗑️ حذف العناصر
+   ======================== */
+document.getElementById('btnDelete').onclick = ()=>{
+  if(!selected){ msg('اختر عنصرًا أولًا'); return; }
+  const id = placedList.value;
+  try{ selected.parentNode && selected.parentNode.removeChild(selected); }catch(e){}
+  placed = placed.filter(p=>p.id!==id);
+  [...placedList.options].forEach(o=>{ if(o.value===id) o.remove(); });
+  selected=null; evidenceSel.value='none';
+  msg('🗑 تم حذف العنصر');
+  saveScene(); // ✅ تحديث الحفظ بعد الحذف
+};
+
+/* ========================
+   🔄 إعادة ضبط المشهد
+   ======================== */
 document.getElementById('btnReset').onclick = ()=>{
   if(!confirm('هل أنت متأكد من حذف جميع العناصر والملاحظات؟')) return;
   document.querySelectorAll('.placed').forEach(el=>el.remove());
-  placed = []; placedList.innerHTML='';
-  localStorage.removeItem('crimeSceneData'); localStorage.removeItem('crimeNotes');
-  msg('🧹 تم إعادة تعيين المشهد بالكامل'); saveScene();
+  placed = [];
+  placedList.innerHTML='';
+  localStorage.removeItem('crimeSceneData');
+  localStorage.removeItem('crimeNotes');
+  msg('🧹 تم إعادة تعيين المشهد بالكامل');
+  saveScene(); // ✅ حفظ الحالة الفارغة
 };
-document.addEventListener('mouseup', ()=>{ if(selected) saveScene(); });
-document.addEventListener('touchend', ()=>{ if(selected) saveScene(); });
 
-/* مراقبة انتقال الكاميرا عند فتح القائمة */
+/* ========================
+   🕒 الحفظ التلقائي عند التغيير
+   ======================== */
+// عند تحريك أو تدوير أو تكبير أي عنصر
+document.addEventListener('mouseup', ()=>{
+  if(selected) saveScene();
+});
+document.addEventListener('touchend', ()=>{
+  if(selected) saveScene();
+});
+
 document.addEventListener('DOMContentLoaded', function() {
   const sidebar = document.getElementById('sidebar');
   const cameraControls = document.querySelector('.camera-controls');
+
   if (!sidebar || !cameraControls) return;
+
   const observer = new MutationObserver(() => {
     const isSidebarVisible = !sidebar.classList.contains('hidden');
-    const isMobile = window.innerWidth <= 900;
-    cameraControls.style.transition = 'transform 0.4s ease';
-    if (isSidebarVisible) cameraControls.style.transform = isMobile ? 'translateX(-80px)' : 'translateX(-290px)';
-    else cameraControls.style.transform = isMobile ? 'translateX(-50%)' : 'translateX(0)';
+    const isMobile = window.innerWidth <= 900; // تحديد إذا الجهاز جوال أو تابلت
+
+    if (isSidebarVisible) {
+      cameraControls.style.transition = 'transform 0.4s ease';
+      if (isMobile) {
+        // في الجوال: حركة بسيطة يسار بعد القائمة
+        cameraControls.style.transform = 'translateX(-80px)';
+      } else {
+        // في اللابتوب: حركة أكبر يسار بعد القائمة
+        cameraControls.style.transform = 'translateX(-290px)';
+      }
+    } else {
+      // لما تُغلق القائمة ترجع لوضعها الطبيعي حسب نوع الجهاز
+      cameraControls.style.transition = 'transform 0.4s ease';
+      if (isMobile) {
+        cameraControls.style.transform = 'translateX(-50%)'; // ترجع للمنتصف
+      } else {
+        cameraControls.style.transform = 'translateX(0)'; // ترجع لمكانها الأصلي
+      }
+    }
   });
+
   observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
 });
-
-/* مؤثرات الباب */
+/* ==== تأثير الباب والانفجار ==== */
 function spawnSmoke(){
-  const root=document.getElementById('fxSmoke'); const W=innerWidth,H=innerHeight;
-  for(let i=0;i<110;i++){
-    const s=document.createElement('div'); s.className='smoke';
-    s.style.left=(W/2-120)+'px'; s.style.top=(H/2-120)+'px'; root.appendChild(s);
-    const ang=Math.random()*Math.PI*2,dist=300+Math.random()*H*.7; const tx=Math.cos(ang)*dist,ty=Math.sin(ang)*dist;
-    const dur=3200+Math.random()*1200,dl=Math.random()*150;
-    s.animate([{transform:'translate(0,0) scale(.5)',opacity:0},{transform:`translate(${tx*.4}px,${ty*.4}px) scale(1.1)`,opacity:.9,offset:.3},{transform:`translate(${tx}px,${ty}px) scale(1.5)`,opacity:0}],{duration:dur,delay:dl,easing:'cubic-bezier(.2,.9,.1,1)',fill:'forwards'});
-    setTimeout(()=>s.remove(),dur+dl+200);
-  }
+ const root=document.getElementById('fxSmoke');
+ const W=innerWidth,H=innerHeight;
+ for(let i=0;i<110;i++){
+  const s=document.createElement('div');
+  s.className='smoke';
+  s.style.left=(W/2-120)+'px';
+  s.style.top=(H/2-120)+'px';
+  root.appendChild(s);
+  const ang=Math.random()*Math.PI*2,dist=300+Math.random()*H*.7;
+  const tx=Math.cos(ang)*dist,ty=Math.sin(ang)*dist;
+  const dur=3200+Math.random()*1200,dl=Math.random()*150;
+  s.animate([
+   {transform:'translate(0,0) scale(.5)',opacity:0},
+   {transform:`translate(${tx*.4}px,${ty*.4}px) scale(1.1)`,opacity:.9,offset:.3},
+   {transform:`translate(${tx}px,${ty}px) scale(1.5)`,opacity:0}
+  ],{duration:dur,delay:dl,easing:'cubic-bezier(.2,.9,.1,1)',fill:'forwards'});
+  setTimeout(()=>s.remove(),dur+dl+200);
+ }
 }
 function spawnParticles(){
-  const root=document.getElementById('fxParticles'); const W=innerWidth,H=innerHeight;
-  for(let i=0;i<140;i++){
-    const p=document.createElement('div');p.className='particle';
-    p.style.left=W/2+'px';p.style.top=H/2+'px'; root.appendChild(p);
-    const ang=Math.random()*Math.PI*2,dist=200+Math.random()*H*.8; const tx=Math.cos(ang)*dist,ty=Math.sin(ang)*dist;
-    const dur=1600+Math.random()*900,dl=Math.random()*100;
-    p.animate([{transform:'translate(0,0) scale(.6)',opacity:0},{transform:`translate(${tx*.6}px,${ty*.6}px) scale(1)`,opacity:1,offset:.3},{transform:`translate(${tx}px,${ty}px) scale(.8)`,opacity:0}],{duration:dur,delay:dl,easing:'cubic-bezier(.2,.9,.1,1)',fill:'forwards'});
-    setTimeout(()=>p.remove(),dur+dl+100);
-  }
+ const root=document.getElementById('fxParticles');
+ const W=innerWidth,H=innerHeight;
+ for(let i=0;i<140;i++){
+  const p=document.createElement('div');p.className='particle';
+  p.style.left=W/2+'px';p.style.top=H/2+'px';
+  root.appendChild(p);
+  const ang=Math.random()*Math.PI*2,dist=200+Math.random()*H*.8;
+  const tx=Math.cos(ang)*dist,ty=Math.sin(ang)*dist;
+  const dur=1600+Math.random()*900,dl=Math.random()*100;
+  p.animate([
+   {transform:'translate(0,0) scale(.6)',opacity:0},
+   {transform:`translate(${tx*.6}px,${ty*.6}px) scale(1)`,opacity:1,offset:.3},
+   {transform:`translate(${tx}px,${ty}px) scale(.8)`,opacity:0}
+  ],{duration:dur,delay:dl,easing:'cubic-bezier(.2,.9,.1,1)',fill:'forwards'});
+  setTimeout(()=>p.remove(),dur+dl+100);
+ }
 }
-function cameraShake(){ const cam=document.getElementById('rig'); cam.classList.add('shake'); setTimeout(()=>cam.classList.remove('shake'),1600); }
+function cameraShake(){
+ const cam=document.getElementById('rig');
+ cam.classList.add('shake');
+ setTimeout(()=>cam.classList.remove('shake'),1600);
+}
+/* ⚡ فلاش الانفجار */
+/* ⚡ الانفجار الملكي (ذهبي + 3 ومضات زرقاء) */
 function flashBlast(){
   const ov = document.getElementById('doorOverlay');
+
+  // ✨ الوميض الذهبي الكبير
   setTimeout(()=>{
-    const gold = document.createElement('div');
-    gold.style.position='absolute'; gold.style.inset='0';
-    gold.style.background='radial-gradient(circle at center, rgba(255,220,150,0.95) 0%, rgba(212,175,55,0.6) 35%, transparent 80%)';
-    gold.style.zIndex='25000'; gold.style.opacity='0'; gold.style.pointerEvents='none'; ov.appendChild(gold);
-    gold.animate([{opacity:0},{opacity:1, offset:.15},{opacity:.8, offset:.3},{opacity:.3, offset:.55},{opacity:0}],{duration:1200,easing:'ease-out'});
+    const gold=document.createElement('div');
+    gold.style.position='absolute';
+    gold.style.inset='0';
+    gold.style.background='radial-gradient(circle,rgba(255,220,150,0.9) 0%,rgba(212,175,55,0.5) 40%,transparent 80%)';
+    gold.style.zIndex='25000'; gold.style.pointerEvents='none';
+    ov.appendChild(gold);
+    gold.animate([{opacity:0},{opacity:1,offset:.2},{opacity:0}],{duration:1200,easing:'ease-out'});
     setTimeout(()=>gold.remove(),1300);
-  }, 2500);
+  },2500);
+
+  // ⚡ 3 ومضات زرقاء
   setTimeout(()=>{
-    for(let i=0;i<6;i++){
+    let done=false;
+    for(let i=0;i<3;i++){
       setTimeout(()=>{
         const blue=document.createElement('div');
-        blue.style.position='absolute'; blue.style.inset='0';
-        blue.style.background='radial-gradient(circle at center, rgba(100,180,255,1) 0%, rgba(50,100,200,0.6) 25%, rgba(0,0,0,0.9) 80%)';
-        blue.style.zIndex='25000'; blue.style.opacity='0'; blue.style.pointerEvents='none'; ov.appendChild(blue);
-        blue.animate([{transform:'scale(0.8)',opacity:0},{transform:'scale(1.1)',opacity:1,offset:.15},{transform:'scale(1.3)',opacity:.8,offset:.3},{transform:'scale(1.5)',opacity:0}],{duration:350,easing:'ease-in-out'});
-        setTimeout(()=>blue.remove(),380);
-      }, i*380);
-    }
-  }, 4000);
-}
+        blue.style.position='absolute';
+        blue.style.inset='0';
+        blue.style.background='radial-gradient(circle,rgba(100,180,255,1) 0%,rgba(0,0,50,0.9) 80%)';
+        blue.style.zIndex='25000'; ov.appendChild(blue);
+        blue.animate([{opacity:0},{opacity:1,offset:.15},{opacity:0}],{duration:400,easing:'ease-in-out'});
+        setTimeout(()=>blue.remove(),420);
 
-/* الغوص داخل المدينة ثم دخول الغرفة */
-function startCityDiveThenEnterRoom(){
-  // إخفاء المشهد والـUI أثناء الغوص
-  document.querySelector('a-scene').style.display = 'none';
-  const uiEls = document.querySelectorAll('#hud, #controls, #cameraPanel, #uiLayer');
-  uiEls.forEach(el => el.style.display = 'none');
-
-  const stage = document.getElementById('cityDive');
-  const img = document.getElementById('cityImg');
-  stage.style.display='block';
-  stage.style.opacity='1';
-  img.style.transformOrigin='center';
-
-  // 🎧 تشغيل صوت الهواء أثناء الغوص
-  let windAudio = document.getElementById('windAudio');
-  if(!windAudio){
-    windAudio = document.createElement('audio');
-    windAudio.id = 'windAudio';
-    windAudio.src = 'https://cdn.pixabay.com/download/audio/2025/03/31/audio_3a8f31919f.mp3';
-    windAudio.loop = true;
-    windAudio.volume = 0.45;
-    document.body.appendChild(windAudio);
-  }
-  windAudio.currentTime = 0;
-  windAudio.play().catch(()=>{});
-
-// ✨ حركة الغوص السينمائية الهادئة بزوم تدريجي
-img.animate([
-  { transform: 'scale(1) translateY(0%)', filter: 'brightness(0.9) blur(0px)' },
-  { transform: 'scale(1.2) translateY(-1%)', filter: 'brightness(1.0) blur(0.5px)' },
-  { transform: 'scale(1.5) translateY(-5%)', filter: 'brightness(1.05) blur(1px)' },
-  { transform: 'scale(1.8) translateY(-10%)', filter: 'brightness(1.1) blur(1.5px)' },
-  { transform: 'scale(3.5) translateY(-20%)', filter: 'brightness(1.15) blur(2px)' }
-], { 
-  duration: 8000, 
-  easing: 'ease-in-out', 
-  fill: 'forwards' 
-});
-
-
-  // نهاية الغوص → إظهار الغرفة
+        // ✅ بعد آخر ومضة مباشرة، فعّل مشهد الظلام والصوت
+if(i===2 && !done){
+  done = true;
   setTimeout(()=>{
-    stage.animate([{opacity:1},{opacity:0}],{duration:900,fill:'forwards'}).onfinish=()=>{
-      stage.style.display='none';
+    const dark = document.getElementById('darkIntro');
+    const wind = document.getElementById('windSound');
+    const narrator = document.getElementById('narratorVoice');
+    const brief = document.getElementById('briefVoice');
 
-      // 👇 إظهار المشهد والواجهة
-      const sceneEl = document.querySelector('a-scene');
-      sceneEl.style.display = 'block';
-      document.getElementById('room').setAttribute('visible','true');
-      uiEls.forEach(el => el.style.display = '');
-      // لا نستدعي startEvidenceCountdownIfNeeded() هنا مباشرة لأن المراقب سيتولى التشغيل
-      // وكذلك نتحقق من تقرير البلاغ (إذا كان مغلقاً سيبدأ العداد عبر المراقب)
-      if (sceneEl.resize) sceneEl.resize();
-      window.dispatchEvent(new Event('resize'));
-
-      window.missionStarted = true;
-
-      // 🌀 بعد الدخول نوقف صوت الهواء
-      if(windAudio){
-        setTimeout(()=>{
-          windAudio.pause();
-          windAudio.currentTime = 0;
-        }, 300); // بعد لحظة قصيرة من الدخول
-      }
-    };
-  }, 5000);
-}
-
-
-
-/* إغلاق البلاغ والبدء بالغوص */
-document.addEventListener('click', (e)=>{
-  if(e.target && e.target.id === 'reportStartMission'){
-    const ov = document.getElementById('reportOverlay');
-    const audio = document.getElementById('reportAudio');
-    if (audio && !audio.paused) { audio.pause(); audio.currentTime = 0; }
-    ov.animate([{opacity:1},{opacity:0}],{duration:600,fill:'forwards'}).onfinish = ()=>{
-      ov.style.display='none';
-      startCityDiveThenEnterRoom();
-    };
-  }
-});
-
-/* إظهار وإخفاء البلاغ */
-function showReportOverlay(){
-  const ov = document.getElementById('reportOverlay');
-  const audio = document.getElementById('reportAudio');
-  ov.style.display = 'flex';
-  ov.style.opacity = 0;
-  ov.animate([{opacity:0},{opacity:1}],{duration:250,fill:'forwards'});
-  if (audio){ try{ audio.currentTime = 0; audio.play(); }catch(e){} }
-
-  // 🎞️ حركة ظهور صندوق البلاغ + الوميض
-const box = document.querySelector('#reportCard');
+    if(dark){
+      // 🌑 إظهار مشهد الظلام
+      dark.style.display = 'flex';
+// ✨ ظهور الصندوق بعد ثانية من الظلام
+setTimeout(()=>{
+  const box = document.getElementById('darkBox');
   if(box){
-    box.animate([
-      {transform:'scale(0.8)', opacity:0},
-      {transform:'scale(1.05)', opacity:1, offset:0.6},
-      {transform:'scale(1)', opacity:1}
-    ], {duration:800, easing:'ease-out', fill:'forwards'});
+    box.style.opacity='1';
+    box.style.transform='translateY(0)';
   }
+},1000);
 
-function flashBox(){
-  if(!box) return;
-  const colors = ['#FFD700', '#FF3B3B', '#3B6EFF']; // ذهبي - أحمر - أزرق
-  const color = colors[Math.floor(Math.random() * colors.length)];
-  box.animate([
-    {boxShadow:`0 0 0px ${color}`},
-    {boxShadow:`0 0 40px ${color}`},
-    {boxShadow:`0 0 0px ${color}`}
-  ], {duration:800, easing:'ease-in-out'});
+      // 🎧 تشغيل صوت الرياح فورًا
+      try {
+        wind.currentTime = 0;
+        wind.play().catch(()=>{});
+      } catch(e){}
+
+      // 🎙️ بعد ثانية يبدأ صوت الراوي
+      setTimeout(()=>{
+        try {
+          narrator.currentTime = 0;
+          narrator.play().catch(()=>{});
+        } catch(e){}
+      }, 1000);
+
+      // 🗣️ (اختياري) تشغيل صوت البلاغ القصير بعد صوت الراوي بـ 2 ثانية
+      setTimeout(()=>{
+        try {
+          brief.currentTime = 0;
+          brief.play().catch(()=>{});
+        } catch(e){}
+      }, 3000);
+    }
+  }, 450);
 }
 
-
-let flashCount = 0;
-const flashInterval = setInterval(() => {
-  flashBox();
-  flashCount++;
-  if (flashCount >= 10) clearInterval(flashInterval); // عدد الومضات = 10
-}, 3000); // كل 3 ثواني
-
-
+      },i*450);
+    }
+  },4000);
 }
 
-function hideReportOverlay(){
-  const ov = document.getElementById('reportOverlay');
-  ov.animate([{opacity:1},{opacity:0}],{duration:220,fill:'forwards'}).onfinish = ()=>{ ov.style.display='none'; };
-}
-document.addEventListener('click', (e)=>{ if(e.target && e.target.id === 'reportClose'){ hideReportOverlay(); } });
-
-/* تسلسل فتح الباب */
+/* 🎬 تسلسل فتح الباب والانفجار الملكي */
 function startDoorSequence(){
   const l=document.getElementById('leftDoor'),
         r=document.getElementById('rightDoor'),
         sfx=document.getElementById('doorSfx'),
         ov=document.getElementById('doorOverlay'),
         btn=document.getElementById('btnDoorStart');
+// 🎯 الانتقال من الظلام إلى المشهد الفعلي
+document.getElementById('enterReal').addEventListener('click', () => {
+  const dark = document.getElementById('darkIntro');
+  const voice = document.getElementById('briefVoice');
+  try { if (voice) voice.pause(); } catch (e) {}
 
-  btn.style.transition='opacity .4s ease'; btn.style.opacity='0'; setTimeout(()=>btn.style.display='none',400);
+  // 🔇 إيقاف الأصوات الغامضة
+  const wind = document.getElementById('windSound');
+  const narrator = document.getElementById('narratorVoice');
+  try {
+    if (wind) { wind.pause(); wind.currentTime = 0; }
+    if (narrator) { narrator.pause(); narrator.currentTime = 0; }
+  } catch (e) {}
 
+  // 🌟 إنشاء تأثير الانتقال الذهبي
+// 🌌 إنشاء تأثير الانتقال الأزرق الغامض
+const flash = document.createElement('div');
+flash.id = 'blueTransition';
+flash.style.position = 'fixed';
+flash.style.inset = '0';
+flash.style.background = 'radial-gradient(circle at center, rgba(0,128,255,0.65), rgba(0,0,30,0.95))';
+flash.style.boxShadow = '0 0 80px 40px rgba(0,150,255,0.3) inset';
+flash.style.zIndex = '40000';
+flash.style.opacity = '0';
+flash.style.transition = 'opacity 1.2s ease-in-out, transform 1.2s ease-in-out';
+flash.style.transform = 'scale(1.05)';
+document.body.appendChild(flash);
+
+// ✨ التشغيل التدريجي (وميض أزرق ثم اختفاء)
+setTimeout(() => {
+  flash.style.opacity = '1';
+  flash.style.transform = 'scale(1)';
+}, 100);
+setTimeout(() => {
+  flash.style.opacity = '0';
+  flash.style.transform = 'scale(1.2)';
+}, 1200);
+setTimeout(() => { flash.remove(); }, 2300);
+
+
+  // 🕒 بعد اختفاء الوميض، انتقل للمشهد الفعلي
+  setTimeout(() => {
+    if (dark) {
+      dark.style.transition = 'opacity 1s ease';
+      dark.style.opacity = '0';
+      setTimeout(() => {
+        dark.style.display = 'none';
+        dark.style.opacity = '1';
+        // 🎬 إظهار رسالة البداية بعد الدخول للمشهد
+        setTimeout(() => {
+          const toast = document.getElementById('taskToastBtn');
+          if (toast) {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(40px)';
+            toast.style.transition = 'opacity 1s ease, transform 1s ease';
+            toast.classList.add('show');
+            setTimeout(() => {
+              toast.style.opacity = '1';
+              toast.style.transform = 'translateY(0)';
+            }, 100);
+          }
+        }, 1500);
+      }, 1000);
+    }
+  }, 1800);
+});
+
+  // 🔘 إخفاء الزر تدريجيًا
+  btn.style.transition='opacity .4s ease';
+  btn.style.opacity='0';
+  setTimeout(()=>btn.style.display='none',400);
+
+  // 🔊 تشغيل صوت الباب
   sfx.currentTime=0; sfx.play();
 
+  // 🚪 فتح البابين ببطء
   l.style.transition='transform 3s ease-in-out';
   r.style.transition='transform 3s ease-in-out';
   l.style.transform='rotateY(-100deg)';
   r.style.transform='rotateY(100deg)';
 
-  setTimeout(()=>{ spawnSmoke(); spawnParticles(); flashBlast(); cameraShake(); },3000);
+  // 💨 بعد الفتح يظهر الدخان والانفجار
+  setTimeout(()=>{
+    spawnSmoke();
+    spawnParticles();
+    flashBlast(); // ✨ الوميض الذهبي ثم الأزرق
+    cameraShake();
+  },3000);
 
-  setTimeout(()=>{ if (!window.missionStarted) showReportOverlay(); }, 8000);
-
+  // ⏳ اختفاء الباب بعد انتهاء الصوت مباشرة
   const checkInterval=setInterval(()=>{
     if(sfx.duration && sfx.currentTime >= sfx.duration - 0.2){
       clearInterval(checkInterval);
-      ov.style.transition='opacity 1.6s ease'; ov.style.opacity='0';
-      setTimeout(()=>{ ov.style.display='none'; ov.style.zIndex='-1'; },1600);
+      ov.style.transition='opacity 1.6s ease';
+      ov.style.opacity='0';
+      setTimeout(()=>{
+        ov.style.display='none';
+        ov.style.zIndex='-1';
+      },1600);
     }
   },100);
 }
+
+
+
 document.getElementById('btnDoorStart').addEventListener('click',startDoorSequence);
 
-// 🧱 نظام تصادم ناعم يمنع الاختراق في كل الاتجاهات (كيبورد + أزرار)
-// 🧱 تصادم احترافي يغطي الكيبورد + الأزرار
-AFRAME.registerComponent('smooth-collision', {
+AFRAME.registerComponent('collision-avoid', {
   schema: {
-    room: { type: 'selector' },
-    marginFront: { type: 'number', default: 0.4 },
-    marginBack:  { type: 'number', default: 0.4 },
-    marginLeft:  { type: 'number', default: 0.4 },
-    marginRight: { type: 'number', default: 0.4 },
-    minY: { type: 'number', default: 0.6 },
-    maxY: { type: 'number', default: 3 }
+    bounds: {type: 'number', default: 14.8},   // نصف مساحة الغرفة
+    wallOffset: {type: 'number', default: 0.8}, // المسافة المسموحة قبل الجدار
+    minY: {type: 'number', default: 1.6},      // ارتفاع العين
+    maxY: {type: 'number', default: 5.4}       // سقف الغرفة
   },
-  init() {
-    this.lastPos = this.el.object3D.position.clone();
-    this.box = null;
-    this.frame = 0;
-  },
-  tick() {
-    const el = this.el;
-    const data = this.data;
-    const room = data.room;
-    if (!room || !room.object3D) return;
+  tick: function () {
+    const rig = this.el;
+    const pos = rig.getAttribute('position') || {x: 0, y: 1.6, z: 0};
+    const newPos = { ...pos };
 
-    // نحسب الـ Box كل 10 إطارات فقط لتقليل الحمل
-    if (this.frame++ % 10 === 0) {
-      const mesh = room.getObject3D('mesh');
-      if (mesh) this.box = new THREE.Box3().setFromObject(mesh);
-    }
+    // 🔒 حدود الغرفة كاملة (يمين، يسار، أمام، خلف)
+    const b = this.data.bounds;
+    const o = this.data.wallOffset;
+    if (newPos.x < -b + o) newPos.x = -b + o;
+    if (newPos.x >  b - o) newPos.x =  b - o;
+    if (newPos.z < -b + o) newPos.z = -b + o;
+    if (newPos.z >  b - o) newPos.z =  b - o;
 
-    if (!this.box) return;
-    const pos = el.object3D.position;
-    const min = this.box.min.clone();
-    const max = this.box.max.clone();
+    // 🔒 منع تجاوز الأرض والسقف
+    if (newPos.y < this.data.minY) newPos.y = this.data.minY;
+    if (newPos.y > this.data.maxY) newPos.y = this.data.maxY;
 
-    // نحسب المسافات المسموح بها حسب الجدران الأربعة
-    const leftLimit   = min.x + data.marginLeft;
-    const rightLimit  = max.x - data.marginRight;
-    const frontLimit  = max.z - data.marginFront;
-    const backLimit   = min.z + data.marginBack;
-
-    // قيود المحاور
-    pos.x = THREE.MathUtils.clamp(pos.x, leftLimit, rightLimit);
-    pos.z = THREE.MathUtils.clamp(pos.z, backLimit, frontLimit);
-    pos.y = THREE.MathUtils.clamp(pos.y, data.minY, data.maxY);
-
-    // تنعيم الحركة (يقلل الاهتزاز)
-    this.lastPos.lerp(pos, 0.25);
-    el.object3D.position.copy(this.lastPos);
+    // ✅ تطبيق الموضع الآمن
+    rig.setAttribute('position', newPos);
   }
 });
-function showFinalGlassReport(details){
-  const modal = document.getElementById('finalGlassModal');
-  const body = document.getElementById('finalReportDetails');
-  if(!modal || !body) return;
-  body.innerHTML = details + '<br><br><em>المهمة انتهت. اضغط إغلاق للعودة.</em>';
-  modal.style.display = 'flex';
-  // عند ظهور التقرير نُخفي واجهة العد (إن كانت ظاهرة)
-  const evidenceUI = document.getElementById('evidenceCenter');
-  if(evidenceUI) evidenceUI.style.display = 'none';
-}
-document.getElementById('finalCloseBtn').onclick = ()=>{
-  // عند الإغلاق نعيد التوجيه للرابط المطلوب (مبدئياً google.com)
-  try{
-    window.location.href = 'https://dns3uae-glitch.github.io/crime-book/3d-2/';
-  }catch(e){
-    // إذا لم يُسمح بالتوجيه داخل بيئة ما، نغلق النافذة
-    try{ window.close(); }catch(_){}
-  }
-};
 
-// حفظ/تحميل المشهد (بسيط)
-function saveScene(){
-  try{
-    const data = placed.map(p=>({
-      id:p.id, name:p.name, position: p.el.getAttribute('position'), rotation: p.el.getAttribute('rotation'), scale: p.el.getAttribute('scale')
-    }));
-    localStorage.setItem('crimeSceneData', JSON.stringify(data));
-  }catch(e){}
-}
-window.addEventListener('load', ()=>{
-  const saved = localStorage.getItem('crimeSceneData');
-  if(saved){
-    try{
-      const arr = JSON.parse(saved);
-      arr.forEach(a=>{
-        // لا نعيد تحميل النماذج تلقائياً لتجنب تعقيد، لكن نحتفظ بالبيانات إن أردت لاحقاً
-      });
-    }catch(e){}
+/* 🛠️ مكوّن لضبط مقياس واتجاه النماذج تلقائياً */
+AFRAME.registerComponent('auto-fix-scale', {
+  schema: {
+    target: {default: 1}
+  },
+  init: function () {
+    this.el.addEventListener('model-loaded', () => {
+      const scale = this.data.target;
+      this.el.object3D.scale.set(scale, scale, scale);
+      this.el.object3D.rotation.x = THREE.MathUtils.degToRad(0);
+      this.el.object3D.rotation.z = THREE.MathUtils.degToRad(0);
+      this.el.object3D.rotation.y = THREE.MathUtils.degToRad(0);
+      console.log(`✅ ${this.el.id} scale fixed to ${scale}`);
+    });
   }
 });
+
 
 </script>
+<style>
+  /* تصميم Toast خاص بد. أحمد */
+  #ahmedToast{
+    position:fixed; top:52%; left:50%; transform:translate(-50%,-50%); z-index:25500;
+    width:min(76vw,520px); padding:14px 18px; border-radius:14px;
+    background:linear-gradient(180deg, rgba(6,28,48,0.95), rgba(8,18,28,0.95));
+    border:1px solid rgba(48,120,180,0.12);
+    color:#dff6ff; display:flex; gap:12px; align-items:center; justify-content:space-between;
+    box-shadow:0 18px 50px rgba(0,0,0,.6); visibility:hidden; opacity:0;
+    transition:opacity .45s ease, transform .45s cubic-bezier(.2,.9,.2,1);
+  }
+  #ahmedToast.show{ visibility:visible; opacity:1; transform:translate(-50%,-50%) scale(1); }
+  #ahmedToast .badge{ width:48px;height:48px;border-radius:10px;background:linear-gradient(180deg,#2ea3f2,#0b6fb0);
+    display:flex;align-items:center;justify-content:center;font-weight:900;color:#001827; box-shadow:0 6px 16px rgba(10,90,160,.12); }
+  #ahmedToast .txt{ flex:1; text-align:right; padding-right:10px; font-weight:800; font-size:15px; }
+
+  /* مودال نصي من عند د. أحمد */
+  #ahmedModal{
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:25600;
+    background: radial-gradient(circle at 50% 40%, rgba(2,8,12,0.45), rgba(0,0,0,0.85)); backdrop-filter: blur(6px);
+  }
+  .ahmedCard{
+    width:min(88vw,720px); background:linear-gradient(180deg,#061827,#081826f0);
+    border-radius:16px; padding:22px; color:#eaf9ff; border:1px solid rgba(46,163,242,0.08);
+    box-shadow:0 30px 80px rgba(0,0,0,.7);
+  }
+  .ahmedCard h3{ margin:0 0 8px 0; color:#7fd1ff; font-weight:900; }
+  .ahmedCard p{ color:#dff6ff; line-height:1.7; }
+  .ahmedFooter{ display:flex; justify-content:flex-end; gap:10px; margin-top:14px; }
+  .btnPrimaryBlue{ background:linear-gradient(90deg,#7fd1ff,#2ea3f2); color:#003047; border:none; padding:10px 16px; border-radius:10px; font-weight:900; cursor:pointer; }
+  .btnGhost{ background:transparent; color:#cfeefc; border:1px solid rgba(255,255,255,0.04); padding:10px 14px; border-radius:10px; cursor:pointer; }
+</style>
+
+<!-- Toast يظهر عندما تقترب -->
+<div id="ahmedToast" role="button" aria-label="رسالة من د. أحمد">
+  <div class="txt">
+    رسالة جديدة من المحقق <strong>د. أحمد</strong><br>
+    اضغط لقراءة التعليمات الميدانية
+  </div>
+  <div class="badge">د.أ</div>
+</div>
+
+<!-- Modal مفصل من د. أحمد -->
+<div id="ahmedModal" aria-hidden="true">
+  <div class="ahmedCard" role="dialog" aria-labelledby="ahmedTitle">
+    <h3 id="ahmedTitle">رسالة من المحقق د. أحمد</h3>
+    <p>
+      عزيزي الطالب الضابط — أنت الآن وصلت لموقع جريمة القتل.
+      الجثة موجودة خلفك مباشرة. الرجاء بدء اجراءات الحفاظ على مسرح الجريمة بوضع شريط مسرح الجريمة والاقماع والحواجز والبحث فورًا عن الأدلة بعناية.
+علما بأهمية الوصول للمجرم الذي يرتدي ملابس رمادية يحاول الاختباء من خلالها والبحث عن الادلة المتمثلة في السيف والمسدس 
+    </p>
+    <div class="ahmedFooter">
+      <button id="ahmedClose" class="btnGhost">إغلاق</button>
+      <button id="ahmedOk" class="btnPrimaryBlue">بدأت التحقيق</button>
+    </div>
+  </div>
+</div>
+
+<!-- صوت من د. أحمد (اختياري) -->
+<audio id="ahmedVoice" src="https://dns3uae-glitch.github.io/crime-book/assets/audio/ahmed_msg.mp3" preload="auto"></audio>
+
 <script>
-  window.missionStarted = false;
-  let evidenceCountdown = null;
-  let evidenceTimeLeft = 180; // 3 minutes
-  let evidenceCountdownStarted = false;
+(function(){
+  // ⚙️ إعدادات سهلة التعديل
+  const TARGET_ID = 'ev_3_ahmed'; // العنصر الهدف
 
-  function fmtSec(t){
-    const m = String(Math.floor(Math.max(0,t)/60)).padStart(2,'0');
-    const s = String(Math.max(0,t)%60).padStart(2,'0');
-    return `${m}:${s}`;
-  }
+  // 🛑 تأخير التفعيل إلى أن تبدأ المهمة فعليًا
+  const startWatch = () => {
 
-  function startEvidenceCountdownIfNeeded(){
-    if(evidenceCountdownStarted) return;
-    const room = document.getElementById('room');
-    if (!room || !room.getAttribute('visible')) return;  // Ensure the room is visible
+    const DISTANCE_THRESHOLD = 1.6; // بالمتر
+    const CHECK_INTERVAL = 350;     // ms
+    const ONLY_ONCE = true;         // ظهور مرة واحدة فقط
 
-    evidenceCountdownStarted = true;
-    evidenceTimeLeft = 180; // 3 minutes
-    const evidenceUI = document.getElementById('evidenceCenter');
-    if (evidenceUI) evidenceUI.style.display = 'flex';
+    const toast = document.getElementById('ahmedToast');
+    const modal = document.getElementById('ahmedModal');
+    const ahmedVoice = document.getElementById('ahmedVoice');
+    const ahmedClose = document.getElementById('ahmedClose');
+    const ahmedOk = document.getElementById('ahmedOk');
 
-    evidenceCountdown = setInterval(() =&gt; {
-      evidenceTimeLeft--;
-      document.getElementById('evidenceCenterTime').textContent = fmtSec(evidenceTimeLeft);
+    let fired = false;
 
-      if (evidenceTimeLeft &lt;= 0) {
-        clearInterval(evidenceCountdown);
-        evidenceCountdown = null;
-        finalizeEvidenceReport();
-      }
-    }, 1000);
-  }
-
-  function finalizeEvidenceReport(){
-    // Construct the report details for the timer
-    const reportDetails = '&lt;strong&gt;الوقت انتهى!&lt;/strong&gt;&lt;br&gt;تم الانتهاء من المهمة.';
-    document.getElementById('finalReportDetails').innerHTML = reportDetails;
-    document.getElementById('finalGlassModal').style.display = 'flex';
-  }
-
-  // Start the countdown when the room becomes visible
-  const observer = new MutationObserver(() =&gt; {
-    const visible = document.getElementById('room').getAttribute('visible');
-    if (visible &amp;&amp; !evidenceCountdownStarted) {
-      startEvidenceCountdownIfNeeded();
+    // 🎯 إيجاد الكاميرا
+    function findCameraEl(){
+      return document.querySelector('[camera]') ||
+             document.querySelector('a-camera') ||
+             document.querySelector('#camera') ||
+             document.querySelector('a-entity[camera]');
     }
+
+    const cameraEl = findCameraEl();
+    const targetEl = document.getElementById(TARGET_ID);
+    if(!cameraEl || !targetEl){
+      console.warn('Ahmed trigger: camera or target not found', cameraEl, targetEl);
+      return;
+    }
+
+    // 🧭 حساب المسافة بين الكاميرا والعنصر
+    function distanceBetween(elA, elB){
+      const vA = new THREE.Vector3();
+      const vB = new THREE.Vector3();
+      elA.object3D.getWorldPosition(vA);
+      elB.object3D.getWorldPosition(vB);
+      return vA.distanceTo(vB);
+    }
+
+    // 🎬 عرض / إخفاء التوست
+    function showToast(){
+      if(fired && ONLY_ONCE) return;
+      toast.classList.add('show');
+    }
+    function hideToast(){
+      toast.classList.remove('show');
+    }
+
+    // 📜 فتح نافذة أحمد
+    function openModalFromAhmed(){
+      hideToast();
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden','false');
+      try{
+        ahmedVoice.currentTime = 0;
+        ahmedVoice.volume = 0.9;
+        ahmedVoice.play().catch(()=>{});
+      }catch(e){}
+      if(ONLY_ONCE) fired = true;
+    }
+
+    // 🔕 إغلاق النافذة
+    function closeModalFromAhmed(){
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden','true');
+      try{ ahmedVoice.pause(); }catch(e){}
+    }
+
+    // 🛰️ مراقبة المسافة
+    const watcher = setInterval(()=>{
+      if(fired && ONLY_ONCE){ clearInterval(watcher); return; }
+      const d = distanceBetween(cameraEl, targetEl);
+      if(d <= DISTANCE_THRESHOLD){
+        showToast();
+      } else {
+        hideToast();
+      }
+    }, CHECK_INTERVAL);
+
+    // 👆 تفاعلات المستخدم
+    toast.addEventListener('click', openModalFromAhmed);
+    toast.addEventListener('touchstart', openModalFromAhmed);
+    ahmedClose.addEventListener('click', closeModalFromAhmed);
+    ahmedOk.addEventListener('click', () => {
+      closeModalFromAhmed();
+      const statusEl = document.getElementById('status');
+      if(statusEl)
+        statusEl.textContent = '🔎 تحقق عند د. أحمد — ابدأ جمع الأدلة';
+    });
+
+    // 🧹 تنظيف قبل الإغلاق
+    window.addEventListener('beforeunload', ()=> {
+      try{ clearInterval(watcher); }catch(e){}
+    });
+  };
+
+  // 🔔 انتظر حتى تبدأ المهمة فعليًا
+  const missionCheck = setInterval(() => {
+    if (window.missionStarted) {
+      clearInterval(missionCheck);
+      startWatch(); // ✅ شغّل المراقبة بعد بدء المهمة فقط
+      console.log('🎯 Ahmed proximity watcher activated after mission start');
+    }
+  }, 500);
+
+})();
+</script>
+<!-- 🌑 شاشة الظلام بعد الانفجار -->
+<div id="darkIntro" style="
+  position:fixed; inset:0; background:#000;
+  display:none; align-items:center; justify-content:center;
+  z-index:30000; flex-direction:column; text-align:center; color:#fff;
+  font-family:'Tajawal',sans-serif; line-height:1.9;
+  overflow:hidden;
+">
+  <!-- ✨ خلفية غامضة تتحرك ببطء -->
+  <div id="darkFX" style="
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 40%, rgba(30,30,30,0.8), #000 90%);
+    animation: pulseDark 5s infinite alternate;
+  "></div>
+
+  <!-- 🧠 النص -->
+<div id="darkBox" style="
+  max-width:780px; padding:38px 42px;
+  background:rgba(10,10,10,0.75);
+  border:2px solid rgba(212,175,55,0.5);
+  border-radius:20px;
+  box-shadow:0 0 35px rgba(212,175,55,0.3);
+  opacity:0; transform:translateY(30px);
+  transition:all 1.8s ease;
+">
+  <h3 style="color:#d4af37;font-size:26px;font-weight:900;margin-bottom:14px;">📢 بلاغ عاجل — غرفة عمليات شرطة الشارقة</h3>
+  <p style="font-size:18px;line-height:1.9;">
+    <strong>التاريخ:</strong> الأحد، الساعة 7:35 مساءً — 
+    <strong>الموقع:</strong> منطقة المجاز 3، برج الأفق — الطابق 4، الشقة 402.<br><br>
+    وردت مكالمة من حارس المبنى عن سماع أصوات شجار تلتها صرخة ودوي سقوط جسم ثقيل. 
+    منذ 10 دقائق انقطعت الأصوات ولا يوجد رد عند طرق الباب.<br><br>
+    لوحظت بقع داكنة قرب العتبة مع آثار سحب نحو الداخل.
+    يُطلب الانتقال فورًا، تأمين المدخل، وتقييم الوضع الأوّلي.
+  </p>
+  <button id="enterReal" style="
+    margin-top:25px; padding:13px 36px; font-size:19px; font-weight:900;
+    border:none; border-radius:12px; cursor:pointer;
+    background:linear-gradient(90deg,#FFD54A,#b78f2a);
+    color:#000; box-shadow:0 0 20px rgba(212,175,55,0.4);
+  ">ابدأ المهمة</button>
+
+  <audio id="briefVoice" preload="auto">
+    <source src="https://dns3uae-glitch.github.io/crime-book/assets/audio/CrimeScene_Closed_Majaz_Report.mp3" type="audio/mpeg">
+  </audio>
+</div>
+
+
+
+  <style>
+    @keyframes pulseDark {
+      from { background:radial-gradient(circle at 50% 40%, rgba(40,40,40,0.8), #000 90%); }
+      to { background:radial-gradient(circle at 50% 60%, rgba(0,0,0,0.9), #000 100%); }
+    }
+  </style>
+</div>
+
+<script>
+// تفعيل الأنيميشن لكل عنصر عنده gltf-model
+function enableMixer(el){
+  // نفعلها فورًا (لو كان محمل أصلاً)
+  el.setAttribute('animation-mixer', 'clip:*; loop:repeat; timeScale:1');
+  // ونعيد تأكيدها عند model-loaded (لو ما كان لسه جاهز)
+  el.addEventListener('model-loaded', () => {
+    el.setAttribute('animation-mixer', 'clip:*; loop:repeat; timeScale:1');
+    const src = el.getAttribute('gltf-model');
+    console.log('🎬 animation-mixer ON for:', src);
+  }, { once: true });
+}
+
+function enableAnimationsForAll(){
+  document.querySelectorAll('a-entity[gltf-model], a-obj-model[gltf-model]').forEach(enableMixer);
+}
+
+// فعّل بعد تحميل الـ DOM
+window.addEventListener('DOMContentLoaded', enableAnimationsForAll);
+</script>
+<script>
+function addAnimatedModel(url, opts={}){
+  const parent = document.querySelector('a-scene') || document.body;
+  const ent = document.createElement('a-entity');
+  ent.setAttribute('gltf-model', url);
+
+  // موضع/مقياس افتراضي أو مخصص
+  const p = opts.position || {x:0, y:0, z:-2};
+  const s = opts.scale    || 0.6;
+  const r = opts.rotation || {x:0, y:0, z:0};
+  ent.setAttribute('position', `${p.x} ${p.y} ${p.z}`);
+  ent.setAttribute('rotation', `${r.x} ${r.y} ${r.z}`);
+  ent.setAttribute('scale', `${s} ${s} ${s}`);
+
+  // تفعيل الأنيميشن
+  enableMixer(ent);
+
+  // أضِف للسين
+  parent.appendChild(ent);
+  return ent;
+}
+
+// مثال اختبار سريع (احذف السطر لو ما تبغاه):
+// addAnimatedModel('https://dns3uae-glitch.github.io/crime-book/assets/3d/man2.glb', {position:{x:0,y:0,z:-3}, scale:0.5});
+</script>
+<!-- 🔙 زر العودة -->
+<button id="btnBack">⮐ العودة</button>
+
+<style>
+  #btnBack {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 30000;
+    background: linear-gradient(90deg, #d4af37, #b78f2a);
+    color: #000;
+    font-weight: 900;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 22px;
+    box-shadow: 0 0 14px rgba(212,175,55,.5);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, filter 0.3s ease;
+    display: none;
+  }
+
+  #btnBack:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 24px rgba(212,175,55,.7);
+    filter: brightness(1.1);
+  }
+</style>
+
+<script>
+  const btnBack = document.getElementById('btnBack');
+
+  // عند الضغط يرجع للمسرح الرئيسي
+  btnBack.addEventListener('click', () => {
+    window.location.href = 'https://dns3uae-glitch.github.io/crime-book/3d-2';
   });
 
-  observer.observe(document.getElementById('room'), { attributes: true, attributeFilter: ['visible'] });
+  // 🧠 ننتظر لحظة رسالة "مرحباً بك عزيزي الطالب الضابط"
+  // إذا عندك كود فعلي يشغلها، اربطه هنا (مثلاً بعد دالة تشغيل الصوت أو عرض النص)
+  // لكن مؤقتاً نربطها بحدث مخصص اسمه "show-mission-button"
+  window.addEventListener('show-mission-button', () => {
+    btnBack.style.display = 'block';
+    btnBack.animate([
+      { opacity: 0, transform: 'scale(0.8)' },
+      { opacity: 1, transform: 'scale(1)' }
+    ], { duration: 600, fill: 'forwards', easing: 'ease-out' });
+  });
 </script>
 <script>
-    let timerStarted = false;
-    let timerInterval;
-    let timeLeft = 180; // 3 minutes
+// === جويستك تحريك العنصر المختار (أعلى/أسفل/يمين/يسار) ===
+(function(){
+  const joy  = document.getElementById('objJoy');
+  const knob = document.getElementById('objJoyKnob');
+  if (!joy || !knob) return; // لو ما فيه دائرة لا تسوي شيء
 
-    function startTimer() {
-        if (timerStarted) return; // Prevent multiple starts
-        timerStarted = true;
-        timerInterval = setInterval(function() {
-            timeLeft--;
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            document.getElementById('evidenceCenterTime').textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+  let active = false;
+  let baseRect = null;
+  let maxR = 32;
+  let joyVec = { x: 0, y: 0 };
 
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                alert('الوقت انتهى!');
-            }
-        }, 1000);
+  // دالة تجيب العنصر المختار بنفس طريقة الأزرار
+  function getSelectedEntity() {
+    // الأولوية للـ window.selected اللي عرّفته سكربتاتك الأصلية
+    if (window.selected) return window.selected;
+
+    // لو مو موجود، جرّب تشوف القائمة
+    const list = document.getElementById('placedList');
+    if (list && list.value) {
+      const optId = list.value;
+      const ent = document.getElementById(optId);
+      if (ent) {
+        window.selected = ent; // خزّنه عشان المرات الجاية
+        return ent;
+      }
     }
+    return null;
+  }
+
+  function start(e){
+    const sel = getSelectedEntity();
+    if (!sel) {
+      if (typeof msg === "function") msg("اختر عنصرًا أولاً");
+      return;
+    }
+    active = true;
+    baseRect = joy.getBoundingClientRect();
+    maxR = Math.min(baseRect.width, baseRect.height) * 0.38;
+    update(e);
+  }
+
+  function stop(){
+    active = false;
+    joyVec.x = 0;
+    joyVec.y = 0;
+    knob.style.transform = "translate(0,0)";
+  }
+
+  function update(e){
+    const t = (e.touches && e.touches[0]) || e;
+    const cx = baseRect.left + baseRect.width / 2;
+    const cy = baseRect.top  + baseRect.height / 2;
+    const dx = t.clientX - cx;
+    const dy = t.clientY - cy;
+    const dist = Math.hypot(dx, dy);
+    const r = Math.min(dist, maxR);
+    const nx = (r === 0) ? 0 : (dx / dist) * r;
+    const ny = (r === 0) ? 0 : (dy / dist) * r;
+
+    knob.style.transform = `translate(${nx}px,${ny}px)`;
+    // 🧮 نحولها -1..1 (عكس الاتجاه الأفقي)
+joyVec.x = -nx / maxR;   // ← عكس حركة اليمين/اليسار
+joyVec.y = ny / maxR;    // فوق/تحت تبقى كما هي
+
+  }
+
+  // حلقة التحريك
+  function tick(){
+    if (active) {
+      const sel = getSelectedEntity();
+      if (sel) {
+        const step = (typeof window.stepVal === "function") ? window.stepVal() : 0.1;
+
+const moveX = -joyVec.x * step; // ← عكس الاتجاه ليصبح السحب لليمين = تحرك يمين
+        const moveY = -joyVec.y * step;     // عكسناه لأن السحب لتحت = نزول
+
+        if (typeof window.tweenDeltaPosition === "function") {
+          window.tweenDeltaPosition(sel, moveX, moveY, 0, 80);
+        } else if (sel.object3D) {
+          // احتياط لو ما لقينا الدالة
+          sel.object3D.position.x += moveX;
+          sel.object3D.position.y += moveY;
+        }
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  // الأحداث
+  joy.addEventListener("pointerdown", e => {
+    joy.setPointerCapture(e.pointerId);
+    start(e);
+  });
+  window.addEventListener("pointermove", e => { if (active) update(e); });
+  window.addEventListener("pointerup",   () => { if (active) stop();    });
+  window.addEventListener("pointercancel",() => { if (active) stop();   });
+
+})();
 </script>
+
+<!-- 🟢 كود التفاعل مع الأدلة (يشمل PNG و GLB) -->
+<script>
+AFRAME.registerComponent('evidence-select', {
+  init: function () {
+    const el = this.el;
+
+    // نجعل العنصر فعلياً قابل للكشف بالنقر حتى لو كان مسطح
+    if (!el.hasAttribute('geometry')) {
+      el.setAttribute('geometry', 'primitive: plane; width: 0.8; height: 0.8;');
+      el.setAttribute('material', 'opacity: 0; transparent: true;');
+    }
+
+    el.addEventListener('click', () => {
+  if (!window.missionStarted) return;
+
+  const plane = el.querySelector('a-plane') || el;
+  const mat = plane.getAttribute('material') || {};
+  const isGreen = mat.color === '#39d98a';
+  const newColor = isGreen ? '#ffffff' : '#39d98a';
+  const newEmissive = isGreen ? 'none' : '#39d98a';
+
+  plane.setAttribute('material', {
+    color: newColor,
+    emissive: newEmissive,
+    emissiveIntensity: isGreen ? 0 : 0.6,
+    transparent: true,
+    opacity: 1
+  });
+
+  // 🟢 استدعاء نظام النقاط والـHUD الأصلي
+  el.emit('evidencecollected', { id: el.id });
+
+  console.log(isGreen ? '🔁 ألغيت اختيار الدليل' : '✅ تم اختيار الدليل');
+});
+
+  }
+});
+</script>
+
+
+
+
+
+<script>
+  // 🎯 زر "ابدأ المهمة" داخل بلاغ عاجل
+  const enterRealBtn = document.getElementById("enterReal");
+
+  if (enterRealBtn) {
+    enterRealBtn.addEventListener("click", () => {
+      // 🎧 إيقاف صوت البلاغ إن وُجد
+      const briefVoice = document.getElementById("briefVoice");
+      if (briefVoice) {
+        briefVoice.pause();
+        briefVoice.currentTime = 0;
+      }
+
+      // 🖼️ إنشاء الصورة وإضافتها على الشاشة
+      const zoomImg = document.createElement("img");
+      zoomImg.src = "http://dns3uae-glitch.github.io/crime-book/assets/A_digital_photograph_captures_a_nighttime_cityscap.png";
+      zoomImg.style.cssText = `
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 99999;
+        opacity: 0;
+        transform: scale(1);
+        transition: opacity 1s ease, transform 3s ease;
+      `;
+      document.body.appendChild(zoomImg);
+
+      // ⚡ الخطوة 1: إظهار الصورة بعد نصف ثانية
+      setTimeout(() => {
+        zoomImg.style.opacity = "1";
+      }, 500);
+
+      // ⚡ الخطوة 2: بعد ثانيتين يبدأ الزوم الناعم
+      setTimeout(() => {
+        zoomImg.style.transform = "scale(2.5)";
+      }, 2000);
+
+      // ⚡ الخطوة 3: بعد 5 ثواني تُخفي الصورة فقط بدون أي انتقال
+      setTimeout(() => {
+        zoomImg.style.opacity = "0";
+        setTimeout(() => {
+          zoomImg.remove();
+        }, 1000);
+      }, 5000);
+    });
+  }
+</script>
+<script>
+// === جويستك تحريك العنصر + زر إعادة التمثيل + دالة المشهد السينمائي (معدّلة الاتجاهات) ===
+(function(){
+  // -----------------------------------------
+  // 🕹️ الجويستك لتحريك العنصر المختار
+  // -----------------------------------------
+  const joy  = document.getElementById('objJoy');
+  const knob = document.getElementById('objJoyKnob');
+  if (joy && knob){
+    let active = false;
+    let baseRect = null;
+    let maxR = 32;
+    let joyVec = { x: 0, y: 0 };
+
+    function getSelectedEntity() {
+      if (window.selected) return window.selected;
+      const list = document.getElementById('placedList');
+      if (list && list.value) {
+        const ent = document.getElementById(list.value);
+        if (ent) { window.selected = ent; return ent; }
+      }
+      return null;
+    }
+
+    function start(e){
+      const sel = getSelectedEntity();
+      if (!sel) { if (typeof msg === "function") msg("اختر عنصرًا أولاً"); return; }
+      active = true;
+      baseRect = joy.getBoundingClientRect();
+      maxR = Math.min(baseRect.width, baseRect.height) * 0.38;
+      update(e);
+    }
+
+    function stop(){
+      active = false;
+      joyVec.x = 0;
+      joyVec.y = 0;
+      knob.style.transform = "translate(0,0)";
+    }
+
+    function update(e){
+      const t = (e.touches && e.touches[0]) || e;
+      const cx = baseRect.left + baseRect.width / 2;
+      const cy = baseRect.top  + baseRect.height / 2;
+      const dx = t.clientX - cx;
+      const dy = t.clientY - cy;
+      const dist = Math.hypot(dx, dy);
+      const r = Math.min(dist, maxR);
+      const nx = (r === 0) ? 0 : (dx / dist) * r;
+      const ny = (r === 0) ? 0 : (dy / dist) * r;
+
+      knob.style.transform = `translate(${nx}px,${ny}px)`;
+      joyVec.x = nx / maxR;
+      joyVec.y = ny / maxR;
+    }
+
+    function tick(){
+      if (active) {
+        const sel = getSelectedEntity();
+        if (sel) {
+          const step = (typeof window.stepVal === "function") ? window.stepVal() : 0.1;
+          const moveX = -joyVec.x * step;
+          const moveY = -joyVec.y * step;
+          if (typeof window.tweenDeltaPosition === "function") {
+            window.tweenDeltaPosition(sel, moveX, moveY, 0, 80);
+          } else if (sel.object3D) {
+            sel.object3D.position.x += moveX;
+            sel.object3D.position.y += moveY;
+          }
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    tick();
+
+    joy.addEventListener("pointerdown", e => { joy.setPointerCapture(e.pointerId); start(e); });
+    window.addEventListener("pointermove", e => { if (active) update(e); });
+    window.addEventListener("pointerup",   () => { if (active) stop(); });
+    window.addEventListener("pointercancel",() => { if (active) stop(); });
+  }
+
+  // -----------------------------------------
+  // 🎥 دالة إعادة التمثيل السينمائي
+  // -----------------------------------------
+  const ID_CORPSE = 'custom_12_corpse';
+  const ID_PHONE  = 'custom_4_mobile';
+  const ID_CUP    = 'custom_3_broken_cup';
+  const ID_GUN    = 'custom_13_gun';
+  const ID_BLOOD  = 'ev_4_blood';
+  const ID_FOOT   = 'ev_foot_1';
+
+  const FINAL = {
+    corpse: { x: 2.8,  y: 0.15, z: -2.55 },
+    phone:  { x: 0.65, y: 0,    z: -2.8  },
+    cup:    { x: 4.45, y: 0,    z: -2.7  },
+    gun:    { x: -7.6, y: 0,    z: 4.75  },
+    blood:  { x: 2.7,  y: -0.03, z: -3.1 },
+    foot:   { x: -3.78,y: 0.05, z: 1.57  }
+  };
+
+  const PRE = {
+    corpse: { x: 0,   y: 0.15, z: -5.0 },
+    phone:  { x: 0.5, y: 0.25, z: -4.8 },
+    cup:    { x: 1.2, y: 0.25, z: -4.9 }
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function posStr(v){ return `${v.x} ${v.y} ${v.z}`; }
+  function wait(ms){ return new Promise(r=>setTimeout(r, ms)); }
+
+  function clearAnimations(el){
+    if(!el || !el.attributes) return;
+    [...el.attributes].forEach(a=>{
+      if(a.name.startsWith('animation__')) el.removeAttribute(a.name);
+    });
+  }
+
+  async function runReplay(scene, btn){
+    btn.disabled = true;
+    btn.textContent = '⏳ ...';
+
+    const corpse = $(ID_CORPSE);
+    const cup    = $(ID_CUP);
+    const phone  = $(ID_PHONE);
+    const blood  = $(ID_BLOOD);
+    const foot   = $(ID_FOOT);
+    const gun    = $(ID_GUN);
+
+    [corpse,cup,phone,blood,foot,gun].forEach(clearAnimations);
+
+    if (corpse) corpse.setAttribute('position', posStr(PRE.corpse));
+    if (phone)  phone.setAttribute('position', posStr(PRE.phone));
+    if (cup)    cup.setAttribute('position', posStr(PRE.cup));
+    if (blood)  blood.setAttribute('visible', false);
+    if (foot)   foot.setAttribute('visible', false);
+    if (gun)    gun.setAttribute('visible', false);
+
+    // ======= الجاني =======
+   // ======= الجاني =======
+const killer = document.createElement('a-entity');
+killer.setAttribute('gltf-model', 'https://dns3uae-glitch.github.io/crime-book/assets/3d/bad2.glb');
+killer.setAttribute('position', '-7.6 0.9 4.75');
+// ✅ بدل 0 180 0 إلى 0 90 0 لأن الكاميرا على يمينه
+killer.setAttribute('rotation', '0 90 0'); // ظهره للكاميرا عند البداية
+killer.setAttribute('scale', '1 1 1');
+killer.setAttribute('visible', 'false');
+scene.appendChild(killer);
+
+await waitForModel(killer);
+killer.setAttribute('visible','true');
+
+const sfxGun   = new Audio('https://cdn.pixabay.com/download/audio/2021/09/01/audio_4c8f73320a.mp3?filename=gun-shot-1.mp3');
+const sfxGlass = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_1f97c5ac54.mp3?filename=glass-break-14575.mp3');
+
+// الجاني يمشي نحو السرير (ظهره للكاميرا)
+await moveTo(killer, {x:-3, y:0.9, z:1}, 1300);
+await moveTo(killer, {x:0.5, y:0.9, z:-2}, 1000);
+await moveTo(killer, {x:0, y:0.9, z:-4.5}, 800);
+
+if (foot){ foot.setAttribute('position', posStr(FINAL.foot)); foot.setAttribute('visible', true); }
+
+// 🔴 يطلق النار
+sfxGun.play().catch(()=>{});
+const kpos = killer.getAttribute('position');
+redFlash(scene, kpos);
+
+// الضحية تسقط
+if (corpse){ await wait(200); await moveTo(corpse, FINAL.corpse, 900); }
+
+// الدم يظهر
+if (blood){
+  blood.setAttribute('position', posStr(FINAL.blood));
+  blood.setAttribute('visible', true);
+  blood.setAttribute('animation__fade', 'property: material.opacity; from:0; to:1; dur:600');
+}
+
+// الهاتف والكوب
+if (phone){ await wait(100); await moveTo(phone, FINAL.phone, 600); }
+if (cup){
+  await wait(150);
+  sfxGlass.play().catch(()=>{});
+  cup.setAttribute('visible', true);
+  cup.setAttribute('position', posStr(FINAL.cup));
+}
+
+// 🧭 قبل العودة، يدور بوجهه نحو الكاميرا
+await wait(400);
+killer.setAttribute('animation__turn', {
+  property: 'rotation',
+  to: '0 -90 0', // ✅ يواجه الكاميرا أثناء الرجوع
+  dur: 800,
+  easing: 'easeInOutQuad'
+});
+await wait(850); // ننتظر دوران الوجه يكتمل قبل الرجوع
+
+// 🔙 الجاني يرجع للممر ووجهه نحو الكاميرا
+await moveTo(killer, {x:0.5, y:0.9, z:-2}, 900);
+await moveTo(killer, {x:-3, y:0.9, z:1}, 1000);
+await moveTo(killer, {x:-7.6, y:0.9, z:4.75}, 1200);
+
+// 🔫 يسقط المسدس بعد هروبه
+if (gun){
+  gun.setAttribute('visible', true);
+  await moveTo(gun, FINAL.gun, 600);
+}
+
+// 🧹 حذف الجاني بعد الهروب
+killer.remove();
+
+    if (corpse) corpse.setAttribute('position', posStr(FINAL.corpse));
+    if (phone)  phone.setAttribute('position', posStr(FINAL.phone));
+    if (cup)    cup.setAttribute('position', posStr(FINAL.cup));
+    if (blood)  blood.setAttribute('visible', true);
+    if (foot)   foot.setAttribute('visible', true);
+    if (gun)    gun.setAttribute('position', posStr(FINAL.gun));
+
+    btn.disabled = false;
+    btn.textContent = '🎥 إعادة تمثيل جريمة القتل';
+  }
+
+  function moveTo(el, toObj, dur){
+    return new Promise(res=>{
+      clearAnimations(el);
+      el.setAttribute('animation__move', {
+        property: 'position',
+        to: `${toObj.x} ${toObj.y} ${toObj.z}`,
+        dur: dur,
+        easing: 'easeInOutQuad'
+      });
+      setTimeout(()=>{ clearAnimations(el); res(); }, dur+50);
+    });
+  }
+
+  function waitForModel(el){
+    return new Promise(res=>{
+      if (el.hasLoaded) return res();
+      el.addEventListener('model-loaded', ()=>res());
+      setTimeout(res, 2000);
+    });
+  }
+
+  function redFlash(scene, pos){
+    const f = document.createElement('a-sphere');
+    f.setAttribute('position', `${pos.x} ${pos.y+1} ${pos.z}`);
+    f.setAttribute('radius', '0.3');
+    f.setAttribute('material', 'color:#ff0000; emissive:#ff0000; opacity:0.9');
+    scene.appendChild(f);
+    setTimeout(()=> f.remove(), 250);
+  }
+
+  // -----------------------------------------
+  // 🧠 الزر يظهر بعد "ابدأ المهمة"
+  // -----------------------------------------
+  const observer = new MutationObserver((mutations)=>{
+    for (const m of mutations){
+      const text = m.target.innerText || "";
+      if (text.includes("ابدأ المهمة") || text.includes("عزيز الطالب الضابط")) {
+        showReplayButton();
+        observer.disconnect();
+        break;
+      }
+    }
+  });
+  observer.observe(document.body, { subtree:true, childList:true, characterData:true });
+
+  function showReplayButton(){
+    if (document.getElementById("replayBtn")) return;
+    const scene = document.querySelector('a-scene');
+    const btn = document.createElement("button");
+    btn.id = "replayBtn";
+    btn.textContent = "🎥 إعادة تمثيل جريمة القتل";
+    btn.style.cssText = `
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg,#FFD54A,#b78f2a);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 26px;
+      font-size: 17px;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+      z-index: 9999;
+      cursor: pointer;
+    `;
+    document.body.appendChild(btn);
+    btn.addEventListener("click", ()=> runReplay(scene, btn));
+  }
+
+})();
+</script>
+
 </body>
 </html>
