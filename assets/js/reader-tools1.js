@@ -1429,9 +1429,13 @@ if (chatSend) {
 async function sendChat() {
   const text = chatInput.value.trim();
   if (!text) return;
+
   appendChat("👨‍🎓 أنت", text);
   chatInput.value = "";
   appendChat("🤖 ChatGPT", "جاري التفكير...");
+
+  const msgs = chatBox.querySelectorAll(".chat-msg");
+  const lastMsg = msgs[msgs.length - 1];
 
   try {
     const res = await fetch("https://gpt-proxy-server-xs5u.onrender.com/ask", {
@@ -1439,25 +1443,23 @@ async function sendChat() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: text })
     });
-    const data = await res.json();
-    updateLastChat(data.reply || "⚠️ لم يصل رد من النظام.");
-  } catch {
-    updateLastChat("⚠️ حدث خطأ أثناء الاتصال بالمساعد.");
+
+    // نقرأ الرد كسلسلة نصوص بدلاً من الانتظار الكامل
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    lastMsg.innerHTML = "<b>🤖 ChatGPT:</b> ";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      lastMsg.innerHTML = `<b>🤖 ChatGPT:</b> ${buffer}`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  } catch (err) {
+    lastMsg.innerHTML = "<b>🤖 ChatGPT:</b> ⚠️ حدث خطأ أثناء الاتصال.";
   }
-}
-
-function appendChat(sender, msg) {
-  const div = document.createElement("div");
-  div.className = "chat-msg";
-  div.innerHTML = `<b>${sender}:</b> ${msg}`;
-  chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function updateLastChat(text) {
-  const msgs = chatBox.querySelectorAll(".chat-msg");
-  if (msgs.length > 0)
-    msgs[msgs.length - 1].innerHTML = `<b>🤖 ChatGPT:</b> ${text}`;
 }
 
 })();
