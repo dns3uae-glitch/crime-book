@@ -201,8 +201,6 @@
 .chat-message {
   word-wrap: break-word;
 }
-.chat-msg { margin-bottom:8px; line-height:1.6; }
-.chat-msg b { color:#8fd3ff; }
 
   #rt-voice { background:rgba(20,30,45,.9); color:#fff; border:1px solid rgba(0,120,255,.4); border-radius:8px; padding:8px }
   #rt-voice option { background:#0f1520; color:#fff; }
@@ -232,7 +230,6 @@ document.head.appendChild(style);
   <button class="rt-tab" data-tab="quiz">🧩 اختبر نفسك</button>
    <button class="rt-tab" data-tab="ask">👮‍♂️ اسأل المحاضر</button>
   <button class="rt-tab" data-tab="ai">🤖 Ask AI</button>
-  <button class="rt-tab" data-tab="chat">💬 ChatGPT</button> 
   <button class="rt-tab" data-tab="notebook">📔 NotebookLM</button>
 </div>
 
@@ -368,25 +365,6 @@ document.head.appendChild(style);
       style="min-height:60px;background:#1e1e1e;color:#FFD54A;padding:10px;border-radius:8px;">
       ✨ سيتم عرض الإجابة هنا أو سيجيبك أحمد صوتيًا...
     </div>
-  </div>
-</section>
-<!-- 💬 ChatGPT -->
-<section class="rt-sec" id="rt-sec-chat">
-  <div class="rt-title">💬 ChatGPT - المحادثة الذكية</div>
-  <div class="rt-row">
-    <div id="chatBox" class="chat-box"
-         style="min-height:180px;max-height:300px;overflow-y:auto;
-                background:#0f1520;color:#FFD54A;
-                padding:10px;border-radius:8px;">
-      ✨ ابدأ المحادثة مع ChatGPT...
-    </div>
-  </div>
-  <div class="rt-row" style="margin-top:10px;">
-    <textarea id="chatInput" class="rt-input" rows="2"
-              placeholder="اكتب سؤالك هنا..."></textarea>
-  </div>
-  <div class="rt-row">
-    <button class="rt-btn gold" id="chatSend">إرسال</button>
   </div>
 </section>
 
@@ -1411,55 +1389,5 @@ document.getElementById('rt-speak').onclick = ()=>{
       });
     }
   });
-/* -------------------- 💬 ChatGPT Helper -------------------- */
-const chatInput = document.getElementById("chatInput");
-const chatSend = document.getElementById("chatSend");
-const chatBox = document.getElementById("chatBox");
-
-if (chatSend) {
-  chatSend.addEventListener("click", sendChat);
-  chatInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendChat();
-    }
-  });
-}
-
-async function sendChat() {
-  const text = chatInput.value.trim();
-  if (!text) return;
-
-  appendChat("👨‍🎓 أنت", text);
-  chatInput.value = "";
-  appendChat("🤖 ChatGPT", "جاري التفكير...");
-
-  const msgs = chatBox.querySelectorAll(".chat-msg");
-  const lastMsg = msgs[msgs.length - 1];
-
-  try {
-    const res = await fetch("https://gpt-proxy-server-xs5u.onrender.com/ask", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: text })
-    });
-
-    // نقرأ الرد كسلسلة نصوص بدلاً من الانتظار الكامل
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    lastMsg.innerHTML = "<b>🤖 ChatGPT:</b> ";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      lastMsg.innerHTML = `<b>🤖 ChatGPT:</b> ${buffer}`;
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-  } catch (err) {
-    lastMsg.innerHTML = "<b>🤖 ChatGPT:</b> ⚠️ حدث خطأ أثناء الاتصال.";
-  }
-}
 
 })();
