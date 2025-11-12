@@ -687,6 +687,8 @@ startBtn.addEventListener('click', ()=> {
     collected.style.display = 'block';
     collected.innerHTML = '<div class="colTitle">🧠 الأدلة المجمعة:</div><div class="items">لا يوجد</div>';
   }
+startCountdown(180); // يبدأ العد التنازلي بعد بدء المهمة
+
 });
 
 
@@ -729,6 +731,15 @@ AFRAME.registerComponent('collect-evidence', {
       // 🚫 لا تعيد جمعه
       if (this.el.dataset.collected === 'true') return;
       this.el.dataset.collected = 'true';
+// ✅ تحقق فورًا إن كانت كل الأدلة قد جُمعت، وأظهر شاشة التقييم
+setTimeout(() => {
+  const totalEvidences = document.querySelectorAll('[collect-evidence]').length;
+  const collectedCount = document.querySelectorAll('[collect-evidence][data-collected="true"]').length;
+  if (collectedCount === totalEvidences && totalEvidences > 0) {
+    clearInterval(window.countdownInterval);
+    if (typeof endMission === 'function') endMission('collectedAll');
+  }
+}, 300);
 
       // 🎯 تحديث النقاط
       const scoreEl = document.getElementById('score');
@@ -864,6 +875,7 @@ document.querySelectorAll('[gltf-model]').forEach(ent=>{
 <a-entity id="ev_0_siaf"
           class="clickable"
           collect-evidence
+data-name="سيف"
           gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/siaf.glb)"
           position="-3.6 1.22 -37.85"
           rotation="-162 0 0"
@@ -937,6 +949,7 @@ document.querySelectorAll('[gltf-model]').forEach(ent=>{
 <a-entity id="ev_6_gun2"
           class="clickable"
           collect-evidence
+data-name="مسدس"
           gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/gun1.glb)"
           position="-0.05 1.52 -45.65"
           rotation="-84 20 0"
@@ -953,6 +966,7 @@ document.querySelectorAll('[gltf-model]').forEach(ent=>{
 <a-entity id="custom_8_man"
           class="clickable"
           collect-evidence
+data-name="مجرم"
           gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/bad2.glb)"
           position="-25.05 1.8 -38.4"
           rotation="0 0 0"
@@ -3053,6 +3067,411 @@ const moveY = -joyVec.y * step; // السحب لتحت = ينزل
   window.addEventListener("pointercancel",() => { if (active) stop();   });
 
 })();
+</script>
+<!-- 🛰️ Royal Tactical Radar v7.0 — Ultra Realistic Edition -->
+<script>
+(function(){
+  function ready(f){document.readyState!=='loading'?f():document.addEventListener('DOMContentLoaded',f);}
+  ready(()=>{
+    const scene=document.querySelector('a-scene');
+    if(!scene) return;
+    scene.addEventListener('loaded',()=>{
+      const rig=document.getElementById('rig');
+      const THREERef=window.AFRAME?.THREE||window.THREE;
+      if(!rig||!THREERef) return;
+
+      // 🎯 إعداد الحجم والموقع (مثل السابق)
+      const sizeNormal=200, sizeZoom=340;
+      const topOffset=65; 
+      const canvas=document.createElement('canvas');
+      canvas.width=sizeNormal; canvas.height=sizeNormal;
+      Object.assign(canvas.style,{
+        position:'fixed',
+        top:topOffset+'px',
+        left:'18px',
+        width:sizeNormal+'px',
+        height:sizeNormal+'px',
+        borderRadius:'50%',
+        zIndex:9990,
+        background:'radial-gradient(circle at center,#0a0c11 50%,#000 100%)',
+        border:'2px solid rgba(212,175,55,0.35)',
+        boxShadow:'0 0 16px rgba(255,215,0,0.18), inset 0 0 16px rgba(255,215,0,0.08)',
+        backdropFilter:'blur(3px)'
+      });
+      document.body.appendChild(canvas);
+      const ctx=canvas.getContext('2d');
+
+      // ✨ زر التكبير
+      const toggle=document.createElement('button');
+      Object.assign(toggle.style,{
+        position:'fixed',
+        top:(topOffset+sizeNormal+18)+'px',
+        left:'28px',
+        zIndex:9991,
+        background:'linear-gradient(90deg,#FFD54A,#caa838)',
+        border:'1px solid rgba(212,175,55,0.7)',
+        color:'#1a1a1a',
+        fontWeight:'800',
+        fontSize:'13px',
+        padding:'6px 14px',
+        borderRadius:'10px',
+        cursor:'pointer',
+        boxShadow:'0 0 12px rgba(255,215,0,0.5)',
+        transition:'all .25s ease'
+      });
+      toggle.textContent='🗺 تكبير';
+      document.body.appendChild(toggle);
+
+      let zoomed=false, scale=3.8, last=0;
+      toggle.onclick=()=>{
+        zoomed=!zoomed;
+        scale=zoomed?2.6:3.8;
+        canvas.width=canvas.height=zoomed?sizeZoom:sizeNormal;
+        canvas.style.width=canvas.style.height=(zoomed?sizeZoom:sizeNormal)+'px';
+        toggle.textContent=zoomed?'🗺 تصغير':'🗺 تكبير';
+      };
+
+      const ahmed=document.querySelector('[id*="ahmed"]');
+      const corpse=document.querySelector('[id*="corpse"],[id*="body"]');
+
+      function drawIcon(x,y,emoji,color,size=16){
+        ctx.save();
+        ctx.shadowColor=color; ctx.shadowBlur=6;
+        ctx.font=`${size}px "Segoe UI Emoji", Arial`;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle=color;
+        ctx.fillText(emoji,x,y);
+        ctx.restore();
+      }
+
+      function worldToRadar(pos,cam,yaw,cx,cy){
+        const dx=(pos.x-cam.x)*scale;
+        const dz=(pos.z-cam.z)*scale;
+        const rx=dx*Math.cos(yaw)-dz*Math.sin(yaw);
+        const rz=dx*Math.sin(yaw)+dz*Math.cos(yaw);
+        return {x:cx+rx,y:cy+rz,dist:Math.hypot(rx,rz)};
+      }
+
+      function draw(){
+        const now=performance.now();
+        if(now-last<100){requestAnimationFrame(draw);return;}
+        last=now;
+
+        const w=canvas.width,h=canvas.height,cx=w/2,cy=h/2,max=cx-10;
+        const rot=rig.getAttribute('rotation')||{y:0};
+        const cam=rig.getAttribute('position')||{x:0,y:0,z:0};
+        const yaw=THREERef.MathUtils.degToRad(rot.y||0);
+        ctx.clearRect(0,0,w,h);
+
+        // 🌌 خلفية زجاجية متدرجة (عمق بصري)
+        const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,cx);
+        bg.addColorStop(0,'rgba(255,255,255,0.03)');
+        bg.addColorStop(0.6,'rgba(15,20,25,0.9)');
+        bg.addColorStop(1,'rgba(0,0,0,0.95)');
+        ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(cx,cy,cx,0,Math.PI*2); ctx.fill();
+
+        // ✴️ شبكة HUD (خطوط + نقاط)
+        ctx.strokeStyle='rgba(212,175,55,0.15)';
+        ctx.lineWidth=0.6;
+        for(let i=-4;i<=4;i++){
+          const pos=i*cx/4;
+          ctx.beginPath(); ctx.moveTo(pos+cx,0); ctx.lineTo(pos+cx,h); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(0,pos+cy); ctx.lineTo(w,pos+cy); ctx.stroke();
+        }
+
+        // 🔵 دوائر HUD متدرجة
+        for(let r=30;r<cx;r+=30){
+          ctx.beginPath();
+          ctx.arc(cx,cy,r,0,Math.PI*2);
+          ctx.strokeStyle=`rgba(212,175,55,${0.05+(r/cx)*0.08})`;
+          ctx.lineWidth=0.6;
+          ctx.stroke();
+        }
+
+        // 💫 نبض مركزي
+        const pulse = (Math.sin(now/700)+1)/2;
+        const pulseSize = 5 + pulse*3;
+        ctx.beginPath();
+        ctx.arc(cx,cy,pulseSize,0,Math.PI*2);
+        ctx.fillStyle=`rgba(255,215,0,${0.25+pulse*0.25})`;
+        ctx.shadowColor='#FFD54A'; ctx.shadowBlur=10;
+        ctx.fill(); ctx.shadowBlur=0;
+
+        // 🌀 شعاع دوّار مزدوج محسّن
+        const sweep1=(Date.now()/1000)% (2*Math.PI);
+        const g1=ctx.createRadialGradient(cx,cy,0,cx,cy,cx);
+        g1.addColorStop(0,'rgba(0,180,255,0.25)');
+        g1.addColorStop(1,'rgba(0,180,255,0)');
+        ctx.save(); ctx.translate(cx,cy); ctx.rotate(sweep1);
+        ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,cx,0,0.6,false); ctx.closePath();
+        ctx.fillStyle=g1; ctx.fill(); ctx.restore();
+
+        // 👮‍♂️ أحمد
+        if(ahmed){
+          const p=ahmed.getAttribute('position');
+          if(p){const r=worldToRadar(p,cam,yaw,cx,cy);
+            if(r.dist<max) drawIcon(r.x,r.y,'👮‍♂️','#4fc9ff',14);
+          }
+        }
+
+        // 💀 الجثة
+        if(corpse){
+          const p=corpse.getAttribute('position');
+          if(p){const r=worldToRadar(p,cam,yaw,cx,cy);
+            if(r.dist<max) drawIcon(r.x,r.y,'💀','#ff5555',14);
+          }
+        }
+
+        // 🟡 الأدلة
+        const evidences=document.querySelectorAll('[collect-evidence]');
+        evidences.forEach(e=>{
+          if(e.getAttribute('visible')==='false')return;
+          const p=e.getAttribute('position');if(!p)return;
+          const r=worldToRadar(p,cam,yaw,cx,cy);
+          if(r.dist>max)return;
+          const pulse=(Math.sin(Date.now()/300)+1)/2;
+          const color=e.dataset.collected==='true'?'#39d98a':'#FFD54A';
+          ctx.globalAlpha=0.7+pulse*0.3;
+          ctx.beginPath();ctx.arc(r.x,r.y,3+pulse*1.6,0,Math.PI*2);
+          ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=zoomed?8:5;
+          ctx.fill();ctx.shadowBlur=0;ctx.globalAlpha=1;
+        });
+
+        // 🔺 اللاعب
+        drawIcon(cx,cy,'🔺','#39d9ff',13);
+
+        // ✨ لمعان زجاجي علوي
+        const gloss=ctx.createLinearGradient(0,0,0,h);
+        gloss.addColorStop(0,'rgba(255,255,255,0.18)');
+        gloss.addColorStop(0.15,'rgba(255,255,255,0.08)');
+        gloss.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.beginPath(); ctx.arc(cx,cy,cx,0,Math.PI*2);
+        ctx.fillStyle=gloss; ctx.fill();
+
+        // ⚙️ إطار خارجي أنيق
+        ctx.beginPath();
+        ctx.arc(cx,cy,cx-1,0,Math.PI*2);
+        ctx.strokeStyle='rgba(212,175,55,0.4)';
+        ctx.lineWidth=1.8;
+        ctx.stroke();
+
+        requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(draw);
+    });
+  });
+})();
+</script>
+<!-- 🕒 مؤقت المهمة -->
+<script>
+function startCountdown(seconds = 180) {
+  const timeEl = document.getElementById("time");
+  const statusEl = document.getElementById("status");
+  let remaining = seconds;
+
+  function updateDisplay() {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    timeEl.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  updateDisplay();
+  const timer = setInterval(() => {
+    remaining--;
+    updateDisplay();
+
+    if (remaining <= 0) {
+      clearInterval(timer);
+      endMission();
+    }
+  }, 1000);
+
+  statusEl.textContent = "🚨 المهمة جارية...";
+}
+
+function endMission() {
+  const statusEl = document.getElementById("status");
+  statusEl.textContent = "⏰ انتهى الوقت!";
+  alert("انتهى الوقت ⏰ - الرجاء تسليم المهمة");
+}
+</script>
+<script>
+// 🕒 المؤقت الزمني الذكي
+function startCountdown(seconds = 180) {
+  const timeEl = document.getElementById("time");
+  const statusEl = document.getElementById("status");
+  let remaining = seconds;
+  let totalEvidences = document.querySelectorAll("[collect-evidence]").length;
+
+  function updateDisplay() {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    timeEl.textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  }
+
+  updateDisplay();
+
+  // 🟢 عدّ تنازلي مع مراقبة الأدلة
+  window.countdownInterval = setInterval(() => {
+    remaining--;
+    updateDisplay();
+
+    // ✅ إذا جمع كل الأدلة → توقف المؤقت
+    const collectedCount = document.querySelectorAll("[collect-evidence][data-collected='true']").length;
+    if(collectedCount === totalEvidences && totalEvidences > 0){
+      clearInterval(window.countdownInterval);
+      endMission("collectedAll");
+      return;
+    }
+
+    // ⏰ إذا انتهى الوقت
+    if (remaining <= 0) {
+      clearInterval(window.countdownInterval);
+      endMission("timeout");
+    }
+  }, 1000);
+
+  if(statusEl) statusEl.textContent = "🚨 المهمة جارية...";
+}
+
+// 🎯 إنهاء المهمة وإظهار شاشة التقييم
+function endMission(reason="timeout") {
+  const overlay = document.getElementById("endOverlay");
+  const report = document.getElementById("evidenceReport");
+  overlay.style.display = "block";
+  clearInterval(window.countdownInterval);
+
+  // 🟡 تجميع الأدلة المجمعة
+  const collected = [];
+  const allEvidences = document.querySelectorAll("[collect-evidence]");
+  allEvidences.forEach(el=>{
+    if(el.dataset.collected === "true"){
+      collected.push(el.getAttribute("id") || "دليل غير معروف");
+    }
+  });
+
+  // 🧾 إنشاء التقرير
+  let html = "";
+  if(collected.length === 0){
+    html = "<p>لم يتم جمع أي دليل.</p>";
+  } else {
+    html = "<table style='width:100%;border-collapse:collapse;'>"+
+           "<tr><th style='border-bottom:1px solid #FFD54A;padding:8px;'>الدليل</th>"+
+           "<th style='border-bottom:1px solid #FFD54A;padding:8px;'>النقاط</th></tr>";
+    collected.forEach(ev=>{
+      html += `<tr>
+        <td style='padding:8px;border-bottom:1px solid rgba(255,215,0,0.2);'>${ev}</td>
+        <td style='padding:8px;border-bottom:1px solid rgba(255,215,0,0.2);color:#39d98a;'>+10</td>
+      </tr>`;
+    });
+    html += "</table><h3 style='margin-top:15px;'>إجمالي النقاط: "+
+            (collected.length * 10)+"</h3>";
+  }
+
+  // 🧠 نص العنوان حسب السبب
+  let title = (reason === "collectedAll")
+    ? "🎉 جميع الأدلة تم جمعها!"
+    : "⏰ انتهى الوقت!";
+
+  report.innerHTML = `<h2>${title}</h2>` + html;
+}
+
+// 🎯 دالة إنهاء المهمة وإظهار شاشة التقييم الملكية المحسّنة
+function endMission(reason = "time") {
+  clearInterval(window.countdownInterval);
+
+  // 🟡 تجميع الأدلة المجمّعة مع أسمائها
+  const evidences = Array.from(document.querySelectorAll("[collect-evidence]"));
+  const collected = evidences.filter(el => el.dataset.collected === "true");
+
+  const totalEvidences = evidences.length;
+  const collectedCount = collected.length;
+  const scoreValue = collectedCount * 10;
+
+  // 🧾 إعداد محتوى التقرير
+  let evidenceRows = "";
+  if (collectedCount === 0) {
+    evidenceRows = `<tr><td colspan="2" style="padding:10px;">لم يتم جمع أي دليل.</td></tr>`;
+  } else {
+    collected.forEach(el => {
+      const evName =
+        el.getAttribute("data-name") ||
+        el.getAttribute("id") ||
+        "دليل غير معروف";
+      evidenceRows += `
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid rgba(255,215,0,0.2);">${evName}</td>
+          <td style="padding:8px;border-bottom:1px solid rgba(255,215,0,0.2);color:#39d98a;">+10</td>
+        </tr>`;
+    });
+  }
+
+  const title =
+    reason === "collectedAll"
+      ? "🏅 أحسنت! جمعت جميع الأدلة قبل انتهاء الوقت"
+      : "⏰ انتهى الوقت";
+
+  // 🪄 إنشاء واجهة التقييم
+  const overlay = document.createElement("div");
+  overlay.id = "missionResult";
+  overlay.style = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.92);
+    color:#FFD54A;font-family:'Cairo',sans-serif;
+    display:flex;align-items:center;justify-content:center;
+    z-index:999999;backdrop-filter:blur(6px);
+  `;
+  overlay.innerHTML = `
+    <div style="background:linear-gradient(180deg,#111,#1a1a1a);
+                border:1.5px solid rgba(212,175,55,0.4);
+                box-shadow:0 0 30px rgba(212,175,55,0.25);
+                border-radius:14px;
+                width:min(90vw,600px);
+                padding:30px 40px;
+                text-align:center;">
+      <h2 style="color:#FFD54A;margin-bottom:8px;">${title}</h2>
+      <p style="color:#ccc;font-size:15px;margin-bottom:20px;">
+        الأدلة المجمعة: ${collectedCount} / ${totalEvidences}
+      </p>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:15px;">
+        <tr>
+          <th style="border-bottom:1px solid #FFD54A;padding:8px;">الدليل</th>
+          <th style="border-bottom:1px solid #FFD54A;padding:8px;">النقاط</th>
+        </tr>
+        ${evidenceRows}
+      </table>
+      <h3 style="color:#39d98a;margin-top:10px;">إجمالي النقاط: ${scoreValue}</h3>
+      <div style="margin-top:25px;display:flex;gap:12px;justify-content:center;">
+        <button onclick="location.reload()" 
+          style="padding:10px 22px;border:none;border-radius:10px;
+          background:linear-gradient(90deg,#FFD54A,#b78f2a);
+          color:#000;font-weight:800;cursor:pointer;">
+          🔁 إعادة المهمة
+        </button>
+       <button onclick="window.location.href='https://dns3uae-glitch.github.io/crime-book/3d-2/'"
+  style="
+    padding:12px 28px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(90deg,#111,#222);
+    color:#FFD54A;
+    font-weight:800;
+    letter-spacing:0.5px;
+    cursor:pointer;
+    box-shadow:0 0 14px rgba(212,175,55,0.25), inset 0 0 10px rgba(212,175,55,0.15);
+    transition:all .25s ease;
+  "
+  onmouseover="this.style.background='linear-gradient(90deg,#222,#000)';this.style.boxShadow='0 0 24px rgba(212,175,55,0.45)';"
+  onmouseout="this.style.background='linear-gradient(90deg,#111,#222)';this.style.boxShadow='0 0 14px rgba(212,175,55,0.25), inset 0 0 10px rgba(212,175,55,0.15)';"
+>
+  ✨ إنهاء المهمة
+</button>
+
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
 </script>
 
 </body>
