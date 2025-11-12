@@ -1144,11 +1144,34 @@ document.querySelectorAll('[gltf-model]').forEach(ent=>{
 
 
 
+<a-entity
+  id="custom_0_جثة"
+  class="clickable"
+  collect-evidence
+  gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/corpse.glb)"
+  position="-1.80 0 2.20"
+  rotation="0 -16 0"
+  scale="1 1 1">
+</a-entity>
 
-
-
-
-
+<a-entity
+  id="custom_0_هندي"
+  class="clickable"
+  collect-evidence
+  gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/indian1.glb)"
+  position="-2.10 0 0.3"
+  rotation="0 -16 0"
+  scale="0.25 0.25 0.25">
+</a-entity>
+<a-entity
+  id="custom_0_توكتوك"
+  class="clickable"
+  collect-evidence
+  gltf-model="url(https://dns3uae-glitch.github.io/crime-book/assets/3d/tuktuk.glb)"
+  position="-8 -0.70 0.3"
+  rotation="0 -16 0"
+  scale="1 1 1">
+</a-entity>
 
 
   <a-entity light="type:ambient; intensity:0.55"></a-entity>
@@ -3326,62 +3349,6 @@ AFRAME.registerComponent('evidence-select', {
 
   }
 });
-</script>
-
-
-
-
-
-<script>
-/* 📤 كود مؤقت لتصدير جميع إحداثيات العناصر (GLB / PNG) */
-function exportCoords() {
-  const list = [];
-  const entities = document.querySelectorAll('.placed, .clickable');
-
-  entities.forEach(el => {
-    const id = el.id || '';
-    const name = el.getAttribute('data-name') || '';
-    const model = (el.querySelector('a-plane')?.getAttribute('src') || 
-                   el.getAttribute('gltf-model') || '').replace(/^url\(|\)$/g, '');
-    const pos = el.getAttribute('position') || {x:0,y:0,z:0};
-    const rot = el.getAttribute('rotation') || {x:0,y:0,z:0};
-    const scale = el.getAttribute('scale') || {x:1,y:1,z:1};
-
-    const type = model.endsWith('.png') ? 'image' : 'model';
-    list.push({
-      id, name, type, model,
-      position: {x:pos.x, y:pos.y, z:pos.z},
-      rotation: {x:rot.x, y:rot.y, z:rot.z},
-      scale: scale.x
-    });
-  });
-
-  const result = JSON.stringify({evidence: list}, null, 2);
-  console.log("📦 بيانات الإحداثيات المصدّرة:", result);
-
-  // 🟡 نسخ إلى الحافظة Clipboard
-  navigator.clipboard.writeText(result).then(()=>{
-    alert("✅ تم تصدير الإحداثيات ونسخها إلى الحافظة!");
-  }).catch(()=>{
-    alert("📋 تم إنشاء JSON في الكونسول فقط (انسخه يدويًا).");
-  });
-}
-
-/* 🔘 زر التصدير المؤقت */
-const btn = document.createElement('button');
-btn.textContent = '📤 تصدير الإحداثيات';
-btn.style.cssText = `
-  position:fixed;top:20px;right:20px;
-  background:linear-gradient(135deg,#111,#333);
-  color:#ffd700;border:2px solid #bfa130;
-  border-radius:10px;padding:8px 14px;
-  font-family:'Cairo',sans-serif;cursor:pointer;
-  z-index:99999;font-weight:700;
-`;
-btn.onclick = exportCoords;
-document.body.appendChild(btn);
-
-
 </script>
 
 </body>
