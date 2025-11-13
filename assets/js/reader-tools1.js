@@ -13,6 +13,203 @@
   const PAGE_KEY = location.pathname || "page";
   const KEYS = { HL:'rt_v6_highlights', NOTES:'rt_v6_notes', VOICE:'rt_v6_voice' };
 
+/* ============================================================
+   🧠 Adaptive Focus Mode - نظام اكتشاف الصعوبة التكيفي
+   ============================================================ */
+
+// أضف هذا الكود تحت قسم "/* -------------------- الحالة العامة -------------------- */"
+const FOCUS_ENGINE = {
+  hoverTimer: null,
+  hoverStart: 0,
+  repeatTracker: new Map(), // لتتبع التكرار
+  difficultyDetected: false,
+  
+  // تحليل وقت التحويم
+  startHoverTracking(element) {
+    this.hoverStart = Date.now();
+    this.difficultyDetected = false;
+    
+    // إلغاء المؤقت السابق إن وجد
+    if (this.hoverTimer) clearTimeout(this.hoverTimer);
+    
+    this.hoverTimer = setTimeout(() => {
+      const duration = Date.now() - this.hoverStart;
+      if (duration > 3000 && !this.difficultyDetected) { // 3 ثواني
+        this.difficultyDetected = true;
+        this.showSmartHint(element, 'hover', duration);
+      }
+    }, 3000);
+  },
+  
+  // تتبع التكرار
+  trackRepetition(text) {
+    if (!text || text.length < 5) return;
+    
+    const count = (this.repeatTracker.get(text) || 0) + 1;
+    this.repeatTracker.set(text, count);
+    
+    // إذا ظللت نفس النص 3 مرات
+    if (count === 3) {
+      this.showSmartHint(document.querySelector(`mark.rt-hl[data-text="${btoa(text)}"]`), 'repeat', count);
+    }
+  },
+  
+  // إظهار التلميح الذكي
+  showSmartHint(element, type, value) {
+    // إزالة تلميحات سابقة
+    document.querySelectorAll('.rt-adaptive-hint').forEach(h => h.remove());
+    
+    const hint = document.createElement('div');
+    hint.className = 'rt-adaptive-hint';
+    
+    const message = type === 'hover' 
+      ? `💡 لاحظت توقفك ${Math.round(value/1000)}ث. هل تحتاج شرحاً فورياً؟`
+      : `🔁 أرى أنك تراجع هذا المقطع كثيراً. دعني أبسطه لك...`;
+    
+    hint.innerHTML = `
+      <div style="position:absolute; background:linear-gradient(145deg,#FFD54A,#FFA500); 
+                  color:#000; padding:10px 14px; border-radius:10px; font-size:0.9rem; 
+                  font-weight:600; box-shadow:0 0 20px rgba(255,213,74,0.5); 
+                  z-index:99998; animation:fadein .3s ease; max-width:280px; line-height:1.4;">
+        ${message}
+        <div style="display:flex; gap:8px; margin-top:10px; justify-content:center;">
+          <button class="rt-btn rt-mini" style="background:#000; color:#FFD54A; border:none; 
+                  padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;"
+                  onclick="FOCUS_ENGINE.getInstantExplanation('${btoa(element?.textContent?.substring(0,100) || '')}', '${type}')">
+            نعم، شرح فوري
+          </button>
+          <button class="rt-btn rt-mini" style="background:transparent; color:#000; border:1px solid #000; 
+                  padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;"
+                  onclick="this.closest('.rt-adaptive-hint').remove()">
+            لاحقاً
+          </button>
+        </div>
+      </div>
+    `;
+    
+    // تحديد موقع التلميح بذكاء
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      hint.style.position = 'fixed';
+      hint.style.top = `${rect.top - 60}px`;
+      hint.style.left = `${Math.min(rect.left, window.innerWidth - 300)}px`;
+    } else {
+      // إذا لم يكن هناك عنصر، اظهر في المنتصف
+      hint.style.position = 'fixed';
+      hint.style.top = '40%';
+      hint.style.left = '50%';
+      hint.style.transform = 'translate(-50%, -50%)';
+    }
+    
+    document.body.appendChild(hint);
+    
+    // إزالة تلقائياً بعد 10 ثواني
+    setTimeout(() => hint.remove(), 10000);
+  },
+  
+  // الحصول على شرح فوري
+  async getInstantExplanation(encodedText, type) {
+    const text = atob(encodedText);
+    if (!text) return;
+    
+    const output = document.getElementById('rt-sec-ai') ? 
+      document.getElementById('rt-ai-response') : 
+      document.getElementById('rt-ask-output');
+    
+    if (!output) return;
+    
+    output.innerHTML = '⏳ يحضر لك شرحاً مبسطاً...';
+    
+    // فتح تبويب المساعد تلقائياً
+    if (!panel.classList.contains('active')) panel.classList.add('active');
+    activateTab('ai');
+    
+    try {
+      const res = await fetch("https://gpt-proxy-server-xs5u.onrender.com/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: type === 'hover' 
+            ? `المستخدم توقف عند هذا النص: "${text}". اشرحه بجملتين فقط بأسلوب مباشر وعملي.`
+            : `المستخدم ظلل هذا النص 3 مرات: "${text}". هذا يعني أنه صعب عليه. اشرحه بطريقة مبتكرة باستخدام تشبيه من الحياة اليومية.`
+        })
+      });
+      
+      const data = await res.json();
+      const card = FOCUS_ENGINE.createSmartCard(text, data.reply || '⚠️ لم أستطع الشرح.');
+      
+      // إضافة البطاقة في الأعلى
+      if (output.firstChild) output.insertBefore(card, output.firstChild);
+      else output.appendChild(card);
+      
+    } catch (err) {
+      output.innerHTML = '⚠️ تعذر الاتصال بالمساعد الذكي.';
+    }
+    
+    // إزالة التلميح
+    document.querySelector('.rt-adaptive-hint')?.remove();
+  },
+  
+  // إنشاء بطاقة شرح ذكية
+  createSmartCard(question, answer) {
+    const card = document.createElement('div');
+    card.style.cssText = `
+      background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+      border: 1px solid rgba(0,120,255,.3);
+      border-radius: 10px; padding: 12px; margin: 8px 0;
+      color: #FFD54A; box-shadow: 0 0 12px rgba(0,80,255,.2);
+    `;
+    
+    card.innerHTML = `
+      <div style="font-weight:bold; color:#8fd3ff; margin-bottom:6px; font-size:0.9rem;">🧠 سؤال تلقائي:</div>
+      <div class="ai-question" style="margin-bottom:8px; color:#e1f5fe; font-size:0.9rem;">${question.substring(0,100)}...</div>
+      <div style="border-top:1px solid rgba(255,215,0,.2); padding-top:8px; font-size:0.9rem;">${answer}</div>
+    `;
+    
+    return card;
+  }
+};
+
+// تفعيل التتبع التكيفي
+function initAdaptiveFocusMode() {
+  // تتبع التحويم
+  document.addEventListener('mouseover', (e) => {
+    const target = e.target;
+    if (target.tagName === 'P' || target.tagName === 'SPAN' || target.closest('p, span, div')) {
+      FOCUS_ENGINE.startHoverTracking(target);
+    }
+  });
+  
+  // تتبع التظليل المتكرر
+  const originalApplyHighlight = window.applyHighlight;
+  window.applyHighlight = function(color) {
+    const sel = window.getSelection();
+    const text = sel.toString().trim();
+    
+    // تتبع التكرار
+    FOCUS_ENGINE.trackRepetition(text);
+    
+    // استدعاء الدالة الأصلية
+    return originalApplyHighlight.apply(this, arguments);
+  };
+  
+  // تفعيل وضع التركيز التكيفي
+  console.log('✅ Adaptive Focus Mode مفعل');
+}
+
+// أضف هذا CSS في قسم "/* -------------------- CSS -------------------- */"
+const adaptiveCSS = `
+  @keyframes fadein { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+  .rt-adaptive-hint { animation: fadein .3s ease; }
+`;
+style.textContent += adaptiveCSS;
+
+// استدعِ المُهيِّئ في نهاية الملف
+window.addEventListener('load', () => {
+  restoreHL(); 
+  renderNotes();
+  initAdaptiveFocusMode(); // <-- أضف هذا السطر
+});
   /* -------------------- الحالة العامة -------------------- */
   const STATE = {
     selectionRange: null,
@@ -1148,82 +1345,81 @@ askBtn.addEventListener("click", () => {
 });
 
 
-/* -------------------- 🧠 المساعد الذكي (محسّن الأداء + تحميل تدريجي) -------------------- */
+/* -------------------- المساعد الذكي (بطاقات سؤال + جواب) -------------------- */
 const aiBtn = document.getElementById('rt-ai-ask');
 const aiInput = document.getElementById('rt-ai-input');
 const aiResponse = document.getElementById('rt-ai-response');
 
-// ✅ توحيد وظيفة الاتصال بالخادم لتقليل التكرار
-async function gptAsk(text) {
-  const res = await fetch("https://gpt-proxy-server-xs5u.onrender.com/ask", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question: text })
-  });
-  const data = await res.json();
-  return data.reply || "⚠️ لم يصل رد من المساعد.";
-}
-
-// ✅ واجهة الإدخال (زر أو Enter)
-aiBtn.addEventListener("click", handleAIQuery);
-aiInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
+aiBtn.addEventListener('click', sendAIMessage);
+aiInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
-    handleAIQuery();
+    sendAIMessage();
   }
 });
 
-// ✅ الوظيفة الأساسية لإرسال السؤال
-async function handleAIQuery() {
-  const text = (aiInput.value || STATE.selectedText || "").trim();
-  if (!text) return toast("🧠 اكتب سؤالك أولاً");
+async function sendAIMessage() {
+  const text = (aiInput.value || STATE.selectedText || '').trim();
+  if (!text) {
+    toast('اكتب سؤالك أو ظلّل فقرة ليشرحها المساعد');
+    return;
+  }
 
-  const msg = appendAIMessage(text);
-  aiInput.value = "";
-
-  // إظهار مؤشر تحميل
-  msg.answer.textContent = "🤖 جاري التفكير...";
-  msg.card.classList.add("loading");
+  const card = appendAIMessagePair(text);
 
   try {
-    const reply = await gptAsk(text);
-    await streamText(msg.answer, reply); // 🟡 عرض تدريجي
-  } catch (err) {
-    msg.answer.textContent = "⚠️ حدث خطأ أثناء الاتصال بالخادم.";
-  } finally {
-    msg.card.classList.remove("loading");
+    const response = await fetch("https://gpt-proxy-server-xs5u.onrender.com/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: text })
+    });
+
+    const data = await response.json();
+    updateLastAIMessage(data.reply || '⚠️ لم يصل رد من المساعد.');
+  } catch (error) {
+    updateLastAIMessage("⚠️ حدث خطأ أثناء الاتصال بالمساعد.");
   }
+
+  aiInput.value = '';
 }
 
-// ✅ دالة عرض تدريجي للنص مثل ChatGPT الحقيقي
-async function streamText(target, text) {
-  target.textContent = "";
-  for (const word of text.split(" ")) {
-    target.textContent += word + " ";
-    await new Promise(r => setTimeout(r, 20)); // سرعة الكتابة
-  }
-}
+function appendAIMessagePair(questionText) {
+  const container = document.getElementById('rt-ai-response');
 
-// ✅ إنشاء البطاقة
-function appendAIMessage(questionText) {
-  const container = document.getElementById("rt-ai-response");
-  const card = document.createElement("div");
-  card.className = "chat-message-pair";
-  card.style.cssText = `
-    margin: 10px 0; padding: 10px; border-radius: 10px;
-    background: #1e1e1e; color: #FFD54A; border: 1px solid rgba(0,120,255,.3);
-  `;
+  const card = document.createElement('div');
+  card.className = 'chat-message-pair';
+  card.style.margin = '10px 0';
+  card.style.padding = '10px';
+  card.style.borderRadius = '10px';
+  card.style.background = '#1e1e1e';
+  card.style.color = '#FFD54A';
+  card.style.border = '1px solid rgba(0,120,255,.3)';
+  card.dataset.pending = 'true';
 
   card.innerHTML = `
-    <div style="font-weight:bold; color:#8fd3ff; margin-bottom:6px;">🧠 سؤالك:</div>
-    <div class="ai-question" style="margin-bottom:8px; color:#e1f5fe;">${questionText}</div>
-    <div class="ai-answer" style="color:#FFD54A;">🤖 ...جاري التفكير</div>
+    <div style="font-weight:bold; color:#8fd3ff; margin-bottom:6px">🧠 سؤالك:</div>
+    <div class="ai-question" style="margin-bottom:8px; color:#e1f5fe">${questionText}</div>
+    <div class="ai-answer">🤖 ...جاري التفكير</div>
   `;
 
-  container.prepend(card);
-  return { card, answer: card.querySelector(".ai-answer") };
+  if (container.firstChild) {
+    container.insertBefore(card, container.firstChild);
+  } else {
+    container.appendChild(card);
+  }
+
+  return card;
 }
 
+function updateLastAIMessage(content) {
+  const container = document.getElementById('rt-ai-response');
+  const pendingCard = container.querySelector('.chat-message-pair[data-pending="true"]');
+  if (pendingCard) {
+    const answerDiv = pendingCard.querySelector('.ai-answer');
+    answerDiv.textContent = content;
+    pendingCard.removeAttribute('data-pending');
+  }
+}
 
 
 function appendAIMessagePair(questionText) {
