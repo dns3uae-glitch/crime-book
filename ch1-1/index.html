@@ -577,7 +577,7 @@ openBtn.addEventListener('click', ()=>{
 
     faceMeshObj.onResults(analyze);
 
-    const cam = new Camera(video, {
+const cam = new cameraUtils.Camera(video, {
       onFrame: async () => {
         await faceMeshObj.send({ image: video });
       },
@@ -609,6 +609,7 @@ openBtn.addEventListener('click', ()=>{
 
 </body>
 </html>
+
 
 
 
