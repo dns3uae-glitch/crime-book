@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils"></script>
 
@@ -462,7 +462,6 @@ openBtn.addEventListener('click', ()=>{
 // ==========================================================
 //  🎥 نظام مراقبة تركيز الطالب — النسخة الصحيحة 100%
 // ==========================================================
-
 (function(){
 
   let video = null;
@@ -470,7 +469,6 @@ openBtn.addEventListener('click', ()=>{
   let blink = 0;
   let away = 0;
 
-  // 📌 1 — إنشاء الكاميرا في أعلى يمين الشاشة
   function createVideoBox() {
     video = document.createElement("video");
     video.autoplay = true;
@@ -491,7 +489,6 @@ openBtn.addEventListener('click', ()=>{
     document.body.appendChild(video);
   }
 
-  // 📌 2 — رسالة تنبيه
   function showMsg(text){
     const div = document.createElement("div");
     div.textContent = text;
@@ -513,7 +510,6 @@ openBtn.addEventListener('click', ()=>{
     setTimeout(()=> div.remove(), 3500);
   }
 
-  // 📌 3 — تحليل ملامح الوجه
   function analyze(res){
     if(!res.multiFaceLandmarks || res.multiFaceLandmarks.length === 0){
       away++;
@@ -527,7 +523,7 @@ openBtn.addEventListener('click', ()=>{
     away = 0;
     const pts = res.multiFaceLandmarks[0];
 
-    // 👁️ كشف الرمش
+    // رمش
     const eyeTop = pts[159].y;
     const eyeBottom = pts[145].y;
     const eyeDist = Math.abs(eyeTop - eyeBottom);
@@ -542,7 +538,7 @@ openBtn.addEventListener('click', ()=>{
       blink = 0;
     }
 
-    // 💀 كشف ميل الرأس (سرحان)
+    // شرود
     const nose = pts[1].x;
     const chin = pts[152].x;
     const tilt = Math.abs(nose - chin);
@@ -558,37 +554,33 @@ openBtn.addEventListener('click', ()=>{
     }
   }
 
-// 📌 4 — FaceMesh
-function initFaceMesh(){
+  function initFaceMesh(){
 
-  const fm = new FaceMesh.FaceMesh({
-    locateFile: (file) => 
-      `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
-  });
-
-  fm.setOptions({
-    maxNumFaces: 1,
-    refineLandmarks: true,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5
-  });
-
-  fm.onResults(analyze);
-
-  const cam = new Camera(video, {
-    onFrame: async () => {
-      await fm.send({ image: video });
-    },
-    width: 300,
-    height: 250
-  });
-
-  cam.start();
-}
+    const fm = new FaceMesh.FaceMesh({
+  locateFile: (file)=> 
+    `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
+});
 
 
+    fm.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
 
-  // 📌 5 — تشغيل النظام
+    fm.onResults(analyze);
+
+    const cam = new Camera(video, {
+      onFrame: async ()=>{ await fm.send({ image: video }); },
+      width: 300,
+      height: 250
+    });
+
+    cam.start();
+  }
+
+
   async function startAI(){
     createVideoBox();
 
