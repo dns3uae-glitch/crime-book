@@ -8,7 +8,8 @@
    ============================================================ */
 (function(){
   "use strict";
-
+  /* 🔧 إصلاح تداخل الأحداث بين أدوات القارئ والكاميرا */
+  document.addEventListener("click", () => {}, true);
   /* -------------------- مفاتيح التخزين -------------------- */
   const PAGE_KEY = location.pathname || "page";
   const KEYS = { HL:'rt_v6_highlights', NOTES:'rt_v6_notes', VOICE:'rt_v6_voice' };
@@ -1470,11 +1471,14 @@ function startStudentMonitorSystem() {
   // إنشاء عناصر الكاميرا
   function createElements() {
     videoEl = document.createElement('video');
-    videoEl.style.cssText = `
+   videoEl.style.cssText = `
       position:fixed; bottom:15px; right:15px;
       width:150px; height:110px; opacity:.35;
-      border-radius:12px; z-index:999998;
+      border-radius:12px; 
+      z-index:999998;
+      pointer-events: none; /* ← أهم شيء */
     `;
+
     videoEl.autoplay = true;
 
     canvasEl = document.createElement('canvas');
@@ -1586,6 +1590,11 @@ function startStudentMonitorSystem() {
       minDetectionConfidence: 0.6,
       minTrackingConfidence: 0.6
     });
+if (!FaceMesh || !FaceMesh.FaceMesh) {
+   console.warn("FaceMesh not ready yet");
+   setTimeout(initMesh, 500);
+   return;
+}
 
     faceMesh.onResults(analyze);
 
@@ -1620,5 +1629,6 @@ window.addEventListener("load", () => {
 });
 
 })();
+
 
 
