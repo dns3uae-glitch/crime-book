@@ -558,9 +558,10 @@ openBtn.addEventListener('click', ()=>{
 
   // 📌 4 — FaceMesh
   function initFaceMesh(){
-   const fm = new faceMesh.FaceMesh({
+   const fm = new FaceMesh({
   locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`
 });
+
 
 
     fm.setOptions({
