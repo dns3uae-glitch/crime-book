@@ -475,25 +475,31 @@ openBtn.addEventListener('click', ()=>{
   let blink = 0;
   let away = 0;
 
-  function createVideoBox() {
-    video = document.createElement("video");
-    video.autoplay = true;
-    video.playsinline = true;
-    video.style.cssText = `
-      position:fixed;
-      top:20px;
-      right:20px;
-      width:280px;
-      height:210px;
-      border-radius:12px;
-      border:2px solid #FFD54A;
-      opacity:0.85;
-      background:#000;
-      z-index:999999;
-      pointer-events:none;
-    `;
-    document.body.appendChild(video);
-  }
+ function createVideoBox() {
+  video = document.createElement("video");
+  video.autoplay = true;
+  video.playsinline = true;
+  video.style.cssText = `
+    position:fixed;
+    top:20px;
+    right:20px;
+    width:280px;
+    height:210px;
+    border-radius:12px;
+    border:2px solid #FFD54A;
+    opacity:0.85;
+    background:#000;
+    z-index:999999;
+    pointer-events:none;
+    object-fit:cover;
+  `;
+  
+  // ⭐ أهم سطر — لازم!
+  video.style.transform = "scaleX(-1)";
+
+  document.body.appendChild(video);
+}
+
 
   function showMsg(text){
     const div = document.createElement("div");
@@ -609,6 +615,7 @@ const cam = new cameraUtils.Camera(video, {
 
 </body>
 </html>
+
 
 
 
