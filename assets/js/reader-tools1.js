@@ -1,3 +1,9 @@
+<!-- Mediapipe FaceMesh -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.min.js"></script>
+
+<!-- Mediapipe Camera Utils -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
 /* ============================================================
    📘 reader-tools.js — الأكاديمية التفاعلية (نسخة متكاملة)
    - فتح تلقائي عند تحديد النص + Popover ألوان
@@ -1187,43 +1193,7 @@ async function sendAIMessage() {
   aiInput.value = '';
 }
 
-function appendAIMessagePair(questionText) {
-  const container = document.getElementById('rt-ai-response');
 
-  const card = document.createElement('div');
-  card.className = 'chat-message-pair';
-  card.style.margin = '10px 0';
-  card.style.padding = '10px';
-  card.style.borderRadius = '10px';
-  card.style.background = '#1e1e1e';
-  card.style.color = '#FFD54A';
-  card.style.border = '1px solid rgba(0,120,255,.3)';
-  card.dataset.pending = 'true';
-
-  card.innerHTML = `
-    <div style="font-weight:bold; color:#8fd3ff; margin-bottom:6px">🧠 سؤالك:</div>
-    <div class="ai-question" style="margin-bottom:8px; color:#e1f5fe">${questionText}</div>
-    <div class="ai-answer">🤖 ...جاري التفكير</div>
-  `;
-
-  if (container.firstChild) {
-    container.insertBefore(card, container.firstChild);
-  } else {
-    container.appendChild(card);
-  }
-
-  return card;
-}
-
-function updateLastAIMessage(content) {
-  const container = document.getElementById('rt-ai-response');
-  const pendingCard = container.querySelector('.chat-message-pair[data-pending="true"]');
-  if (pendingCard) {
-    const answerDiv = pendingCard.querySelector('.ai-answer');
-    answerDiv.textContent = content;
-    pendingCard.removeAttribute('data-pending');
-  }
-}
 
 
 function appendAIMessagePair(questionText) {
@@ -1590,15 +1560,16 @@ function startStudentMonitorSystem() {
       minDetectionConfidence: 0.6,
       minTrackingConfidence: 0.6
     });
-if (!FaceMesh || !FaceMesh.FaceMesh) {
-   console.warn("FaceMesh not ready yet");
-   setTimeout(initMesh, 500);
-   return;
+if (typeof FaceMesh === "undefined" || typeof FaceMesh.FaceMesh === "undefined") {
+  console.warn("⏳ FaceMesh not loaded yet… retrying");
+  setTimeout(initMesh, 500);
+  return;
 }
+
 
     faceMesh.onResults(analyze);
 
-    const cam = new CameraUtils.Camera(videoEl, {
+    const cam = new Camera(videoEl, {
       onFrame: async () => {
         await faceMesh.send({ image: videoEl });
       },
@@ -1629,6 +1600,5 @@ window.addEventListener("load", () => {
 });
 
 })();
-
 
 
