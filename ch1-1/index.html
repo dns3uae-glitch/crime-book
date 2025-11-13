@@ -456,9 +456,13 @@ openBtn.addEventListener('click', ()=>{
 
 
 
+<!-- ⭐ Mediapipe Correct Import -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
+
 <script>
 // ==========================================================
-//  🎥 نظام مراقبة تركيز الطالب — Mediapipe FaceMesh
+//  🎥 نظام مراقبة تركيز الطالب — النسخة الصحيحة 100%
 // ==========================================================
 
 (function(){
@@ -477,17 +481,19 @@ openBtn.addEventListener('click', ()=>{
       position:fixed;
       top:20px;
       right:20px;
-      width:160px;
-      height:120px;
-      border-radius:12px;
-      opacity:0.45;
+      width:200px;
+      height:150px;
+      border-radius:14px;
+      border:2px solid #FFD54A;
+      opacity:0.85;
+      background:#000;
       z-index:99999;
       pointer-events:none;
     `;
     document.body.appendChild(video);
   }
 
-  // 📌 2 — صندوق رسائل تنبيه
+  // 📌 2 — رسالة تنبيه
   function showMsg(text){
     const div = document.createElement("div");
     div.textContent = text;
@@ -498,12 +504,12 @@ openBtn.addEventListener('click', ()=>{
       transform:translateX(-50%);
       background:rgba(0,0,0,0.85);
       color:#FFD54A;
-      padding:12px 20px;
+      padding:14px 22px;
       border-radius:12px;
       border:1px solid #FFD54A;
       z-index:999999;
-      font-size:1.1rem;
-      box-shadow:0 0 20px rgba(255,215,0,0.3);
+      font-size:1.15rem;
+      box-shadow:0 0 25px rgba(255,215,0,0.35);
     `;
     document.body.appendChild(div);
     setTimeout(()=> div.remove(), 3500);
@@ -513,8 +519,8 @@ openBtn.addEventListener('click', ()=>{
   function analyze(res){
     if(!res.multiFaceLandmarks || res.multiFaceLandmarks.length === 0){
       away++;
-      if (away > 45){
-        showMsg("⚠️ يبدو أنك بعيد عن الشاشة — ركّز أكثر");
+      if (away > 50){
+        showMsg("⚠️ انت بعيد عن الشاشة — رجّع تركيزك");
         away = 0;
       }
       return;
@@ -523,15 +529,15 @@ openBtn.addEventListener('click', ()=>{
     away = 0;
     const pts = res.multiFaceLandmarks[0];
 
-    // 👁️ كشف الرمش (تعب)
+    // 👁️ كشف الرمش
     const eyeTop = pts[159].y;
     const eyeBottom = pts[145].y;
     const eyeDist = Math.abs(eyeTop - eyeBottom);
 
-    if (eyeDist < 0.01){
+    if (eyeDist < 0.011){
       blink++;
-      if (blink > 12){
-        showMsg("😴 يبدو أنك متعب… خذ استراحة قصيرة");
+      if (blink > 13){
+        showMsg("😴 شكلك تعبان… خذ 30 ثانية راحة");
         blink = 0;
       }
     } else {
@@ -545,8 +551,8 @@ openBtn.addEventListener('click', ()=>{
 
     if (tilt > 0.06){
       tired++;
-      if (tired > 25){
-        showMsg("⚠️ جلستك غير مستقرة — عد لوضع طبيعي");
+      if (tired > 30){
+        showMsg("⚠️ سرحت! حاول تركز أكثر");
         tired = 0;
       }
     } else {
@@ -554,7 +560,7 @@ openBtn.addEventListener('click', ()=>{
     }
   }
 
-  // 📌 4 — تشغيل FaceMesh والكاميرا
+  // 📌 4 — FaceMesh
   function initFaceMesh(){
     const fm = new FaceMesh.FaceMesh({
       locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`
@@ -580,7 +586,7 @@ openBtn.addEventListener('click', ()=>{
     cam.start();
   }
 
-  // 📌 5 — تشغيل النظام الكامل
+  // 📌 5 — تشغيل النظام
   async function startAI(){
     createVideoBox();
 
@@ -588,7 +594,7 @@ openBtn.addEventListener('click', ()=>{
       const stream = await navigator.mediaDevices.getUserMedia({ video:true });
       video.srcObject = stream;
     } catch(e){
-      alert("يجب السماح للكاميرا حتى يعمل نظام التركيز");
+      alert("رجاءً: اسمح بالكاميرا حتى يعمل نظام التركيز");
       return;
     }
 
@@ -601,9 +607,9 @@ openBtn.addEventListener('click', ()=>{
 </script>
 
 
-
 </body>
 </html>
+
 
 
 
