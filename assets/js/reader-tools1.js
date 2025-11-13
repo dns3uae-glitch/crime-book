@@ -1390,3 +1390,234 @@ document.getElementById('rt-speak').onclick = ()=>{
   });
 
 })();
+/* ============================================================
+   📸 نافذة إذن استخدام الكاميرا — Permission Dialog
+   ============================================================ */
+
+function showCameraPermissionDialog() {
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed; inset:0; 
+    background: rgba(0,0,0,.7);
+    backdrop-filter: blur(5px);
+    z-index: 999999;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  `;
+
+  const box = document.createElement('div');
+  box.style.cssText = `
+    background:#0d1b2a;
+    padding:22px;
+    width:330px;
+    border-radius:14px;
+    border:1px solid #FFD54A;
+    color:#FFD54A;
+    text-align:center;
+    box-shadow:0 0 15px rgba(255,215,0,.35);
+    font-family:"Cairo",sans-serif;
+  `;
+
+  box.innerHTML = `
+    <h2 style="color:white;margin-bottom:10px;">📸 إذن استخدام الكاميرا</h2>
+    <p style="line-height:1.7;margin-bottom:20px;">
+      لتفعيل نظام مراقبة التعب والتركيز وتحسين تجربتك التعليمية،  
+      نحتاج إلى إذنك لتشغيل كاميرا جهازك.  
+      <br><br>
+      ❗ لن يتم تخزين أو تسجيل أي صورة أو فيديو.
+    </p>
+
+    <button id="camAllow" style="
+      width:100%;padding:10px;border:none;
+      background:#FFD54A;color:#000;
+      border-radius:10px;font-size:1.1rem;
+      cursor:pointer;margin-bottom:12px;
+    ">السماح بتشغيل الكاميرا</button>
+
+    <button id="camDeny" style="
+      width:100%;padding:10px;border:1px solid #FFD54A;
+      background:transparent;color:#FFD54A;
+      border-radius:10px;font-size:1rem;
+      cursor:pointer;
+    ">رفض</button>
+  `;
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  document.getElementById("camAllow").onclick = () => {
+    overlay.remove();
+    localStorage.setItem("cam_permission", "granted");
+    startStudentMonitorSystem();
+  };
+
+  document.getElementById("camDeny").onclick = () => {
+    overlay.remove();
+    localStorage.setItem("cam_permission", "denied");
+  };
+}
+/* ============================================================
+   🧠 نظام مراقبة التعب والتركيز — Face Monitoring System
+   ============================================================ */
+
+function startStudentMonitorSystem() {
+
+  let videoEl, canvasEl, ctx;
+  let tiredCounter = 0;
+  let blinkCounter = 0;
+  let lookingAwayCounter = 0;
+
+  // إنشاء عناصر الكاميرا
+  function createElements() {
+    videoEl = document.createElement('video');
+    videoEl.style.cssText = `
+      position:fixed; bottom:15px; right:15px;
+      width:150px; height:110px; opacity:.35;
+      border-radius:12px; z-index:999998;
+    `;
+    videoEl.autoplay = true;
+
+    canvasEl = document.createElement('canvas');
+    canvasEl.width = 300;
+    canvasEl.height = 200;
+    ctx = canvasEl.getContext('2d');
+
+    document.body.appendChild(videoEl);
+  }
+
+  // بدء الكاميرا
+  async function initCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoEl.srcObject = stream;
+    } catch(e) {
+      console.warn("لم يتم تشغيل الكاميرا:", e);
+    }
+  }
+
+  // رسائل للطالب
+  function studentMessage(msg) {
+    const box = document.createElement('div');
+    box.textContent = msg;
+    box.style.cssText = `
+      position:fixed; bottom:25px; left:50%;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,.9);
+      padding:12px 18px;
+      color:#FFD54A; font-size:1rem;
+      border-radius:10px;
+      border:1px solid #FFD54A;
+      z-index:999999;
+      animation:fadein .3s;
+    `;
+    document.body.appendChild(box);
+    setTimeout(() => box.remove(), 3500);
+  }
+
+  // فتح التبويب تلقائياً
+  function openExplainTab() {
+    try {
+      const aiTab = document.querySelector('.rt-tab[data-tab="ai"]');
+      if (aiTab) aiTab.click();
+    } catch {}
+  }
+
+  // تحليل بيانات الوجه
+  function analyze(results) {
+
+    if (!results.multiFaceLandmarks || !results.multiFaceLandmarks.length) {
+      lookingAwayCounter++;
+      if (lookingAwayCounter === 40) {
+        studentMessage("⚠️ يبدو أنك مبتعد عن الشاشة… هل تحتاج مساعدة؟");
+        openExplainTab();
+      }
+      return;
+    }
+
+    lookingAwayCounter = 0;
+
+    const face = results.multiFaceLandmarks[0];
+
+    const leftEye = face[159];
+    const rightEye = face[386];
+
+    const eyeHeight = Math.abs(leftEye.y - face[145].y);
+
+    // إغلاق العين (نعاس)
+    if (eyeHeight < 0.010) {
+      blinkCounter++;
+      if (blinkCounter >= 15) {
+        studentMessage("😴 تبدو مرهقًا… خذ دقيقة راحة.");
+        openExplainTab();
+        blinkCounter = 0;
+      }
+    } else {
+      blinkCounter = 0;
+    }
+
+    // إمالة الرأس (تعب)
+    const nose = face[1];
+    const chin = face[152];
+    const tilt = Math.abs(nose.x - chin.x);
+
+    if (tilt > 0.055) {
+      tiredCounter++;
+      if (tiredCounter >= 30) {
+        studentMessage("⚠️ وضعية جلوس غير مستقرة… هل تحتاج شرح؟");
+        openExplainTab();
+        tiredCounter = 0;
+      }
+    } else {
+      tiredCounter = 0;
+    }
+  }
+
+  // تشغيل Mediapipe
+  function initMesh() {
+
+    const faceMesh = new FaceMesh.FaceMesh({
+      locateFile: (file) =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+    });
+
+    faceMesh.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.6,
+      minTrackingConfidence: 0.6
+    });
+
+    faceMesh.onResults(analyze);
+
+    const cam = new CameraUtils.Camera(videoEl, {
+      onFrame: async () => {
+        await faceMesh.send({ image: videoEl });
+      },
+      width: 300,
+      height: 200
+    });
+
+    cam.start();
+  }
+
+  // تشغيل النظام
+  createElements();
+  initCamera();
+  initMesh();
+}
+/* ============================================================
+   🚀 تشغيل النظام عند تحميل الصفحة
+   ============================================================ */
+
+window.addEventListener("load", () => {
+  const permission = localStorage.getItem("cam_permission");
+
+  if (permission === "granted") {
+    startStudentMonitorSystem();
+  } else {
+    showCameraPermissionDialog();
+  }
+});
+
