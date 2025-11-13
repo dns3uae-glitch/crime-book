@@ -14,168 +14,12 @@
   const KEYS = { HL:'rt_v6_highlights', NOTES:'rt_v6_notes', VOICE:'rt_v6_voice' };
 
   /* -------------------- الحالة العامة -------------------- */
-
-  /* ============================================================
-     🧠 Adaptive Focus Mode - نظام اكتشاف الصعوبة التكيفي
-     ============================================================ */
-  const FOCUS_ENGINE = {
-    hoverTimer: null,
-    hoverStart: 0,
-    repeatTracker: new Map(),
-    difficultyDetected: false,
-
-    startHoverTracking(element) {
-      this.hoverStart = Date.now();
-      this.difficultyDetected = false;
-
-      if (this.hoverTimer) clearTimeout(this.hoverTimer);
-
-      this.hoverTimer = setTimeout(() => {
-        const duration = Date.now() - this.hoverStart;
-        if (duration > 3000 && !this.difficultyDetected) {
-          this.difficultyDetected = true;
-          this.showSmartHint(element, 'hover', duration);
-        }
-      }, 3000);
-    },
-
-    trackRepetition(text) {
-      if (!text || text.length < 5) return;
-      const count = (this.repeatTracker.get(text) || 0) + 1;
-      this.repeatTracker.set(text, count);
-      if (count === 3) {
-        const encoded = btoa(text);
-        const mark = document.querySelector(`mark.rt-hl[data-text="${encoded}"]`) || null;
-        this.showSmartHint(mark, 'repeat', count);
-      }
-    },
-
-    showSmartHint(element, type, value) {
-      document.querySelectorAll('.rt-adaptive-hint').forEach(h => h.remove());
-
-      const hint = document.createElement('div');
-      hint.className = 'rt-adaptive-hint';
-
-      const message = type === 'hover'
-        ? `💡 لاحظت توقفك ${Math.round(value/1000)}ث. هل تحتاج شرحاً فورياً؟`
-        : `🔁 أرى أنك تراجع هذا المقطع كثيراً. دعني أبسطه لك...`;
-
-      hint.innerHTML = `
-        <div style="position:absolute; background:linear-gradient(145deg,#FFD54A,#FFA500);
-                    color:#000; padding:10px 14px; border-radius:10px; font-size:0.9rem;
-                    font-weight:600; box-shadow:0 0 20px rgba(255,213,74,0.5);
-                    z-index:99998; animation:fadein .3s ease; max-width:280px; line-height:1.4;">
-          ${message}
-          <div style="display:flex; gap:8px; margin-top:10px; justify-content:center;">
-            <button class="rt-btn rt-mini" style="background:#000; color:#FFD54A; border:none;
-                    padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;"
-                    onclick="FOCUS_ENGINE.getInstantExplanation('${btoa(element?.textContent?.substring(0,100) || '')}', '${type}')">
-              نعم، شرح فوري
-            </button>
-            <button class="rt-btn rt-mini" style="background:transparent; color:#000; border:1px solid #000;
-                    padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem;"
-                    onclick="this.closest('.rt-adaptive-hint').remove()">
-              لاحقاً
-            </button>
-          </div>
-        </div>
-      `;
-
-      if (element) {
-        const rect = element.getBoundingClientRect();
-        hint.style.position = 'fixed';
-        hint.style.top = `${rect.top - 60}px`;
-        hint.style.left = `${Math.min(rect.left, window.innerWidth - 300)}px`;
-      } else {
-        hint.style.position = 'fixed';
-        hint.style.top = '40%';
-        hint.style.left = '50%';
-        hint.style.transform = 'translate(-50%, -50%)';
-      }
-
-      document.body.appendChild(hint);
-      setTimeout(() => hint.remove(), 10000);
-    },
-
-    async getInstantExplanation(encodedText, type) {
-      const text = atob(encodedText || '');
-      if (!text) return;
-
-      const output = document.getElementById('rt-sec-ai')
-        ? document.getElementById('rt-ai-response')
-        : document.getElementById('rt-ask-output');
-
-      if (!output) return;
-
-      output.innerHTML = '⏳ يحضر لك شرحاً مبسطاً...';
-
-      if (!panel.classList.contains('active')) panel.classList.add('active');
-      activateTab('ai');
-
-      try {
-        const res = await fetch("https://gpt-proxy-server-xs5u.onrender.com/ask", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            question: type === 'hover'
-              ? `المستخدم توقف عند هذا النص: "${text}". اشرحه بجملتين فقط بأسلوب مباشر وعملي.`
-              : `المستخدم ظلل هذا النص 3 مرات: "${text}". هذا يعني أنه صعب عليه. اشرحه بطريقة مبتكرة باستخدام تشبيه من الحياة اليومية.`
-          })
-        });
-
-        const data = await res.json();
-        const card = FOCUS_ENGINE.createSmartCard(text, data.reply || '⚠️ لم أستطع الشرح.');
-
-        if (output.firstChild) output.insertBefore(card, output.firstChild);
-        else output.appendChild(card);
-      } catch (err) {
-        output.innerHTML = '⚠️ تعذر الاتصال بالمساعد الذكي.';
-      }
-
-      document.querySelector('.rt-adaptive-hint')?.remove();
-    },
-
-    createSmartCard(question, answer) {
-      const card = document.createElement('div');
-      card.style.cssText = `
-        background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
-        border: 1px solid rgba(0,120,255,.3);
-        border-radius: 10px; padding: 12px; margin: 8px 0;
-        color: #FFD54A; box-shadow: 0 0 12px rgba(0,80,255,.2);
-      `;
-
-      card.innerHTML = `
-        <div style="font-weight:bold; color:#8fd3ff; margin-bottom:6px; font-size:0.9rem;">🧠 سؤال تلقائي:</div>
-        <div class="ai-question" style="margin-bottom:8px; color:#e1f5fe; font-size:0.9rem;">${question.substring(0,100)}...</div>
-        <div style="border-top:1px solid rgba(255,215,0,.2); padding-top:8px; font-size:0.9rem;">${answer}</div>
-      `;
-
-      return card;
-    }
-  };
-
-  // جعل FOCUS_ENGINE متاحًا للزر داخل الـ HTML inline
-  window.FOCUS_ENGINE = FOCUS_ENGINE;
-
-  function initAdaptiveFocusMode() {
-    document.addEventListener('mouseover', (e) => {
-      const target = e.target;
-      if (!target) return;
-      if (target.tagName === 'P' || target.tagName === 'SPAN' || target.closest('p, span, div')) {
-        FOCUS_ENGINE.startHoverTracking(target);
-      }
-    });
-
-    console.log('✅ Adaptive Focus Mode مفعل');
-  }
-
   const STATE = {
     selectionRange: null,
     selectedText: '',
     voices: [],
     voicePrefs: load(KEYS.VOICE, { rate: 1, voiceURI: '' })
   };
-
 
   /* -------------------- ألوان التظليل -------------------- */
   const COLORS = [
@@ -333,7 +177,7 @@
   .rt-confirm { margin-top:6px;padding:6px;border-radius:8px;background:rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center;animation:fadein .25s ease }
   .rt-msg { background:rgba(0,80,255,.15);border:1px solid rgba(0,120,255,.4);color:#8fd3ff;border-radius:8px;padding:4px 8px;font-size:.85rem;margin-top:6px;text-align:center;animation:fadein .25s ease }
   @keyframes fadein { from{opacity:0} to{opacity:1} }
-.rt-adaptive-hint{animation:fadein .3s ease;}
+
   /* قائمة الأصوات داكنة وواضحة */
 /* تنسيق المساعد الذكي */
 #rt-sec-ai {
@@ -604,121 +448,47 @@ document.addEventListener('mouseup', ()=> setTimeout(handleSelection, 100), {pas
   document.addEventListener('touchend', ()=> setTimeout(handleSelection, 0), {passive:true});
   document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ window.getSelection()?.removeAllRanges();  } });
 
-function handleSelection() {
+function handleSelection(){
   const sel = window.getSelection();
-  if (!sel) return;
-  let selectedText = sel.toString().trim();
+  const txt = (sel && sel.toString().trim()) || '';
+  if(!txt) return;
 
-  // 🎯 التقاط ذكي: في حال لم يكن هناك تحديد مباشر، نحاول التقاط الكلمة تحت المؤشر
-  if (!selectedText && sel.anchorNode) {
-    const word = getSmartWordAtCursor(sel.anchorNode, sel.anchorOffset || 0);
-    if (word && word.length > 2) {
-      selectWordAutomatically(sel.anchorNode, word);
-      selectedText = word;
-
-      // فتح تبويب شرح المصطلحات مباشرة للكلمات
-      if (word.length > 3 && /[a-zA-Z\u0600-\u06FF]/.test(word)) {
-        if (!panel.classList.contains('active')) panel.classList.add('active');
-        activateTab('define');
-        const defineInput = document.getElementById('rt-define-word');
-        if (defineInput) defineInput.value = word;
-        const defineBtn = document.getElementById('rt-define-search');
-        if (defineBtn) defineBtn.click();
-        return;
-      }
-    }
-  }
-
-  if (!selectedText) return;
-
-  // 🚫 منع التفاعل داخل أدوات القارئ
-  if (sel.anchorNode && (panel.contains(sel.anchorNode) || fab.contains(sel.anchorNode))) {
+  // 🚫 تجاهل التحديد داخل أدوات القارئ (حتى لا يخرج من الأداة)
+  if (sel && sel.anchorNode && panel.contains(sel.anchorNode)) {
     return;
   }
 
-  // حفظ النطاق والنص
-  STATE.selectionRange = sel.rangeCount > 0 ? sel.getRangeAt(0).cloneRange() : null;
-  STATE.selectedText = selectedText;
+  // حفظ النص المحدد في الذاكرة
+  STATE.selectionRange = sel.getRangeAt(0).cloneRange();
+  STATE.selectedText = txt;
 
-  // 📊 تحليل نوع التحديد
-  const context = analyzeSelectionContext(selectedText);
-
-  // ملء الحقول الذكية
-  fillSmartFields(selectedText, context);
-
-  // فتح اللوحة + التبويب المناسب
-  if (!panel.classList.contains('active')) {
-    panel.classList.add('active');
-  }
-  if (context.tab) {
-    activateTab(context.tab);
-  }
-
-  // 📈 تتبع الحالة النفسية
-  if (typeof EMOTIONAL_PULSE !== 'undefined') {
-    EMOTIONAL_PULSE.recordInteraction('selection_made');
-  }
-}
-
-function getSmartWordAtCursor(node, offset) {
-  if (!node || !node.textContent) return '';
-  const text = node.textContent;
-  let start = offset;
-  let end = offset;
-
-  while (start > 0 && /\S/.test(text[start - 1])) start--;
-  while (end < text.length && /\S/.test(text[end])) end++;
-
-  const word = text.substring(start, end).trim();
-  return (word.length >= 3 && word.length <= 30) ? word : '';
-}
-
-function selectWordAutomatically(node, word) {
-  const text = node.textContent || '';
-  const start = text.indexOf(word);
-  if (start === -1) return;
-
-  const range = document.createRange();
-  range.setStart(node, start);
-  range.setEnd(node, start + word.length);
-
-  const sel = window.getSelection();
+  // ✅ إزالة التحديد من الصفحة فقط حتى لا يمنع النقر
   sel.removeAllRanges();
-  sel.addRange(range);
 
-  STATE.selectedText = word;
-  STATE.selectionRange = range.cloneRange();
-}
+  // تعبئة الحقول تلقائيًا في جميع الأدوات
+  const q = document.getElementById('rt-q'); 
+  if(q) q.value = txt;
 
-function analyzeSelectionContext(text) {
-  const length = text.length;
-  if (length < 15 && !text.includes(' ')) {
-    return { type: 'word', tab: 'define', action: 'explain' };
-  } else if (length < 100) {
-    return { type: 'phrase', tab: 'translate', action: 'translate' };
-  } else {
-    return { type: 'paragraph', tab: 'summary', action: 'summarize' };
-  }
-}
+  const speakInput = document.getElementById('rt-speak-text');
+  if(speakInput) speakInput.value = txt;
 
-function fillSmartFields(text, context) {
-  const mapping = {
-    'rt-q': text,
-    'rt-speak-text': text,
-    'rt-translate-text': text,
-    'rt-summary-input': context.type === 'paragraph' ? text : '',
-    'rt-quiz-input': context.type === 'paragraph' ? text : '',
-    'rt-ai-input': text,
-    'rt-ask-input': text
-  };
+  const translateInput = document.getElementById('rt-translate-text');
+  if(translateInput) translateInput.value = txt;
 
-  Object.entries(mapping).forEach(([id, value]) => {
-    const field = document.getElementById(id);
-    if (!field) return;
-    if (field.tagName === 'TEXTAREA' || field.tagName === 'INPUT') {
-      if (value) field.value = value;
-    }
-  });
+  const summaryInput = document.getElementById('rt-summary-input');
+  if(summaryInput) summaryInput.value = txt;
+
+  const quizInput = document.getElementById('rt-quiz-input');
+  if(quizInput) quizInput.value = txt;
+
+  // فتح اللوحة إن لم تكن مفتوحة
+  if (!panel.classList.contains('active')) panel.classList.add('active');
+
+  // تفعيل تبويب التظليلات افتراضيًا
+  tabs.forEach(x => x.classList.remove('active'));
+  secs.forEach(s => s.classList.remove('active'));
+  panel.querySelector('[data-tab="hl"]').classList.add('active');
+  document.getElementById('rt-sec-hl').classList.add('active');
 }
 
 
@@ -744,22 +514,12 @@ function fillSmartFields(text, context) {
     if(range.collapsed) return;
     const id = 'rt_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
     const mark = document.createElement('mark');
-    mark.className='rt-hl'; 
-    mark.style.background=color; 
-    mark.dataset.rtId=id; 
-    mark.dataset.text = btoa(mark.textContent || '');
-    mark.title='انقر للتحديد';
-    const frag=range.extractContents(); 
-    mark.appendChild(frag); 
-    range.insertNode(mark);
+    mark.className='rt-hl'; mark.style.background=color; mark.dataset.rtId=id; mark.title='انقر للتحديد';
+    const frag=range.extractContents(); mark.appendChild(frag); range.insertNode(mark);
     sel.removeAllRanges(); 
 
     DB.hl[PAGE_KEY].push({ id, text: mark.textContent, color, note:'', ts: Date.now() });
     save(KEYS.HL, DB.hl);
-    if (typeof FOCUS_ENGINE !== 'undefined') {
-      FOCUS_ENGINE.trackRepetition(mark.textContent.trim());
-    }
-
     mark.addEventListener('click', ()=> jumpToHighlight(id));
     renderHL();
   }
@@ -1565,160 +1325,11 @@ document.getElementById('rt-speak').onclick = ()=>{
     STATE.voicePrefs.rate = parseFloat(rateInp.value||'1') || 1;
     save(KEYS.VOICE, STATE.voicePrefs);
   };
-  /* ============================================================
-     💓 Emotional Pulse System - تواصل تلقائي مع المحاضر
-     ============================================================ */
-  const EMOTIONAL_PULSE = {
-    session: {
-      startTime: Date.now(),
-      lastInteraction: Date.now(),
-      frustrations: 0,
-      achievements: 0,
-      lastSentPulse: 0
-    },
-
-    detectState() {
-      const now = Date.now();
-      const timeSinceLastInteraction = now - this.session.lastInteraction;
-      const timeSinceLastPulse = now - this.session.lastSentPulse;
-
-      // لا نرسل أكثر من مرة كل 10 دقائق
-      if (timeSinceLastPulse < 600000) return null;
-
-      if (this.session.frustrations >= 3) {
-        return {
-          type: 'frustration',
-          level: 'high',
-          message: 'الطالب يواجه صعوبة متكررة',
-          suggestedAction: 'اتصل بالطالب لشرح مباشر',
-          concept: this.getLastDifficultConcept()
-        };
-      }
-
-      if (timeSinceLastInteraction > 300000 && this.session.frustrations > 0) {
-        return {
-          type: 'disengaged',
-          level: 'medium',
-          message: 'الطالب توقف بعد محاولة فاشلة',
-          suggestedAction: 'أرسل رسالة تحفيزية',
-          concept: null
-        };
-      }
-
-      if (this.session.achievements >= 2) {
-        return {
-          type: 'achievement',
-          level: 'high',
-          message: 'الطالب يحقق نتائج ممتازة',
-          suggestedAction: 'أرسل تحديًا إضافيًا',
-          concept: null
-        };
-      }
-
-      return null;
-    },
-
-    getLastDifficultConcept() {
-      const highlights = DB.hl[PAGE_KEY] || [];
-      const conceptCounts = new Map();
-
-      highlights.forEach(h => {
-        if (!h.text) return;
-        conceptCounts.set(h.text, (conceptCounts.get(h.text) || 0) + 1);
-      });
-
-      for (let [concept, count] of conceptCounts) {
-        if (count >= 2) return concept.substring(0, 100);
-      }
-
-      return 'غير محدد';
-    },
-
-    async sendPulse() {
-      const pulse = this.detectState();
-      if (!pulse) return;
-
-      const messageData = {
-        studentId: localStorage.getItem('studentId') || 'student_' + Math.random().toString(36).substr(2, 9),
-        timestamp: new Date().toISOString(),
-        ...pulse
-      };
-
-      try {
-        const response = await fetch('https://hooks.zapier.com/hooks/catch/YOUR_WEBHOOK_ID', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(messageData)
-        });
-
-        if (response.ok) {
-          toast(`📨 تم إشعار المحاضر تلقائياً: "${pulse.message}"`);
-          this.session.lastSentPulse = Date.now();
-          this.session.frustrations = 0;
-          this.session.achievements = 0;
-        }
-      } catch (err) {
-        console.log('⚠️ فشل إرسال النبضة:', err);
-      }
-    },
-
-    recordInteraction(type, data = {}) {
-      this.session.lastInteraction = Date.now();
-
-      if (type === 'quiz_success') {
-        this.session.achievements++;
-        this.session.frustrations = Math.max(0, this.session.frustrations - 1);
-      } else if (type === 'quiz_fail' || type === 'repeated_highlight') {
-        this.session.frustrations++;
-      } else if (type === 'selection_made') {
-        // تفاعل عادي
-      }
-
-      if (type === 'repeated_highlight' && this.session.frustrations >= 3) {
-        setTimeout(() => this.sendPulse(), 2000);
-      }
-    }
-  };
-
-  function initEmotionalPulseSystem() {
-    // مراقبة كل 30 ثانية
-    setInterval(() => {
-      EMOTIONAL_PULSE.sendPulse();
-    }, 30000);
-
-    // تتبع التظليل المتكرر
-    document.addEventListener('mouseup', () => {
-      const text = window.getSelection().toString().trim();
-      if (!text) return;
-      const count = (FOCUS_ENGINE?.repeatTracker?.get(text) || 0);
-      if (count >= 2) {
-        EMOTIONAL_PULSE.recordInteraction('repeated_highlight');
-      }
-    });
-
-    // تتبع نتائج الاختبار من تبويب الاختبار الذكي
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest('#rt-quiz-output button');
-      if (!btn) return;
-      const isCorrect = btn.getAttribute('data-correct') === 'true';
-      if (isCorrect) {
-        EMOTIONAL_PULSE.recordInteraction('quiz_success');
-      } else {
-        EMOTIONAL_PULSE.recordInteraction('quiz_fail');
-      }
-    });
-
-    console.log('💓 Emotional Pulse System مفعل');
-  }
 
   /* -------------------- استعادة + تشغيل أولي -------------------- */
   window.addEventListener('load', ()=>{
-    restoreHL();
-    renderNotes();
-    initAdaptiveFocusMode();
-    initEmotionalPulseSystem();
+    restoreHL(); renderNotes();
   });
-
 
   /* -------------------- أدوات مساعدة -------------------- */
   function el(tag, cls, html){ const d=document.createElement(tag); if(cls) d.className=cls; if(html!=null) d.innerHTML=html; return d; }
