@@ -568,8 +568,8 @@ z-index:999999999;
   // 📌 4 — تشغيل FaceMesh
 function initFaceMesh() {
 
-  // ⭐ الاستدعاء الصحيح حسب مكتبة v0.4
-  const fm = new faceMesh.FaceMesh({
+  // ⭐ FaceMesh الصحيح (بدون faceMesh.)
+  const fm = new FaceMesh({
     locateFile: (file) =>
       `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
   });
@@ -583,8 +583,8 @@ function initFaceMesh() {
 
   fm.onResults(analyze);
 
-  // ⭐ الكاميرا الصحيحة
-  const cam = new cameraUtils.Camera(video, {
+  // ⭐ Camera الصحيحة (بدون cameraUtils.)
+  const cam = new Camera(video, {
     onFrame: async () => {
       await fm.send({ image: video });
     },
@@ -619,5 +619,6 @@ function initFaceMesh() {
 
 </body>
 </html>
+
 
 
