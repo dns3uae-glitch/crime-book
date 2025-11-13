@@ -569,7 +569,7 @@ openBtn.addEventListener('click', ()=>{
   // 📌 هذا هو التصحيح الرئيسي
   function initFaceMesh() {
 
-    const faceMeshObj = new FaceMesh({
+const faceMeshObj = new faceMesh.FaceMesh({
       locateFile: (file) =>
         `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
     });
@@ -615,6 +615,7 @@ const cam = new cameraUtils.Camera(video, {
 
 </body>
 </html>
+
 
 
 
