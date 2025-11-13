@@ -1388,8 +1388,6 @@ document.getElementById('rt-speak').onclick = ()=>{
       });
     }
   });
-
-})();
 /* ============================================================
    📸 نافذة إذن استخدام الكاميرا — Permission Dialog
    ============================================================ */
@@ -1620,4 +1618,7 @@ window.addEventListener("load", () => {
     showCameraPermissionDialog();
   }
 });
+
+})();
+
 
