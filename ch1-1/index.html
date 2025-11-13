@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+<!-- ⛔ امسح كل المكتبات السابقة الخاصة بـ mediapipe -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4/drawing_utils.js"></script>
 
 
 
@@ -455,13 +458,14 @@ openBtn.addEventListener('click', ()=>{
   else popup.focus();
 });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4/drawing_utils.js"></script>
+
 
 <script>
 // ==========================================================
 //  🎥 نظام مراقبة تركيز الطالب — النسخة الصحيحة 100%
+// ==========================================================
+// ==========================================================
+//  🎥 نظام مراقبة تركيز الطالب — النسخة المُصححة
 // ==========================================================
 (function(){
 
@@ -473,7 +477,7 @@ openBtn.addEventListener('click', ()=>{
   function createVideoBox() {
     video = document.createElement("video");
     video.autoplay = true;
-    video.playsinline = true;
+    video.playsInline = true;
     video.style.cssText = `
       position:fixed;
       top:20px;
@@ -524,7 +528,7 @@ openBtn.addEventListener('click', ()=>{
     away = 0;
     const pts = res.multiFaceLandmarks[0];
 
-    // رمش
+    // رمش العين
     const eyeTop = pts[159].y;
     const eyeBottom = pts[145].y;
     const eyeDist = Math.abs(eyeTop - eyeBottom);
@@ -539,7 +543,7 @@ openBtn.addEventListener('click', ()=>{
       blink = 0;
     }
 
-    // شرود
+    // إمالة الرأس (شرود)
     const nose = pts[1].x;
     const chin = pts[152].x;
     const tilt = Math.abs(nose - chin);
@@ -556,12 +560,10 @@ openBtn.addEventListener('click', ()=>{
   }
 
   function initFaceMesh(){
-
-    const fm = new FaceMesh.FaceMesh({
-  locateFile: (file)=> 
-    `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
-});
-
+    // ==== الإصلاح الرئيسي ====
+    const fm = new FaceMesh({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
+    });
 
     fm.setOptions({
       maxNumFaces: 1,
@@ -572,8 +574,11 @@ openBtn.addEventListener('click', ()=>{
 
     fm.onResults(analyze);
 
-    const cam = new Camera(video, {
-      onFrame: async ()=>{ await fm.send({ image: video }); },
+    // ==== الإصلاح الرئيسي ====
+    const cam = new Camera.Camera(video, {
+      onFrame: async () => {
+        await fm.send({ image: video });
+      },
       width: 300,
       height: 250
     });
@@ -581,23 +586,42 @@ openBtn.addEventListener('click', ()=>{
     cam.start();
   }
 
-
   async function startAI(){
-    createVideoBox();
-
-    try{
-      const stream = await navigator.mediaDevices.getUserMedia({ video:true });
-      video.srcObject = stream;
-    } catch(e){
-      alert("رجاءً: اسمح بالكاميرا حتى يعمل نظام التركيز");
+    // التأكد من تحميل المكتبات أولاً
+    if (typeof FaceMesh === 'undefined' || typeof Camera === 'undefined') {
+      console.error('MediaPipe libraries not loaded yet');
+      setTimeout(startAI, 500);
       return;
     }
 
-    initFaceMesh();
+    createVideoBox();
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          width: 300, 
+          height: 250,
+          facingMode: 'user' 
+        } 
+      });
+      video.srcObject = stream;
+      
+      // الانتظار حتى يبدأ الفيديو
+      video.onloadedmetadata = () => {
+        video.play().then(() => {
+          initFaceMesh();
+        });
+      };
+    } catch(e) {
+      console.error('Camera error:', e);
+      alert("رجاءً: اسمح بالكاميرا حتى يعمل نظام التركيز\n" + e.message);
+    }
   }
 
-  window.addEventListener("load", startAI);
-
+  // بدء النظام بعد تحميل الصفحة
+  window.addEventListener('load', () => {
+    setTimeout(startAI, 1000);
+  });
 })();
 </script>
 
