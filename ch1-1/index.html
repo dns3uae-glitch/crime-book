@@ -448,7 +448,160 @@ openBtn.addEventListener('click', ()=>{
   else popup.focus();
 });
 </script>
+<script>
+// ==========================================================
+// 🎥 نظام مراقبة التعب والتركيز — يعمل لوحده بدون أدوات القارئ
+// ==========================================================
+
+(function(){
+
+  let videoEl = null;
+  let tiredCount = 0;
+  let blinkCount = 0;
+  let awayCount = 0;
+
+  // 🟦 1) إنشاء الفيديو
+  function createCameraBox() {
+    videoEl = document.createElement("video");
+    videoEl.autoplay = true;
+    videoEl.playsinline = true;
+    videoEl.style.cssText = `
+      position:fixed;
+      bottom:20px;
+      right:20px;
+      width:170px;
+      height:120px;
+      border-radius:12px;
+      opacity:.35;
+      z-index:99999;
+      pointer-events:none;
+    `;
+    document.body.appendChild(videoEl);
+  }
+
+  // 🟦 2) رسالة للطالب
+  function studentMsg(text){
+    const box = document.createElement("div");
+    box.textContent = text;
+    box.style.cssText = `
+      position:fixed;
+      bottom:30px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,.85);
+      color:#FFD54A;
+      padding:12px 18px;
+      border-radius:10px;
+      border:1px solid #FFD54A;
+      z-index:999999;
+      font-size:1rem;
+      animation:fadeIn .3s;
+    `;
+    document.body.appendChild(box);
+    setTimeout(()=> box.remove(), 3500);
+  }
+
+  // 🟦 3) تحليل البيانات
+  function analyze(results){
+    if (!results.multiFaceLandmarks || !results.multiFaceLandmarks.length){
+      // وجه غير موجود → الطالب بعيد
+      awayCount++;
+      if (awayCount === 40){
+        studentMsg("⚠️ يبدو أنك مبتعد عن الشاشة، ركّز أكثر.");
+      }
+      return;
+    }
+
+    awayCount = 0;
+    const face = results.multiFaceLandmarks[0];
+
+    // 👁️ إغلاق العين = نعاس
+    const leftEye = face[159];
+    const upper = face[145];
+    const eyeHeight = Math.abs(leftEye.y - upper.y);
+
+    if (eyeHeight < 0.010){ 
+      blinkCount++;
+      if (blinkCount >= 15){
+        studentMsg("😴 تبدو مرهقًا… خذ دقيقة راحة.");
+        blinkCount = 0;
+      }
+    } else {
+      blinkCount = 0;
+    }
+
+    // 💀 إمالة الرأس = تعب
+    const nose = face[1];
+    const chin = face[152];
+    const tilt = Math.abs(nose.x - chin.x);
+
+    if (tilt > 0.055){
+      tiredCount++;
+      if (tiredCount >= 30){
+        studentMsg("⚠️ وضعية الجلوس غير مستقرة… انتبه.");
+        tiredCount = 0;
+      }
+    } else {
+      tiredCount = 0;
+    }
+  }
+
+  // 🟦 4) تشغيل FaceMesh
+  function initFaceMesh(){
+
+    if (typeof FaceMesh === "undefined" || typeof FaceMesh.FaceMesh === "undefined"){
+      console.warn("⏳ FaceMesh غير جاهز… إعادة المحاولة");
+      return setTimeout(initFaceMesh, 600);
+    }
+
+    const faceMesh = new FaceMesh.FaceMesh({
+      locateFile: file =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+    });
+
+    faceMesh.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.6,
+      minTrackingConfidence: 0.6
+    });
+
+    faceMesh.onResults(analyze);
+
+    // تشغيل الكاميرا
+    const camera = new Camera(videoEl, {
+      onFrame: async ()=>{
+        await faceMesh.send({ image: videoEl });
+      },
+      width: 300,
+      height: 200
+    });
+
+    camera.start();
+  }
+
+  // 🟦 5) تشغيل النظام بالكامل
+  async function startSystem(){
+    createCameraBox();
+
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({ video:true });
+      videoEl.srcObject = stream;
+    } catch(err){
+      alert("لا يمكن تشغيل الكاميرا — الرجاء السماح بالوصول للكاميرا.");
+      return;
+    }
+
+    initFaceMesh();
+  }
+
+  // تشغيل عند تحميل الصفحة
+  window.addEventListener("load", startSystem);
+
+})();
+</script>
 
 </body>
 </html>
+
 
