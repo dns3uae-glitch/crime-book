@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.js"></script>
-
-
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
   <title>مقدمة في مسرح الجريمة</title>
   <style>
@@ -351,9 +350,10 @@ function go(target, dir){
 document.getElementById('prevPage').addEventListener('click', ()=> go('https://dns3uae-glitch.github.io/crime-book/chapter1/','prev'));
 document.getElementById('nextPage').addEventListener('click', ()=> go('https://dns3uae-glitch.github.io/crime-book/chapter2/','next'));
 </script>
-  <script src="https://dns3uae-glitch.github.io/crime-book/assets/js/notebooklm-fallback.js"></script>
+<script src="https://dns3uae-glitch.github.io/crime-book/assets/js/notebooklm-fallback.js"></script>
 
 <script src="https://dns3uae-glitch.github.io/crime-book/assets/js/reader-tools1.js"></script>
+<!-- 🔹 زر عائم لفتح الكتاب -->
 <!-- 🔹 زر عائم فخم لفتح الكتاب -->
 <button id="openBook" class="floating-btn" title="فتح الكتاب الكامل">📖</button>
 
@@ -368,6 +368,8 @@ document.getElementById('nextPage').addEventListener('click', ()=> go('https://d
   </iframe>
   <button id="closeBook">✖</button>
 </div>
+
+
 
 <style>
 /* 👑 زر عائم ذهبي */
@@ -435,6 +437,8 @@ document.getElementById('nextPage').addEventListener('click', ()=> go('https://d
 #closeBook:hover { background: rgba(255,215,0,0.3); }
 </style>
 
+
+
 <script>
 const openBtn = document.getElementById('openBook');
 openBtn.addEventListener('click', ()=>{
@@ -448,105 +452,155 @@ openBtn.addEventListener('click', ()=>{
   else popup.focus();
 });
 </script>
-<script src="https://www.gstatic.com/ml-kit/face_detection/v2/face_detection.js"></script>
+
+
+
 
 <script>
-(async () => {
+// ==========================================================
+//  🎥 نظام مراقبة تركيز الطالب — Mediapipe FaceMesh
+// ==========================================================
 
-  let video = document.createElement("video");
-  video.autoplay = true;
-  video.playsinline = true;
-  video.style.cssText = `
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    width:180px;
-    height:130px;
-    border-radius:12px;
-    opacity:.35;
-    z-index:99999;
-    pointer-events:none;
-  `;
-  document.body.appendChild(video);
+(function(){
 
-  const stream = await navigator.mediaDevices.getUserMedia({ video:true });
-  video.srcObject = stream;
-
-  const detector = await faceDetection.FaceDetector.create({
-    model: "short",
-    minDetectionConfidence: 0.6
-  });
-
+  let video = null;
+  let tired = 0;
   let blink = 0;
   let away = 0;
-  let tired = 0;
 
-  function notify(msg){
-    const box = document.createElement("div");
-    box.textContent = msg;
-    box.style.cssText = `
+  // 📌 1 — إنشاء الكاميرا في أعلى يمين الشاشة
+  function createVideoBox() {
+    video = document.createElement("video");
+    video.autoplay = true;
+    video.playsinline = true;
+    video.style.cssText = `
       position:fixed;
-      bottom:30px;
-      left:50%;
-      transform:translateX(-50%);
-      background:rgba(0,0,0,.85);
-      color:#FFD54A;
-      padding:12px 18px;
-      border-radius:10px;
-      border:1px solid #FFD54A;
-      z-index:999999;
-      font-size:1rem;
+      top:20px;
+      right:20px;
+      width:160px;
+      height:120px;
+      border-radius:12px;
+      opacity:0.45;
+      z-index:99999;
+      pointer-events:none;
     `;
-    document.body.appendChild(box);
-    setTimeout(()=> box.remove(), 4000);
+    document.body.appendChild(video);
   }
 
-  async function loop(){
-    const faces = await detector.detect(video);
+  // 📌 2 — صندوق رسائل تنبيه
+  function showMsg(text){
+    const div = document.createElement("div");
+    div.textContent = text;
+    div.style.cssText = `
+      position:fixed;
+      top:20px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,0.85);
+      color:#FFD54A;
+      padding:12px 20px;
+      border-radius:12px;
+      border:1px solid #FFD54A;
+      z-index:999999;
+      font-size:1.1rem;
+      box-shadow:0 0 20px rgba(255,215,0,0.3);
+    `;
+    document.body.appendChild(div);
+    setTimeout(()=> div.remove(), 3500);
+  }
 
-    if (!faces || faces.length === 0){
+  // 📌 3 — تحليل ملامح الوجه
+  function analyze(res){
+    if(!res.multiFaceLandmarks || res.multiFaceLandmarks.length === 0){
       away++;
-      if (away > 40){
-        notify("⚠️ يبدو أنك بعيد عن الشاشة… ركّز أكثر.");
+      if (away > 45){
+        showMsg("⚠️ يبدو أنك بعيد عن الشاشة — ركّز أكثر");
         away = 0;
       }
-      requestAnimationFrame(loop);
       return;
     }
 
     away = 0;
-    const face = faces[0];
+    const pts = res.multiFaceLandmarks[0];
 
-    // 👁️ قياس العين
-    const eye = face.leftEyeOpenProbability;
-    if (eye !== undefined && eye < 0.4){
+    // 👁️ كشف الرمش (تعب)
+    const eyeTop = pts[159].y;
+    const eyeBottom = pts[145].y;
+    const eyeDist = Math.abs(eyeTop - eyeBottom);
+
+    if (eyeDist < 0.01){
       blink++;
-      if (blink > 15){
-        notify("😴 يبدو عليك الإرهاق… خذ فترة راحة قصيرة.");
+      if (blink > 12){
+        showMsg("😴 يبدو أنك متعب… خذ استراحة قصيرة");
         blink = 0;
       }
     } else {
       blink = 0;
     }
 
-    // 💀 قياس الميل
-    if (face.headEulerAngleY > 25){
+    // 💀 كشف ميل الرأس (سرحان)
+    const nose = pts[1].x;
+    const chin = pts[152].x;
+    const tilt = Math.abs(nose - chin);
+
+    if (tilt > 0.06){
       tired++;
-      if (tired > 20){
-        notify("⚠️ وضعية الجلوس غير مستقرة… عد للتركيز.");
+      if (tired > 25){
+        showMsg("⚠️ جلستك غير مستقرة — عد لوضع طبيعي");
         tired = 0;
       }
     } else {
       tired = 0;
     }
-
-    requestAnimationFrame(loop);
   }
 
-  loop();
+  // 📌 4 — تشغيل FaceMesh والكاميرا
+  function initFaceMesh(){
+    const fm = new FaceMesh.FaceMesh({
+      locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`
+    });
+
+    fm.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
+
+    fm.onResults(analyze);
+
+    const cam = new Camera(video, {
+      onFrame: async ()=>{
+        await fm.send({ image: video });
+      },
+      width: 300,
+      height: 250
+    });
+
+    cam.start();
+  }
+
+  // 📌 5 — تشغيل النظام الكامل
+  async function startAI(){
+    createVideoBox();
+
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({ video:true });
+      video.srcObject = stream;
+    } catch(e){
+      alert("يجب السماح للكاميرا حتى يعمل نظام التركيز");
+      return;
+    }
+
+    initFaceMesh();
+  }
+
+  window.addEventListener("load", startAI);
 
 })();
 </script>
+
+
 
 </body>
 </html>
