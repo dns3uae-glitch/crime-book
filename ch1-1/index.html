@@ -556,31 +556,36 @@ openBtn.addEventListener('click', ()=>{
   }
 
   // 📌 4 — تشغيل FaceMesh
-  function initFaceMesh(){
+function initFaceMesh() {
 
-    const fm = new faceMesh.FaceMesh({
-      locateFile: (file)=> 
-        `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
-    });
+  // ⭐ الإصدار الصحيح تمامًا (FaceMesh v0.4)
+  const fm = new FaceMesh.FaceMesh({
+    locateFile: (file) =>
+      `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
+  });
 
-    fm.setOptions({
-      maxNumFaces: 1,
-      refineLandmarks: true,
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence: 0.5
-    });
+  fm.setOptions({
+    maxNumFaces: 1,
+    refineLandmarks: true,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+  });
 
-    fm.onResults(analyze);
+  fm.onResults(analyze);
 
-    // ⭐ الكاميرا الصحيحة
-    const cam = new cameraUtils.Camera(video, {
-      onFrame: async ()=>{ await fm.send({ image: video }); },
-      width: 300,
-      height: 250
-    });
+  // ⭐ الكاميرا الأصلية التابعة لـ Mediapipe
+  const cam = new Camera(video, {
+    onFrame: async () => {
+      await fm.send({ image: video });
+    },
+    width: 300,
+    height: 250
+  });
 
-    cam.start();
-  }
+  cam.start();
+}
+
+
 
   // 📌 5 — بدء التشغيل
   async function startAI(){
@@ -612,6 +617,7 @@ openBtn.addEventListener('click', ()=>{
 
 </body>
 </html>
+
 
 
 
