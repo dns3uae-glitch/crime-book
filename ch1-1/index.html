@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.js"></script>
+
+
 
   <title>مقدمة في مسرح الجريمة</title>
   <style>
@@ -450,18 +450,21 @@ openBtn.addEventListener('click', ()=>{
 </script>
 <script>
 // ==========================================================
-// 🎥 نظام مراقبة التعب والتركيز — يعمل لوحده بدون أدوات القارئ
+// 🎥 نظام مراقبة التعب والتركيز — النسخة الجديدة (FaceLandmarker)
 // ==========================================================
 
-(function(){
+(async () => {
 
+  const { FaceLandmarker, FilesetResolver } = window;
   let videoEl = null;
-  let tiredCount = 0;
-  let blinkCount = 0;
-  let awayCount = 0;
+  let detector = null;
 
-  // 🟦 1) إنشاء الفيديو
-  function createCameraBox() {
+  let tired = 0;
+  let blink = 0;
+  let away = 0;
+
+  // 🟦 إضافة كاميرا
+  function createVideo() {
     videoEl = document.createElement("video");
     videoEl.autoplay = true;
     videoEl.playsinline = true;
@@ -469,8 +472,8 @@ openBtn.addEventListener('click', ()=>{
       position:fixed;
       bottom:20px;
       right:20px;
-      width:170px;
-      height:120px;
+      width:180px;
+      height:130px;
       border-radius:12px;
       opacity:.35;
       z-index:99999;
@@ -479,10 +482,10 @@ openBtn.addEventListener('click', ()=>{
     document.body.appendChild(videoEl);
   }
 
-  // 🟦 2) رسالة للطالب
-  function studentMsg(text){
+  // 🟦 رسالة للطالب
+  function notify(msg){
     const box = document.createElement("div");
-    box.textContent = text;
+    box.textContent = msg;
     box.style.cssText = `
       position:fixed;
       bottom:30px;
@@ -495,113 +498,93 @@ openBtn.addEventListener('click', ()=>{
       border:1px solid #FFD54A;
       z-index:999999;
       font-size:1rem;
-      animation:fadeIn .3s;
     `;
     document.body.appendChild(box);
     setTimeout(()=> box.remove(), 3500);
   }
 
-  // 🟦 3) تحليل البيانات
-  function analyze(results){
-    if (!results.multiFaceLandmarks || !results.multiFaceLandmarks.length){
-      // وجه غير موجود → الطالب بعيد
-      awayCount++;
-      if (awayCount === 40){
-        studentMsg("⚠️ يبدو أنك مبتعد عن الشاشة، ركّز أكثر.");
+  // 🟦 تحليل الوجه
+  function analyze(res){
+    if (!res || !res.faceLandmarks || !res.faceLandmarks.length){
+      away++;
+      if (away > 40){
+        notify("⚠️ يبدو أنك مبتعد عن الشاشة، ركّز أكثر.");
+        away = 0;
       }
       return;
     }
 
-    awayCount = 0;
-    const face = results.multiFaceLandmarks[0];
+    away = 0;
+    const face = res.faceLandmarks[0];
 
-    // 👁️ إغلاق العين = نعاس
-    const leftEye = face[159];
-    const upper = face[145];
-    const eyeHeight = Math.abs(leftEye.y - upper.y);
+    // 👁️ قياس فتح/إغلاق العين (العين اليسرى)
+    const eyeTop = face[159];
+    const eyeBottom = face[145];
+    const eyeDist = Math.abs(eyeTop.y - eyeBottom.y);
 
-    if (eyeHeight < 0.010){ 
-      blinkCount++;
-      if (blinkCount >= 15){
-        studentMsg("😴 تبدو مرهقًا… خذ دقيقة راحة.");
-        blinkCount = 0;
+    if (eyeDist < 0.004){ 
+      blink++;
+      if (blink > 15){
+        notify("😴 يبدو عليك التعب… خذ قليلاً من الراحة.");
+        blink = 0;
       }
     } else {
-      blinkCount = 0;
+      blink = 0;
     }
 
-    // 💀 إمالة الرأس = تعب
+    // 💀 ميل الرأس = تعب / سرحان
     const nose = face[1];
     const chin = face[152];
     const tilt = Math.abs(nose.x - chin.x);
 
-    if (tilt > 0.055){
-      tiredCount++;
-      if (tiredCount >= 30){
-        studentMsg("⚠️ وضعية الجلوس غير مستقرة… انتبه.");
-        tiredCount = 0;
+    if (tilt > 0.06){
+      tired++;
+      if (tired > 30){
+        notify("⚠️ جلستك غير مستقرة… عد لوضع طبيعي.");
+        tired = 0;
       }
     } else {
-      tiredCount = 0;
+      tired = 0;
     }
   }
 
-  // 🟦 4) تشغيل FaceMesh
-  function initFaceMesh(){
+  // 🟦 تشغيل النظام
+  async function start() {
+    createVideo();
 
-    if (typeof FaceMesh === "undefined" || typeof FaceMesh.FaceMesh === "undefined"){
-      console.warn("⏳ FaceMesh غير جاهز… إعادة المحاولة");
-      return setTimeout(initFaceMesh, 600);
-    }
+    const stream = await navigator.mediaDevices.getUserMedia({ video:true });
+    videoEl.srcObject = stream;
 
-    const faceMesh = new FaceMesh.FaceMesh({
-      locateFile: file =>
-        `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
-    });
+    // تحميل النموذج
+    const vision = await FilesetResolver.forVisionTasks(
+      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+    );
 
-    faceMesh.setOptions({
-      maxNumFaces: 1,
-      refineLandmarks: true,
-      minDetectionConfidence: 0.6,
-      minTrackingConfidence: 0.6
-    });
-
-    faceMesh.onResults(analyze);
-
-    // تشغيل الكاميرا
-    const camera = new Camera(videoEl, {
-      onFrame: async ()=>{
-        await faceMesh.send({ image: videoEl });
+    detector = await FaceLandmarker.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath:
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/models/face_landmarker.task"
       },
-      width: 300,
-      height: 200
+      runningMode: "VIDEO",
+      numFaces: 1
     });
 
-    camera.start();
-  }
-
-  // 🟦 5) تشغيل النظام بالكامل
-  async function startSystem(){
-    createCameraBox();
-
-    try{
-      const stream = await navigator.mediaDevices.getUserMedia({ video:true });
-      videoEl.srcObject = stream;
-    } catch(err){
-      alert("لا يمكن تشغيل الكاميرا — الرجاء السماح بالوصول للكاميرا.");
-      return;
+    function loop(){
+      const now = performance.now();
+      const results = detector.detectForVideo(videoEl, now);
+      analyze(results);
+      requestAnimationFrame(loop);
     }
-
-    initFaceMesh();
+    requestAnimationFrame(loop);
   }
 
-  // تشغيل عند تحميل الصفحة
-  window.addEventListener("load", startSystem);
+  start();
 
 })();
 </script>
 
 </body>
 </html>
+
 
 
