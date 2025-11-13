@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1620248228/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3.1620248228/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils"></script>
+
 
 
 
@@ -560,8 +561,9 @@ openBtn.addEventListener('click', ()=>{
 // 📌 4 — FaceMesh
 function initFaceMesh(){
 
-  const fm = new FaceMesh({
-    locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1638653577/${f}`
+  const fm = new FaceMesh.FaceMesh({
+    locateFile: (file) => 
+      `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
   });
 
   fm.setOptions({
@@ -574,7 +576,7 @@ function initFaceMesh(){
   fm.onResults(analyze);
 
   const cam = new Camera(video, {
-    onFrame: async ()=>{
+    onFrame: async () => {
       await fm.send({ image: video });
     },
     width: 300,
@@ -583,6 +585,7 @@ function initFaceMesh(){
 
   cam.start();
 }
+
 
 
   // 📌 5 — تشغيل النظام
