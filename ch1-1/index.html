@@ -522,7 +522,7 @@ z-index:999999999;
   function analyze(res){
     if(!res.multiFaceLandmarks || res.multiFaceLandmarks.length === 0){
       away++;
-      if (away > 50){
+if (away > 20){
         showMsg("⚠️ انت بعيد عن الشاشة — ركّز أكثر");
         away = 0;
       }
@@ -537,7 +537,7 @@ z-index:999999999;
     const eyeBottom = pts[145].y;
     const eyeDist = Math.abs(eyeTop - eyeBottom);
 
-    if (eyeDist < 0.011){
+if (eyeDist < 0.018){
       blink++;
       if (blink > 13){
         showMsg("😴 شكلك تعبان… خذ استراحة 30 ثانية");
@@ -552,7 +552,7 @@ z-index:999999999;
     const chin = pts[152].x;
     const tilt = Math.abs(nose - chin);
 
-    if (tilt > 0.06){
+if (tilt > 0.04){
       tired++;
       if (tired > 30){
         showMsg("⚠️ انت سرحت! حاول تركز أكثر");
@@ -625,6 +625,7 @@ function initFaceMesh() {
 
 </body>
 </html>
+
 
 
 
