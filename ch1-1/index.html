@@ -11,6 +11,16 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4/drawing_utils.js"></script>
 
   <style>
+
+    <style>
+#reader-tools-root {
+  pointer-events: none !important;
+}
+.reader-tools-container {
+  pointer-events: auto !important;
+}
+</style>
+
     :root{
       --gold:#FFD54A;
       --blue:#0a6bff;
@@ -502,7 +512,7 @@ openBtn.addEventListener('click', ()=>{
       padding:14px 22px;
       border-radius:12px;
       border:1px solid #FFD54A;
-      z-index:9999999;
+z-index:999999999;
       font-size:1.1rem;
       box-shadow:0 0 25px rgba(255,215,0,0.35);
     `;
@@ -617,6 +627,7 @@ function initFaceMesh() {
 
 </body>
 </html>
+
 
 
 
