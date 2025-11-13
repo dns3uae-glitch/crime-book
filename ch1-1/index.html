@@ -448,41 +448,39 @@ openBtn.addEventListener('click', ()=>{
   else popup.focus();
 });
 </script>
-<script>
-// ==========================================================
-// 🎥 نظام مراقبة التعب والتركيز — النسخة الجديدة (FaceLandmarker)
-// ==========================================================
+<script src="https://www.gstatic.com/ml-kit/face_detection/v2/face_detection.js"></script>
 
+<script>
 (async () => {
 
-  const { FaceLandmarker, FilesetResolver } = window;
-  let videoEl = null;
-  let detector = null;
+  let video = document.createElement("video");
+  video.autoplay = true;
+  video.playsinline = true;
+  video.style.cssText = `
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    width:180px;
+    height:130px;
+    border-radius:12px;
+    opacity:.35;
+    z-index:99999;
+    pointer-events:none;
+  `;
+  document.body.appendChild(video);
 
-  let tired = 0;
+  const stream = await navigator.mediaDevices.getUserMedia({ video:true });
+  video.srcObject = stream;
+
+  const detector = await faceDetection.FaceDetector.create({
+    model: "short",
+    minDetectionConfidence: 0.6
+  });
+
   let blink = 0;
   let away = 0;
+  let tired = 0;
 
-  // 🟦 إضافة كاميرا
-  function createVideo() {
-    videoEl = document.createElement("video");
-    videoEl.autoplay = true;
-    videoEl.playsinline = true;
-    videoEl.style.cssText = `
-      position:fixed;
-      bottom:20px;
-      right:20px;
-      width:180px;
-      height:130px;
-      border-radius:12px;
-      opacity:.35;
-      z-index:99999;
-      pointer-events:none;
-    `;
-    document.body.appendChild(videoEl);
-  }
-
-  // 🟦 رسالة للطالب
   function notify(msg){
     const box = document.createElement("div");
     box.textContent = msg;
@@ -500,85 +498,52 @@ openBtn.addEventListener('click', ()=>{
       font-size:1rem;
     `;
     document.body.appendChild(box);
-    setTimeout(()=> box.remove(), 3500);
+    setTimeout(()=> box.remove(), 4000);
   }
 
-  // 🟦 تحليل الوجه
-  function analyze(res){
-    if (!res || !res.faceLandmarks || !res.faceLandmarks.length){
+  async function loop(){
+    const faces = await detector.detect(video);
+
+    if (!faces || faces.length === 0){
       away++;
       if (away > 40){
-        notify("⚠️ يبدو أنك مبتعد عن الشاشة، ركّز أكثر.");
+        notify("⚠️ يبدو أنك بعيد عن الشاشة… ركّز أكثر.");
         away = 0;
       }
+      requestAnimationFrame(loop);
       return;
     }
 
     away = 0;
-    const face = res.faceLandmarks[0];
+    const face = faces[0];
 
-    // 👁️ قياس فتح/إغلاق العين (العين اليسرى)
-    const eyeTop = face[159];
-    const eyeBottom = face[145];
-    const eyeDist = Math.abs(eyeTop.y - eyeBottom.y);
-
-    if (eyeDist < 0.004){ 
+    // 👁️ قياس العين
+    const eye = face.leftEyeOpenProbability;
+    if (eye !== undefined && eye < 0.4){
       blink++;
       if (blink > 15){
-        notify("😴 يبدو عليك التعب… خذ قليلاً من الراحة.");
+        notify("😴 يبدو عليك الإرهاق… خذ فترة راحة قصيرة.");
         blink = 0;
       }
     } else {
       blink = 0;
     }
 
-    // 💀 ميل الرأس = تعب / سرحان
-    const nose = face[1];
-    const chin = face[152];
-    const tilt = Math.abs(nose.x - chin.x);
-
-    if (tilt > 0.06){
+    // 💀 قياس الميل
+    if (face.headEulerAngleY > 25){
       tired++;
-      if (tired > 30){
-        notify("⚠️ جلستك غير مستقرة… عد لوضع طبيعي.");
+      if (tired > 20){
+        notify("⚠️ وضعية الجلوس غير مستقرة… عد للتركيز.");
         tired = 0;
       }
     } else {
       tired = 0;
     }
-  }
 
-  // 🟦 تشغيل النظام
-  async function start() {
-    createVideo();
-
-    const stream = await navigator.mediaDevices.getUserMedia({ video:true });
-    videoEl.srcObject = stream;
-
-    // تحميل النموذج
-    const vision = await FilesetResolver.forVisionTasks(
-      "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-    );
-
-    detector = await FaceLandmarker.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath:
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/models/face_landmarker.task"
-      },
-      runningMode: "VIDEO",
-      numFaces: 1
-    });
-
-    function loop(){
-      const now = performance.now();
-      const results = detector.detectForVideo(videoEl, now);
-      analyze(results);
-      requestAnimationFrame(loop);
-    }
     requestAnimationFrame(loop);
   }
 
-  start();
+  loop();
 
 })();
 </script>
