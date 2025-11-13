@@ -465,7 +465,7 @@ openBtn.addEventListener('click', ()=>{
 </script>
 <script>
 // ==========================================================
-// 🎥 نظام مراقبة تركيز الطالب — النسخة النهائية 100%
+// 🎥 نظام مراقبة تركيز الطالب — النسخة النهائية الثابتة 100%
 // ==========================================================
 
 (function(){
@@ -475,7 +475,7 @@ openBtn.addEventListener('click', ()=>{
   let blink = 0;
   let away = 0;
 
-  // 📌 1 — إنشاء مربع الكاميرا
+  // 📌 1 — إنشاء مربع عرض الكاميرا
   function createVideoBox() {
     video = document.createElement("video");
     video.autoplay = true;
@@ -484,9 +484,8 @@ openBtn.addEventListener('click', ()=>{
       position:fixed;
       top:20px;
       right:20px;
-width:280px;
-height:210px;
-
+      width:280px;
+      height:210px;
       border-radius:12px;
       border:2px solid #FFD54A;
       opacity:0.85;
@@ -511,7 +510,7 @@ height:210px;
       padding:14px 22px;
       border-radius:12px;
       border:1px solid #FFD54A;
-z-index:999999999;
+      z-index:999999999;
       font-size:1.1rem;
       box-shadow:0 0 25px rgba(255,215,0,0.35);
     `;
@@ -520,91 +519,91 @@ z-index:999999999;
   }
 
   // 📌 3 — تحليل الوجه
-  function analyze(res){
-  if(!res.multiFaceLandmarks || res.multiFaceLandmarks.length === 0){
-    away++;
-    if (away > 10){
-      showMsg("⚠️ انت بعيد عن الشاشة — ركّز أكثر");
-      away = 0;
+  function analyze(results){
+
+    if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
+      away++;
+      if (away > 12) {
+        showMsg("⚠️ انت بعيد عن الشاشة — ركّز أكثر");
+        away = 0;
+      }
+      return;
     }
-    return;
-  }
 
-  away = 0;
-  const pts = res.multiFaceLandmarks[0];
+    away = 0;
 
-  // 👁️ الرمش — حساس جداً
-  const eyeTop = pts[159].y;
-  const eyeBottom = pts[145].y;
-  const eyeDist = Math.abs(eyeTop - eyeBottom);
+    const pts = results.multiFaceLandmarks[0];
 
-  if (eyeDist < 0.03){
-    blink++;
-    if (blink > 5){
-      showMsg("😴 يبدو أنك تعبان… خذ استراحة");
+    // 👁️ الرمش — قياس المسافة بين أعلى العين وأسفلها
+    const eyeTop = pts[159].y;
+    const eyeBottom = pts[145].y;
+    const eyeDist = Math.abs(eyeTop - eyeBottom);
+
+    if (eyeDist < 0.03) {
+      blink++;
+      if (blink > 6) {
+        showMsg("😴 يبدو أنك تعبان… خذ استراحة");
+        blink = 0;
+      }
+    } else {
       blink = 0;
     }
-  } else {
-    blink = 0;
-  }
 
-  // 🙄 الشرود — حساس جداً
-  const nose = pts[1].x;
-  const chin = pts[152].x;
-  const tilt = Math.abs(nose - chin);
+    // 🙄 الشرود — قياس ميل الوجه يمين/يسار
+    const nose = pts[1].x;
+    const chin = pts[152].x;
+    const tilt = Math.abs(nose - chin);
 
-  if (tilt > 0.02){
-    tired++;
-    if (tired > 10){
-      showMsg("⚠️ سرحت شوي — حاول تركز");
+    if (tilt > 0.02) {
+      tired++;
+      if (tired > 12) {
+        showMsg("🙄 سرحت شوي — حاول تركز");
+        tired = 0;
+      }
+    } else {
       tired = 0;
     }
-  } else {
-    tired = 0;
-  }
-}
 
+  }
 
   // 📌 4 — تشغيل FaceMesh
-function initFaceMesh() {
+  function initFaceMesh() {
 
-  // ⭐ FaceMesh الصحيح (بدون faceMesh.)
-  const fm = new FaceMesh({
-    locateFile: (file) =>
-      `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
-  });
+    // ✔✔✔ الصحيح 100% — لا تغيّر ولا رقم حرف واحد
+    const faceMeshObj = new faceMesh.FaceMesh({
+      locateFile: (file) =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
+    });
 
-  fm.setOptions({
-    maxNumFaces: 1,
-    refineLandmarks: true,
-    minDetectionConfidence: 0.5,
-    minTrackingConfidence: 0.5
-  });
+    faceMeshObj.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
 
-  fm.onResults(analyze);
+    faceMeshObj.onResults(analyze);
 
-  // ⭐ Camera الصحيحة (بدون cameraUtils.)
-  const cam = new Camera(video, {
-    onFrame: async () => {
-      await fm.send({ image: video });
-    },
-    width: 300,
-    height: 250
-  });
+    // ✔✔✔ الكاميرا الصحيحة 100%
+    const cam = new cameraUtils.Camera(video, {
+      onFrame: async () => {
+        await faceMeshObj.send({ image: video });
+      },
+      width: 300,
+      height: 250
+    });
 
-  cam.start();
-}
+    cam.start();
+  }
 
-
-
-  // 📌 5 — بدء التشغيل
+  // 📌 5 — تشغيل النظام
   async function startAI(){
     createVideoBox();
 
-    try{
+    try {
       const stream = await navigator.mediaDevices.getUserMedia({ video:true });
       video.srcObject = stream;
-    } catch(e){
+    } catch (err) {
       alert("رجاءً اسمح بالكاميرا حتى يعمل نظام التركيز");
       return;
     }
@@ -617,8 +616,10 @@ function initFaceMesh() {
 })();
 </script>
 
+
 </body>
 </html>
+
 
 
 
