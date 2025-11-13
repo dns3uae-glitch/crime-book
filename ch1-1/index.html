@@ -526,7 +526,7 @@ openBtn.addEventListener('click', ()=>{
 
     if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
       away++;
-      if (away > 12) {
+if (away > 4) {
         showMsg("⚠️ انت بعيد عن الشاشة — ركّز أكثر");
         away = 0;
       }
@@ -543,7 +543,7 @@ openBtn.addEventListener('click', ()=>{
 
     if (eyeDist < 0.03) {
       blink++;
-      if (blink > 6) {
+      if (blink > 2) {
         showMsg("😴 يبدو أنك تعبان… خذ استراحة");
         blink = 0;
       }
@@ -557,7 +557,7 @@ openBtn.addEventListener('click', ()=>{
 
     if (tilt > 0.02) {
       tired++;
-      if (tired > 12) {
+      if (tired > 4) {
         showMsg("🙄 سرحت شوي — حاول تركز");
         tired = 0;
       }
@@ -615,6 +615,7 @@ const cam = new cameraUtils.Camera(video, {
 
 </body>
 </html>
+
 
 
 
