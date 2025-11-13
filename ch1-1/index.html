@@ -558,8 +558,8 @@ openBtn.addEventListener('click', ()=>{
   // 📌 4 — تشغيل FaceMesh
 function initFaceMesh() {
 
-  // ⭐ الإصدار الصحيح تمامًا (FaceMesh v0.4)
-  const fm = new FaceMesh.FaceMesh({
+  // ⭐ الاستدعاء الصحيح حسب مكتبة v0.4
+  const fm = new faceMesh.FaceMesh({
     locateFile: (file) =>
       `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
   });
@@ -573,8 +573,8 @@ function initFaceMesh() {
 
   fm.onResults(analyze);
 
-  // ⭐ الكاميرا الأصلية التابعة لـ Mediapipe
-  const cam = new Camera(video, {
+  // ⭐ الكاميرا الصحيحة
+  const cam = new cameraUtils.Camera(video, {
     onFrame: async () => {
       await fm.send({ image: video });
     },
@@ -617,6 +617,7 @@ function initFaceMesh() {
 
 </body>
 </html>
+
 
 
 
