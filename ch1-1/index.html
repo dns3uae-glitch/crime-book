@@ -465,7 +465,7 @@ openBtn.addEventListener('click', ()=>{
 </script>
 <script>
 // ==========================================================
-// 🎥 نظام مراقبة تركيز الطالب — النسخة النهائية الثابتة 100%
+// 🎥 نظام مراقبة تركيز الطالب — النسخة النهائية الصحيحة 100%
 // ==========================================================
 
 (function(){
@@ -475,7 +475,6 @@ openBtn.addEventListener('click', ()=>{
   let blink = 0;
   let away = 0;
 
-  // 📌 1 — إنشاء مربع عرض الكاميرا
   function createVideoBox() {
     video = document.createElement("video");
     video.autoplay = true;
@@ -496,7 +495,6 @@ openBtn.addEventListener('click', ()=>{
     document.body.appendChild(video);
   }
 
-  // 📌 2 — رسالة تنبيه
   function showMsg(text){
     const div = document.createElement("div");
     div.textContent = text;
@@ -518,7 +516,6 @@ openBtn.addEventListener('click', ()=>{
     setTimeout(()=> div.remove(), 3500);
   }
 
-  // 📌 3 — تحليل الوجه
   function analyze(results){
 
     if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
@@ -534,7 +531,6 @@ openBtn.addEventListener('click', ()=>{
 
     const pts = results.multiFaceLandmarks[0];
 
-    // 👁️ الرمش — قياس المسافة بين أعلى العين وأسفلها
     const eyeTop = pts[159].y;
     const eyeBottom = pts[145].y;
     const eyeDist = Math.abs(eyeTop - eyeBottom);
@@ -549,7 +545,6 @@ openBtn.addEventListener('click', ()=>{
       blink = 0;
     }
 
-    // 🙄 الشرود — قياس ميل الوجه يمين/يسار
     const nose = pts[1].x;
     const chin = pts[152].x;
     const tilt = Math.abs(nose - chin);
@@ -563,14 +558,12 @@ openBtn.addEventListener('click', ()=>{
     } else {
       tired = 0;
     }
-
   }
 
-  // 📌 4 — تشغيل FaceMesh
+  // 📌 هذا هو التصحيح الرئيسي
   function initFaceMesh() {
 
-    // ✔✔✔ الصحيح 100% — لا تغيّر ولا رقم حرف واحد
-    const faceMeshObj = new faceMesh.FaceMesh({
+    const faceMeshObj = new FaceMesh({
       locateFile: (file) =>
         `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
     });
@@ -584,8 +577,7 @@ openBtn.addEventListener('click', ()=>{
 
     faceMeshObj.onResults(analyze);
 
-    // ✔✔✔ الكاميرا الصحيحة 100%
-    const cam = new cameraUtils.Camera(video, {
+    const cam = new Camera(video, {
       onFrame: async () => {
         await faceMeshObj.send({ image: video });
       },
@@ -596,7 +588,6 @@ openBtn.addEventListener('click', ()=>{
     cam.start();
   }
 
-  // 📌 5 — تشغيل النظام
   async function startAI(){
     createVideoBox();
 
@@ -616,9 +607,9 @@ openBtn.addEventListener('click', ()=>{
 })();
 </script>
 
-
 </body>
 </html>
+
 
 
 
