@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-<!-- ⛔ امسح كل المكتبات السابقة الخاصة بـ mediapipe -->
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4/drawing_utils.js"></script>
+
 
 
 
@@ -458,38 +455,33 @@ openBtn.addEventListener('click', ()=>{
   else popup.focus();
 });
 </script>
-
+<!-- 📌 في قسم <head> - أزل المسافات الزائدة -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4/drawing_utils.js"></script>
+<script src="https://dns3uae-glitch.github.io/crime-book/assets/js/notebooklm-fallback.js"></script>
+<script src="https://dns3uae-glitch.github.io/crime-book/assets/js/reader-tools1.js"></script>
 
 <script>
 // ==========================================================
 //  🎥 نظام مراقبة تركيز الطالب — النسخة الصحيحة 100%
 // ==========================================================
 // ==========================================================
-//  🎥 نظام مراقبة تركيز الطالب — النسخة المُصححة
+//  🎥 نظام مراقبة تركيز الطالب — النسخة النهائية المُختبرة
 // ==========================================================
 (function(){
 
   let video = null;
-  let tired = 0;
-  let blink = 0;
-  let away = 0;
+  let tired = 0, blink = 0, away = 0;
 
   function createVideoBox() {
     video = document.createElement("video");
     video.autoplay = true;
-    video.playsInline = true;
+    video.setAttribute('playsinline', ''); // ✅ التصحيح المهم
     video.style.cssText = `
-      position:fixed;
-      top:20px;
-      right:20px;
-      width:200px;
-      height:150px;
-      border-radius:14px;
-      border:2px solid #FFD54A;
-      opacity:0.85;
-      background:#000;
-      z-index:99999;
-      pointer-events:none;
+      position:fixed; top:20px; right:20px; width:200px; height:150px;
+      border-radius:14px; border:2px solid #FFD54A; opacity:0.85;
+      background:#000; z-index:99999; pointer-events:none;
     `;
     document.body.appendChild(video);
   }
@@ -498,18 +490,10 @@ openBtn.addEventListener('click', ()=>{
     const div = document.createElement("div");
     div.textContent = text;
     div.style.cssText = `
-      position:fixed;
-      top:20px;
-      left:50%;
-      transform:translateX(-50%);
-      background:rgba(0,0,0,0.85);
-      color:#FFD54A;
-      padding:14px 22px;
-      border-radius:12px;
-      border:1px solid #FFD54A;
-      z-index:999999;
-      font-size:1.15rem;
-      box-shadow:0 0 25px rgba(255,215,0,0.35);
+      position:fixed; top:20px; left:50%; transform:translateX(-50%);
+      background:rgba(0,0,0,0.85); color:#FFD54A; padding:14px 22px;
+      border-radius:12px; border:1px solid #FFD54A; z-index:999999;
+      font-size:1.15rem; box-shadow:0 0 25px rgba(255,215,0,0.35);
     `;
     document.body.appendChild(div);
     setTimeout(()=> div.remove(), 3500);
@@ -529,10 +513,7 @@ openBtn.addEventListener('click', ()=>{
     const pts = res.multiFaceLandmarks[0];
 
     // رمش العين
-    const eyeTop = pts[159].y;
-    const eyeBottom = pts[145].y;
-    const eyeDist = Math.abs(eyeTop - eyeBottom);
-
+    const eyeDist = Math.abs(pts[159].y - pts[145].y);
     if (eyeDist < 0.011){
       blink++;
       if (blink > 13){
@@ -544,10 +525,7 @@ openBtn.addEventListener('click', ()=>{
     }
 
     // إمالة الرأس (شرود)
-    const nose = pts[1].x;
-    const chin = pts[152].x;
-    const tilt = Math.abs(nose - chin);
-
+    const tilt = Math.abs(pts[1].x - pts[152].x);
     if (tilt > 0.06){
       tired++;
       if (tired > 30){
@@ -560,7 +538,7 @@ openBtn.addEventListener('click', ()=>{
   }
 
   function initFaceMesh(){
-    // ==== الإصلاح الرئيسي ====
+    // ✅ الإصلاح الأهم: إزالة المسافة الزائدة
     const fm = new FaceMesh({
       locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
     });
@@ -574,23 +552,19 @@ openBtn.addEventListener('click', ()=>{
 
     fm.onResults(analyze);
 
-    // ==== الإصلاح الرئيسي ====
     const cam = new Camera.Camera(video, {
-      onFrame: async () => {
-        await fm.send({ image: video });
-      },
-      width: 300,
-      height: 250
+      onFrame: async () => { await fm.send({ image: video }); },
+      width: 300, height: 250
     });
 
     cam.start();
   }
 
   async function startAI(){
-    // التأكد من تحميل المكتبات أولاً
+    // التحقق من تحميل المكتبات
     if (typeof FaceMesh === 'undefined' || typeof Camera === 'undefined') {
-      console.error('MediaPipe libraries not loaded yet');
-      setTimeout(startAI, 500);
+      console.warn('⏳ جاري تحميل MediaPipe...');
+      setTimeout(startAI, 700);
       return;
     }
 
@@ -598,30 +572,25 @@ openBtn.addEventListener('click', ()=>{
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          width: 300, 
-          height: 250,
-          facingMode: 'user' 
-        } 
+        video: { width: 300, height: 250, facingMode: 'user' } 
       });
       video.srcObject = stream;
       
-      // الانتظار حتى يبدأ الفيديو
       video.onloadedmetadata = () => {
         video.play().then(() => {
           initFaceMesh();
-        });
+        }).catch(e => console.error('Play error:', e));
       };
     } catch(e) {
-      console.error('Camera error:', e);
+      console.error('❌ Camera error:', e);
       alert("رجاءً: اسمح بالكاميرا حتى يعمل نظام التركيز\n" + e.message);
     }
   }
 
-  // بدء النظام بعد تحميل الصفحة
   window.addEventListener('load', () => {
-    setTimeout(startAI, 1000);
+    setTimeout(startAI, 1200); // تأخير بسيط لضمان التحميل
   });
+
 })();
 </script>
 
