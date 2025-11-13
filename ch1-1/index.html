@@ -3,17 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-<!-- 📌 في قسم <head> - أزل المسافات الزائدة -->
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4/drawing_utils.js"></script>
-<script src="https://dns3uae-glitch.github.io/crime-book/assets/js/notebooklm-fallback.js"></script>
-<script src="https://dns3uae-glitch.github.io/crime-book/assets/js/reader-tools1.js"></script>
-
-
-
-
-
   <title>مقدمة في مسرح الجريمة</title>
   <style>
     :root{
@@ -462,146 +451,13 @@ openBtn.addEventListener('click', ()=>{
 </script>
 
 
-<script>
-// ==========================================================
-//  🎥 نظام مراقبة تركيز الطالب — النسخة الصحيحة 100%
-// ==========================================================
-// ==========================================================
-//  🎥 نظام مراقبة تركيز الطالب — النسخة النهائية المُختبرة
-// ==========================================================
-(function(){
 
-  let video = null;
-  let tired = 0, blink = 0, away = 0;
 
-  function createVideoBox() {
-    video = document.createElement("video");
-    video.autoplay = true;
-    video.setAttribute('playsinline', ''); // ✅ التصحيح المهم
-    video.style.cssText = `
-      position:fixed; top:20px; right:20px; width:200px; height:150px;
-      border-radius:14px; border:2px solid #FFD54A; opacity:0.85;
-      background:#000; z-index:99999; pointer-events:none;
-    `;
-    document.body.appendChild(video);
-  }
 
-  function showMsg(text){
-    const div = document.createElement("div");
-    div.textContent = text;
-    div.style.cssText = `
-      position:fixed; top:20px; left:50%; transform:translateX(-50%);
-      background:rgba(0,0,0,0.85); color:#FFD54A; padding:14px 22px;
-      border-radius:12px; border:1px solid #FFD54A; z-index:999999;
-      font-size:1.15rem; box-shadow:0 0 25px rgba(255,215,0,0.35);
-    `;
-    document.body.appendChild(div);
-    setTimeout(()=> div.remove(), 3500);
-  }
-
-  function analyze(res){
-    if(!res.multiFaceLandmarks || res.multiFaceLandmarks.length === 0){
-      away++;
-      if (away > 50){
-        showMsg("⚠️ انت بعيد عن الشاشة — رجّع تركيزك");
-        away = 0;
-      }
-      return;
-    }
-
-    away = 0;
-    const pts = res.multiFaceLandmarks[0];
-
-    // رمش العين
-    const eyeDist = Math.abs(pts[159].y - pts[145].y);
-    if (eyeDist < 0.011){
-      blink++;
-      if (blink > 13){
-        showMsg("😴 شكلك تعبان… خذ 30 ثانية راحة");
-        blink = 0;
-      }
-    } else {
-      blink = 0;
-    }
-
-    // إمالة الرأس (شرود)
-    const tilt = Math.abs(pts[1].x - pts[152].x);
-    if (tilt > 0.06){
-      tired++;
-      if (tired > 30){
-        showMsg("⚠️ سرحت! حاول تركز أكثر");
-        tired = 0;
-      }
-    } else {
-      tired = 0;
-    }
-  }
-
-  function initFaceMesh(){
-    // ✅ الإصلاح الأهم: إزالة المسافة الزائدة
-    const fm = new FaceMesh({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${file}`
-    });
-
-    fm.setOptions({
-      maxNumFaces: 1,
-      refineLandmarks: true,
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence: 0.5
-    });
-
-    fm.onResults(analyze);
-
-    const cam = new Camera.Camera(video, {
-      onFrame: async () => { await fm.send({ image: video }); },
-      width: 300, height: 250
-    });
-
-    cam.start();
-  }
-
-  async function startAI(){
-    // التحقق من تحميل المكتبات
-    if (typeof FaceMesh === 'undefined' || typeof Camera === 'undefined') {
-      console.warn('⏳ جاري تحميل MediaPipe...');
-      setTimeout(startAI, 700);
-      return;
-    }
-
-    createVideoBox();
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: 300, height: 250, facingMode: 'user' } 
-      });
-      video.srcObject = stream;
-      
-      video.onloadedmetadata = () => {
-        video.play().then(() => {
-          initFaceMesh();
-        }).catch(e => console.error('Play error:', e));
-      };
-    } catch(e) {
-      console.error('❌ Camera error:', e);
-      alert("رجاءً: اسمح بالكاميرا حتى يعمل نظام التركيز\n" + e.message);
-    }
-  }
-
-  window.addEventListener('load', () => {
-    setTimeout(startAI, 1200); // تأخير بسيط لضمان التحميل
-  });
-
-})();
-</script>
 
 
 </body>
 </html>
-
-
-
-
-
 
 
 
