@@ -521,48 +521,49 @@ z-index:999999999;
 
   // 📌 3 — تحليل الوجه
   function analyze(res){
-    if(!res.multiFaceLandmarks || res.multiFaceLandmarks.length === 0){
-      away++;
-if (away > 20){
-        showMsg("⚠️ انت بعيد عن الشاشة — ركّز أكثر");
-        away = 0;
-      }
-      return;
+  if(!res.multiFaceLandmarks || res.multiFaceLandmarks.length === 0){
+    away++;
+    if (away > 10){
+      showMsg("⚠️ انت بعيد عن الشاشة — ركّز أكثر");
+      away = 0;
     }
+    return;
+  }
 
-    away = 0;
-    const pts = res.multiFaceLandmarks[0];
+  away = 0;
+  const pts = res.multiFaceLandmarks[0];
 
-    // 👁️ رمش
-    const eyeTop = pts[159].y;
-    const eyeBottom = pts[145].y;
-    const eyeDist = Math.abs(eyeTop - eyeBottom);
+  // 👁️ الرمش — حساس جداً
+  const eyeTop = pts[159].y;
+  const eyeBottom = pts[145].y;
+  const eyeDist = Math.abs(eyeTop - eyeBottom);
 
-if (eyeDist < 0.018){
-      blink++;
-      if (blink > 13){
-        showMsg("😴 شكلك تعبان… خذ استراحة 30 ثانية");
-        blink = 0;
-      }
-    } else {
+  if (eyeDist < 0.03){
+    blink++;
+    if (blink > 5){
+      showMsg("😴 يبدو أنك تعبان… خذ استراحة");
       blink = 0;
     }
+  } else {
+    blink = 0;
+  }
 
-    // 🙄 شرود / ميل الرأس
-    const nose = pts[1].x;
-    const chin = pts[152].x;
-    const tilt = Math.abs(nose - chin);
+  // 🙄 الشرود — حساس جداً
+  const nose = pts[1].x;
+  const chin = pts[152].x;
+  const tilt = Math.abs(nose - chin);
 
-if (tilt > 0.04){
-      tired++;
-      if (tired > 30){
-        showMsg("⚠️ انت سرحت! حاول تركز أكثر");
-        tired = 0;
-      }
-    } else {
+  if (tilt > 0.02){
+    tired++;
+    if (tired > 10){
+      showMsg("⚠️ سرحت شوي — حاول تركز");
       tired = 0;
     }
+  } else {
+    tired = 0;
   }
+}
+
 
   // 📌 4 — تشغيل FaceMesh
 function initFaceMesh() {
@@ -626,6 +627,7 @@ function initFaceMesh() {
 
 </body>
 </html>
+
 
 
 
