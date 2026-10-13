@@ -183,7 +183,8 @@ td.s{text-align:start}
 </head>
 <body>
 <div class="bar"><div class="bar-in">
-  <div class="brand">لوحة تحكم المدرّس <span>· علم الاجتماع الشرطي</span> <span class="buildstamp">نسخة 2026-09-17</span></div>
+  <div class="brand">لوحة تحكم المدرّس <span>· علم الاجتماع الشرطي</span> <span class="buildstamp">نسخة 2026-10-13 · رابط وباركود</span></div>
+  <button class="btn" id="toplink" style="padding:7px 14px">🔗 رابط وباركود</button>
   <div class="navs" id="navs"></div>
 </div></div>
 
@@ -208,6 +209,7 @@ const PAGES=[["load","الملف"],["edit","المحتوى"],["set","الإعد�
 function nav(){
   $("#navs").innerHTML=PAGES.map(p=>`<button class="nv" data-p="${p[0]}" aria-selected="${page===p[0]}" ${(!W.length&&p[0]!=="load")?"disabled":""}>${p[1]}</button>`).join("");
   $$("#navs .nv").forEach(b=>b.onclick=()=>{page=b.dataset.p;nav();paint()});
+  const tl=$("#toplink");if(tl)tl.onclick=()=>{if(!W.length){toast&&toast("حمّل ملف الطلبة أولاً ثم اضغط الزر");return}page="build";nav();paint();setTimeout(()=>{const g=$(".gencard");g&&g.scrollIntoView({behavior:"smooth",block:"start"})},80)};
 }
 function paint(){
   PAGES.forEach(p=>$("#p-"+p[0]).classList.toggle("hidden",p[0]!==page));
