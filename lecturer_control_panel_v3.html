@@ -1555,27 +1555,31 @@ function vBuild(){
     ${p.length?`<div class="warn" style="margin-top:12px">التنزيل معطّل حتى تُعالَج الملاحظات أعلاه.</div>`:""}</div>
 
    <div class="card gencard"><h3>رابط وباركود للطلبة</h3>
-    <p class="hint">بدل إرسال الملف: انشره بضغطة زر على موقعك في GitHub Pages فيُولَّد رابط وباركود ترسلهما للطلبة. عند تعديل المحتوى أعد النشر على الاسم نفسه فيتحدّث الرابط عند الجميع ويبقى تقدّم الطلبة محفوظاً.</p>
-    <div class="grid2"><div><label>اسم المستخدم في GitHub</label><input id="gh-u" placeholder="dns3uae-glitch" dir="ltr" style="text-align:left" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
-    <div><label>اسم المستودع (الموقع)</label><input id="gh-r" placeholder="crime-book" dir="ltr" style="text-align:left" autocapitalize="off" autocomplete="off" spellcheck="false"></div></div>
-    <div class="grid2" style="margin-top:9px"><div><label>المجلد داخل الموقع</label><input id="gh-f" placeholder="courses" dir="ltr" style="text-align:left" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
-    <div><label>اسم الرابط (حروف إنجليزية صغيرة وأرقام وشرطة، أو اتركه فارغاً)</label><input id="pb-id" placeholder="police-sociology-2026" dir="ltr" style="text-align:left" autocapitalize="off" autocomplete="off" spellcheck="false"></div></div>
-    <div style="margin-top:9px"><label>مفتاح النشر (Token) من حسابك في GitHub</label><input id="gh-t" type="password" dir="ltr" style="text-align:left" autocomplete="off" placeholder="github_pat_..."></div>
-    <label style="margin:9px 0 0"><input type="checkbox" id="pb-rem" checked style="width:auto"> تذكّر الإعدادات في هذا المتصفح</label>
-    <div class="row" style="margin-top:12px">
+    <p class="hint">اضغط زراً واحداً فيُولَّد رابط وباركود ترسلهما للطلبة. عند تعديل المحتوى اضغطه مرة أخرى فيتحدّث الرابط نفسه عند الجميع ويبقى تقدّم الطلبة محفوظاً.</p>
+    <div id="gh-site" class="hint" style="margin:0 0 10px"></div>
+    <div id="gh-tokwrap" class="hidden" style="margin-bottom:10px">
+      <div class="warn" style="margin-bottom:9px">خطوة لمرة واحدة فقط: الصق مفتاح النشر من حسابك في GitHub ليُسمح للوحة بالنشر في موقعك. بعدها لن يُطلب منك شيء.</div>
+      <label>مفتاح النشر (Token)</label><input id="gh-t" type="password" dir="ltr" style="text-align:left" autocomplete="off" placeholder="github_pat_...">
+      <details style="margin-top:8px"><summary style="cursor:pointer;font-family:var(--disp);font-weight:700;color:var(--steel)">كيف أحصل على المفتاح؟</summary>
+        <ol class="hint" style="margin:8px 0 0;padding-inline-start:22px;line-height:2">
+          <li>ادخل حسابك في GitHub ثم الصورة الشخصية ثم <b dir="ltr">Settings</b>.</li>
+          <li>من أسفل القائمة: <b dir="ltr">Developer settings</b> ثم <b dir="ltr">Personal access tokens</b> ثم <b dir="ltr">Fine-grained tokens</b>.</li>
+          <li>اضغط <b dir="ltr">Generate new token</b>، واكتب أي اسم، واختر مدة الصلاحية.</li>
+          <li>في <b dir="ltr">Repository access</b> اختر <b dir="ltr">Only select repositories</b> ثم مستودع الموقع فقط.</li>
+          <li>في <b dir="ltr">Repository permissions</b> اجعل <b dir="ltr">Contents</b> بقيمة <b dir="ltr">Read and write</b>.</li>
+          <li>اضغط <b dir="ltr">Generate token</b> وانسخ المفتاح والصقه هنا.</li></ol></details></div>
+    <div class="row">
       <button class="btn" id="pb-go" ${p.length?"disabled":""}>انشر وولّد الرابط</button>
-      <button class="btn g" id="pb-test">اختبر الاتصال</button>
       <button class="btn g" id="pb-list">الروابط المنشورة</button></div>
     <div id="pb-out" style="margin-top:12px"></div>
-    <details style="margin-top:12px"><summary style="cursor:pointer;font-family:var(--disp);font-weight:700;color:var(--steel)">كيف أحصل على مفتاح النشر؟ (مرة واحدة)</summary>
-      <ol class="hint" style="margin:8px 0 0;padding-inline-start:22px;line-height:2">
-        <li>ادخل حسابك في GitHub ثم الصورة الشخصية ثم <b dir="ltr">Settings</b>.</li>
-        <li>من أسفل القائمة اليسرى: <b dir="ltr">Developer settings</b> ثم <b dir="ltr">Personal access tokens</b> ثم <b dir="ltr">Fine-grained tokens</b>.</li>
-        <li>اضغط <b dir="ltr">Generate new token</b> واكتب أي اسم، واختر مدة الصلاحية.</li>
-        <li>في <b dir="ltr">Repository access</b> اختر <b dir="ltr">Only select repositories</b> ثم مستودع الموقع فقط.</li>
-        <li>في <b dir="ltr">Permissions</b> ثم <b dir="ltr">Repository permissions</b> اجعل <b dir="ltr">Contents</b> بقيمة <b dir="ltr">Read and write</b>.</li>
-        <li>اضغط <b dir="ltr">Generate token</b> وانسخ المفتاح والصقه في الحقل أعلاه. لا يظهر لك مرة أخرى.</li></ol>
-      <p class="hint" style="margin-top:8px">المفتاح يُحفظ في متصفحك فقط ولا يدخل في ملف الطلبة. روابط GitHub Pages عامة: يفتحها كل من يملك الرابط.</p></details></div>`;
+    <details style="margin-top:12px"><summary style="cursor:pointer;font-family:var(--disp);font-weight:700;color:var(--steel)">إعدادات متقدمة</summary>
+      <div class="grid2" style="margin-top:9px"><div><label>اسم المستخدم في GitHub</label><input id="gh-u" dir="ltr" style="text-align:left" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+      <div><label>اسم المستودع (الموقع)</label><input id="gh-r" dir="ltr" style="text-align:left" autocapitalize="off" autocomplete="off" spellcheck="false"></div></div>
+      <div class="grid2" style="margin-top:9px"><div><label>المجلد داخل الموقع</label><input id="gh-f" dir="ltr" style="text-align:left" autocapitalize="off" autocomplete="off" spellcheck="false"></div>
+      <div><label>اسم الرابط (تلقائي إن تُرك فارغاً)</label><input id="pb-id" placeholder="police-sociology-2026" dir="ltr" style="text-align:left" autocapitalize="off" autocomplete="off" spellcheck="false"></div></div>
+      <div class="row" style="margin-top:10px"><button class="btn g sm" id="pb-test">اختبر الاتصال</button>
+        <button class="btn g sm" id="pb-chg">تغيير مفتاح النشر</button>
+        <button class="btn d sm" id="pb-forget">نسيان الإعدادات من هذا المتصفح</button></div></details></div>`;
   $("#dlh").onclick=()=>{
     const a=SRC.indexOf("/*__PSA_DATA_START__*/"),b=SRC.indexOf("/*__PSA_DATA_END__*/");
     const out=SRC.slice(0,a+22)+serialize()+SRC.slice(b);
@@ -1678,7 +1682,17 @@ function b64utf8(str){
 function pubInit(blocked){
   const API="https://api.github.com";
   let c={};try{c=JSON.parse(lsGet(PBK)||"{}")}catch(e){}
-  $("#gh-u").value=c.u||"";$("#gh-r").value=c.r||"";$("#gh-f").value=c.f==null?"courses":c.f;$("#gh-t").value=c.t||"";
+  const auto=(()=>{let u="dns3uae-glitch",r="crime-book";
+    try{const h=location.hostname;
+      if(/\.github\.io$/i.test(h)){u=h.split(".")[0];const seg=location.pathname.split("/").filter(Boolean);
+        r=seg.length>1?seg[0]:u+".github.io"}}catch(e){}
+    return {u,r}})();
+  $("#gh-u").value=c.u||auto.u;$("#gh-r").value=c.r||auto.r;$("#gh-f").value=c.f==null?"courses":c.f;$("#gh-t").value=c.t||"";
+  const tokUI=()=>{const has=!!$("#gh-t").value.trim();
+    $("#gh-tokwrap").classList.toggle("hidden",has);
+    $("#gh-site").innerHTML=has?`<b style="color:var(--ok)">جاهز للنشر</b> على <b dir="ltr">${esc($("#gh-u").value)}/${esc($("#gh-r").value)}</b>`:"";};
+  tokUI();
+  $("#gh-t").addEventListener("input",()=>{if($("#gh-t").value.trim().length>20&&c.t)tokUI()});
   const last=lsGet("psa_gh_id_"+(CFG.course||"")+"_"+(CFG.title||""));
   if(last)$("#pb-id").value=last;
   const out=h=>{$("#pb-out").innerHTML=h};
@@ -1689,9 +1703,9 @@ function pubInit(blocked){
     if(!/^[A-Za-z0-9-]{1,39}$/.test(v.u)){bad("اكتب اسم المستخدم في GitHub (حروف إنجليزية وأرقام وشرطة).");return null}
     if(!/^[A-Za-z0-9._-]{1,100}$/.test(v.r)){bad("اكتب اسم المستودع (الموقع) كما هو في GitHub.");return null}
     if(v.f&&!/^[A-Za-z0-9._\/-]{1,60}$/.test(v.f)){bad("اسم المجلد: حروف إنجليزية وأرقام وشرطة فقط.");return null}
-    if(!v.t){bad("الصق مفتاح النشر (Token). الشرح في الأسفل.");return null}
+    if(!v.t){$("#gh-tokwrap").classList.remove("hidden");$("#gh-t").focus();bad("الصق مفتاح النشر مرة واحدة ثم اضغط انشر.");return null}
     return v};
-  const save=v=>{if($("#pb-rem").checked)lsSet(PBK,JSON.stringify(v));else lsSet(PBK,"{}")};
+  const save=v=>{lsSet(PBK,JSON.stringify(v));c.t=v.t;tokUI()};
   const gh=async(v,path,opt)=>{
     opt=opt||{};let r;
     try{r=await fetch(API+path,{method:opt.method||"GET",cache:"no-store",
@@ -1748,6 +1762,8 @@ function pubInit(blocked){
       if(++n>=30){st.textContent="لم يتفعّل الرابط بعد. إن لم يعمل خلال دقائق فتأكد أن GitHub Pages مفعّلة في إعدادات المستودع (Settings ثم Pages).";return}
       setTimeout(tick,5000)};
     setTimeout(tick,4000)};
+  $("#pb-chg").onclick=()=>{$("#gh-t").value="";c.t="";$("#gh-tokwrap").classList.remove("hidden");$("#gh-site").innerHTML="";$("#gh-t").focus()};
+  $("#pb-forget").onclick=()=>{lsSet(PBK,"{}");lsSet("psa_gh_id_"+(CFG.course||"")+"_"+(CFG.title||""),"");c={};$("#gh-t").value="";$("#pb-id").value="";tokUI();toast("نُسيت الإعدادات")};
   $("#pb-test").onclick=async()=>{
     const v=need();if(!v)return;out('<p class="hint">جارٍ الاختبار…</p>');
     try{const S=await site(v);save(v);
