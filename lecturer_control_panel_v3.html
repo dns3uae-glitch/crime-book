@@ -9,12 +9,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --base:#FBF6EA; --panel:#FFF; --panel2:#F8EFD9; --line:#E3D3AE;
-  --gold:#9A6A25; --gold2:#6E4515; --steel:#80643F; --ink:#4A2E10;
+  --base:#FAF6EE; --panel:#FFF; --panel2:#F5EDDE; --line:#EADFC8;
+  --gold:#9C7430; --gold2:#7A5A22; --steel:#857559; --ink:#4A3B26;
   --ok:#2F7D4F; --no:#B5392E; --amber:#96620F;
   --disp:"Tajawal","Segoe UI",Tahoma,sans-serif;
   --body:"IBM Plex Sans Arabic","Tajawal","Segoe UI",Tahoma,sans-serif;
-  --sh:0 2px 10px rgba(122,86,30,.12);
+  --sh:0 1px 6px rgba(122,90,34,.10);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--base);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.7}
@@ -179,11 +179,18 @@ td.s{text-align:start}
 .rich-ed,textarea,input{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 .rich-ed{-webkit-user-modify:read-write}
 .toast{pointer-events:none}
+.phmain{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0 12px}
+.phmain .pv{width:180px;aspect-ratio:16/9;border-radius:12px;border:1px solid var(--line);background:var(--panel2) center/cover no-repeat;display:grid;place-items:center;color:var(--steel);font-size:12px}
+.phgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0}
+.phit{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;display:grid}
+.phit .pv{aspect-ratio:4/3;background:var(--panel2) center/cover no-repeat;position:relative}
+.phit .x{position:absolute;top:6px;inset-inline-start:6px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:var(--no);font-weight:800;cursor:pointer}
+.phit input{border:0;border-top:1px solid var(--line);border-radius:0;font-size:13px;padding:8px}
 </style>
 </head>
 <body>
 <div class="bar"><div class="bar-in">
-  <div class="brand">لوحة تحكم المدرّس <span>· علم الاجتماع الشرطي</span> <span class="buildstamp">نسخة 2026-10-13 · رابط وباركود</span></div>
+  <div class="brand">لوحة تحكم المدرّس <span>· علم الاجتماع الشرطي</span> <span class="buildstamp">نسخة 2026-10-14 · ألوان مبنى الأكاديمية</span></div>
   <button class="btn" id="toplink" style="padding:7px 14px">🔗 رابط وباركود</button>
   <div class="navs" id="navs"></div>
 </div></div>
@@ -1186,6 +1193,11 @@ function vSet(){
         <button class="btn d sm" id="logodel">إزالة</button>
         <input type="file" id="logof" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="display:none">
         <span class="hint" style="margin:0">يُفضَّل PNG بخلفية شفافة. تُصغَّر الصورة تلقائياً.</span></div></div>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px dashed var(--line)"><label>صور الواجهة — مبنى الأكاديمية والطلبة الضباط</label>
+      <p class="hint">الصورة الرئيسية تظهر في بطاقة الترحيب وبوابة الدخول. صور المعرض (حتى 8) تظهر في شريط «من ميدان الأكاديمية» وتتناوب على ترويسات المحطات. تُضغط الصور تلقائياً، وإن لم ترفع صورة يظهر رسم المبنى الافتراضي.</p>
+      <div id="phwrap"></div>
+      <input type="file" id="phf" accept="image/*" style="display:none">
+      <input type="file" id="phg" accept="image/*" multiple style="display:none"></div>
     <div class="grid2" style="margin-top:12px">
       <label style="display:flex;gap:8px;align-items:center;font-family:var(--body);font-weight:500;font-size:14px;color:var(--ink)">
         <input type="checkbox" id="c-askid" ${CFG.askId?"checked":""} style="width:auto"> طلب الرقم العسكري والدفعة</label>
@@ -1304,6 +1316,42 @@ function vSet(){
     };
     r.readAsDataURL(f);
   };
+  /* ---- صور الواجهة ---- */
+  const PH=()=>{if(!CFG.photos||typeof CFG.photos!=="object")CFG.photos={main:"",gallery:[],caps:[],galTitle:""};
+    const p=CFG.photos;if(!Array.isArray(p.gallery))p.gallery=[];if(!Array.isArray(p.caps))p.caps=[];return p};
+  const shrink=(f,max,q)=>new Promise((ok,no)=>{const r=new FileReader();
+    r.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,max/Math.max(img.width,img.height));
+      const cv=document.createElement("canvas");cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+      const cx=cv.getContext("2d");cx.fillStyle="#fff";cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(img,0,0,cv.width,cv.height);
+      let o="";try{o=cv.toDataURL("image/webp",q)}catch(x){}
+      if(!o||o.indexOf("image/webp")<0)o=cv.toDataURL("image/jpeg",q);ok(o)};
+      img.onerror=()=>no(new Error("img"));img.src=r.result};
+    r.onerror=()=>no(new Error("read"));r.readAsDataURL(f)});
+  const kb=x=>Math.round((x||"").length*0.75/1024);
+  function drawPh(){
+    const p=PH(),w=$("#phwrap");if(!w)return;
+    const tot=kb(p.main)+p.gallery.reduce((a,x)=>a+kb(x),0);
+    w.innerHTML=`<div class="phmain"><div class="pv" style="${p.main?`background-image:url('${p.main}')`:""}">${p.main?"":"الرسم الافتراضي"}</div>
+      <div class="row" style="gap:8px"><button class="btn g sm" id="ph-up">${p.main?"تغيير الصورة الرئيسية":"رفع صورة المبنى (الرئيسية)"}</button>
+      ${p.main?'<button class="btn d sm" id="ph-del">إزالة</button>':""}</div></div>
+      <div class="grid2"><div><label>عنوان المعرض</label><input id="ph-gt" placeholder="من ميدان الأكاديمية" value="${esc(p.galTitle||"")}"></div></div>
+      <div class="phgrid">${p.gallery.map((s,i)=>`<div class="phit"><div class="pv" style="background-image:url('${s}')"><button class="x" data-phx="${i}" title="إزالة">×</button></div>
+        <input data-phc="${i}" placeholder="تعليق (اختياري)" value="${esc(p.caps[i]||"")}"></div>`).join("")}</div>
+      <div class="row" style="gap:8px;align-items:center">${p.gallery.length<8?`<button class="btn g sm" id="ph-add">إضافة صور للمعرض (${p.gallery.length}/8)</button>`:""}
+      <span class="hint" style="margin:0">حجم الصور الكلي: ${tot} كيلوبايت${tot>2500?" — كبير، يُفضَّل حذف بعضها":""}</span></div>`;
+    const up=$("#ph-up");if(up)up.onclick=()=>$("#phf").click();
+    const dl=$("#ph-del");if(dl)dl.onclick=()=>{p.main="";drawPh();toast("أُزيلت الصورة الرئيسية")};
+    const ad=$("#ph-add");if(ad)ad.onclick=()=>$("#phg").click();
+    $("#ph-gt").oninput=e=>{p.galTitle=e.target.value};
+    w.querySelectorAll("[data-phx]").forEach(b=>b.onclick=()=>{const i=+b.dataset.phx;p.gallery.splice(i,1);p.caps.splice(i,1);drawPh()});
+    w.querySelectorAll("[data-phc]").forEach(inp=>inp.oninput=()=>{p.caps[+inp.dataset.phc]=inp.value});
+  }
+  drawPh();
+  $("#phf").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
+    try{PH().main=await shrink(f,1600,0.74);drawPh();toast("رُفعت الصورة الرئيسية")}catch(x){toast("تعذّرت قراءة الصورة")}};
+  $("#phg").onchange=async e=>{const fs=[...e.target.files];e.target.value="";const p=PH();let n=0;
+    for(const f of fs){if(p.gallery.length>=8)break;try{p.gallery.push(await shrink(f,1200,0.72));p.caps.push("");n++}catch(x){}}
+    drawPh();toast(n?("أُضيفت "+n+" صورة"):"تعذّرت قراءة الصور")};
   $("#s5").onclick=()=>{CFG.title=$("#c-title").value;CFG.brand=$("#c-brand").value;
     CFG.hero=$("#c-hero").value;CFG.lead=$("#c-lead").value;CFG.welcome=$("#c-wel").value;CFG.theme=$("#c-theme").value;
     CFG.boardArt=$("#c-art").value;CFG.itemData=$("#c-item").value==="1";
